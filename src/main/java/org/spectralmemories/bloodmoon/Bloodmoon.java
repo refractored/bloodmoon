@@ -99,11 +99,18 @@ public final class Bloodmoon extends JavaPlugin
 
             try
             {
-                configFile.createNewFile();
+                if (! configFile.exists())
+                {
+                    configFile.createNewFile();
+
+                    configReader = new ConfigReader (configFile);
+                    configReader.GenerateDefaultFile();
+                }
             }
             catch (IOException e) {}
 
             configReader = new ConfigReader (configFile);
+            configReader.ReadAllSettings();
         }
 
         return configReader;

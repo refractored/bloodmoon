@@ -24,6 +24,7 @@ import java.util.*;
 
 public class BloodmoonActuator implements Listener, Runnable
 {
+    public static final String DURING_A_BLOOD_MOON = " during a BloodMoon!";
     //Eligible mobs
     public final EntityType[] rewardedTypes = {
             EntityType.ZOMBIE,
@@ -219,17 +220,17 @@ public class BloodmoonActuator implements Listener, Runnable
             case HUSK:
             case DROWNED:
             case ZOMBIE_VILLAGER:
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 160,1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 140,1));
                 break;
             case SKELETON:
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 1));
                 break;
             case SPIDER:
                 player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 160, 1));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 220, 300));
                 break;
             case PHANTOM:
-                player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 40, 3));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 30, 3));
                 break;
         }
     }
@@ -257,7 +258,7 @@ public class BloodmoonActuator implements Listener, Runnable
     {
         if (!isInProgress()) return; //Only during BloodMoon
 
-
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
 
         Player deadplayer = event.getEntity();
 
@@ -267,16 +268,19 @@ public class BloodmoonActuator implements Listener, Runnable
 
         if (! deathMessage.contains("BloodMoon"))
         {
-            deathMessage += " during a BloodMoon!";
+            deathMessage += DURING_A_BLOOD_MOON;
 
             event.setDeathMessage(deathMessage);
         }
 
-        event.setNewTotalExp(0);
-        event.setDroppedExp(0);
+        if (configReader.GetExperienceLossConfig())
+        {
+            event.setNewTotalExp(0);
+            event.setDroppedExp(0);
+        }
 
 
-        event.getDrops().clear();
+        if (configReader.GetInventoryLossConfig()) event.getDrops().clear();
 
     }
 
@@ -303,7 +307,12 @@ public class BloodmoonActuator implements Listener, Runnable
         if (! eligible) return; //Not eligible for reward
 
         List<ItemStack> bonusDrops = new ArrayList<>();
-        int itemCount = new Random().nextInt(4); //from 0 to 3 drops
+
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        int min = configReader.GetMinItemsDropConfig();
+        int max= configReader.GetMaxItemsDropConfig();
+
+        int itemCount = (max - min <= 0) ? min : new Random().nextInt(max - min) + min;
 
         for (int i = 0; i < itemCount; i++)
         {
@@ -338,6 +347,7 @@ public class BloodmoonActuator implements Listener, Runnable
 
         if (receiver instanceof LivingEntity && damager instanceof LivingEntity)
         {
+            ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
              if (receiver instanceof Player)
              {
 
@@ -346,7 +356,7 @@ public class BloodmoonActuator implements Listener, Runnable
                     if (damager.getType() == type)
                     {
                         //Player is damaged by monster
-                        event.setDamage(event.getDamage() + 3);
+                        event.setDamage(event.getDamage() * configReader.GetMobDamageMultConfig());
                         ApplySpecialEffect((Player) receiver, type);
                         ((Player) receiver).playSound(receiver.getLocation(), Sound.AMBIENT_CAVE, 80.0f, 1.5f);
                     }
@@ -359,7 +369,7 @@ public class BloodmoonActuator implements Listener, Runnable
                      if (receiver.getType() == type)
                      {
                          //Player dealt damage to monster
-                         event.setDamage((int) Math.ceil(event.getDamage() / 3f));
+                         event.setDamage((int) Math.ceil(event.getDamage() / configReader.GetMobHealthMultConfig()));
                      }
                  }
              }

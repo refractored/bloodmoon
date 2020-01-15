@@ -78,9 +78,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.dscalzi</groupId>
-            <artifactId>SkyChanger-Bukkit</artifactId>
-            <version>3.0.1</version>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.23</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
