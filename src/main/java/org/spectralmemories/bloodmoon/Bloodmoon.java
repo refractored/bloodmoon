@@ -150,12 +150,13 @@ public final class Bloodmoon extends JavaPlugin
     @Override
     public void onEnable()
     {
+        instance = this;
+
         CreateFolder();
 
         getSqlAccess();
         getConfigReader();
 
-        instance = this;
         nightChecks = new ArrayList<>();
         actuators = new ArrayList<>();
 

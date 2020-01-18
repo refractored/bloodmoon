@@ -32,7 +32,7 @@ public class PeriodicNightCheck implements Runnable, Listener
     public static final String THE_SKY_IS_DARKER_THAN_USUAL_TONIGHT = "The sky is darker than usual tonight..";
     public static final String THE_BLOOD_MOON_IS_UPON_US = "The BloodMoon is upon us";
     public static final String DYING_DURING_A_BLOOD_MOON_RESULTS_IN_INVENTORY_AND_EXP_LOSS_BEWARE = "Dying during a BloodMoon results in inventory and exp loss. Beware";
-    public static final String EXPERIENCE_IS_QUADRUPLED_AND_MOBS_HAVE_RANDOM_DROPS = "Experience is quadrupled, and mobs have random drops";
+    public static final String EXPERIENCE_IS_QUADRUPLED_AND_MOBS_HAVE_RANDOM_DROPS = "Experience is multiplied, and mobs have random drops";
     public static final String MOBS_ARE_STRONGER_AND_APPLY_SPECIAL_EFFECTS = "Mobs are stronger and apply special effects";
     public static final String THE_BLOOD_MOON_FADES_AWAY_FOR_NOW = "The BloodMoon fades away... For now";
 

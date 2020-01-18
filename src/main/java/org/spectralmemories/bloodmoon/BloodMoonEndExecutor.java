@@ -17,6 +17,7 @@ public class BloodMoonEndExecutor implements CommandExecutor
             playerSender = (Player) sender;
 
             World world = playerSender.getWorld();
+            PeriodicNightCheck.GetPeriodicNightCheck(world).SetCheckAfter(0);
             PeriodicNightCheck.GetPeriodicNightCheck(world).SetDaysRemaining(PeriodicNightCheck.GetBloodMoonInterval() - 1);
             world.setTime(0);
             return true;

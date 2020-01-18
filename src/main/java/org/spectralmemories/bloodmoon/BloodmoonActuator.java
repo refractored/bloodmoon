@@ -132,77 +132,12 @@ public class BloodmoonActuator implements Listener, Runnable
 
     private Material GetRandomBonus ()
     {
-        Material[] materials = {
-                Material.GOLD_INGOT,
-                Material.GOLD_INGOT,
-                Material.GOLD_INGOT,
-                Material.GOLD_INGOT,
-                Material.GOLD_BLOCK,
-                Material.GOLD_BLOCK,
-                Material.IRON_INGOT,
-                Material.IRON_INGOT,
-                Material.IRON_INGOT,
-                Material.IRON_INGOT,
-                Material.IRON_BLOCK,
-                Material.IRON_BLOCK,
-                Material.IRON_BLOCK,
-                Material.DIAMOND,
-                Material.DIAMOND,
-                Material.DIAMOND,
-                Material.TOTEM_OF_UNDYING,
-                Material.DIAMOND_BLOCK,
-                Material.COAL_BLOCK,
-                Material.COAL_BLOCK,
-                Material.COAL_BLOCK,
-                Material.REDSTONE_BLOCK,
-                Material.REDSTONE_BLOCK,
-                Material.REDSTONE_BLOCK,
-                Material.REDSTONE_BLOCK,
-                Material.LAPIS_BLOCK,
-                Material.LAPIS_BLOCK,
-                Material.LAPIS_BLOCK,
-                Material.LAPIS_BLOCK,
-        };
 
-        Material[] discs = {
-                Material.MUSIC_DISC_11,
-                Material.MUSIC_DISC_13,
-                Material.MUSIC_DISC_BLOCKS,
-                Material.MUSIC_DISC_CAT,
-                Material.MUSIC_DISC_CHIRP,
-                Material.MUSIC_DISC_FAR,
-                Material.MUSIC_DISC_MALL,
-                Material.MUSIC_DISC_MELLOHI,
-                Material.MUSIC_DISC_STRAD,
-                Material.MUSIC_DISC_STAL,
-                Material.MUSIC_DISC_WARD,
-                Material.MUSIC_DISC_WAIT
-        };
+        Random random = new Random(); //We want to regenerate it every time to ensure randomness
 
-        Material[] patterns = {
-                Material.SKULL_BANNER_PATTERN,
-                Material.FLOWER_BANNER_PATTERN,
-                Material.CREEPER_BANNER_PATTERN,
-                Material.GLOBE_BANNER_PATTERN
-        };
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        Material[] selection = configReader.GetItemListConfig();
 
-        Random random = new Random();
-
-        int zeroToHundred = random.nextInt(100);
-        Material[] selection;
-
-        if (zeroToHundred < 97)
-        {
-            selection = materials;
-        }
-        else if (zeroToHundred < 98)
-        {
-            selection = discs;
-        }
-        else
-        {
-            selection = patterns;
-        }
         int amount = selection.length;
 
         return selection [random.nextInt(amount)];
@@ -211,27 +146,32 @@ public class BloodmoonActuator implements Listener, Runnable
 
     private void ApplySpecialEffect (Player player, EntityType mob)
     {
-        switch (mob)
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+
+        String[] configs = configReader.GetMobEffectConfig(mob.name());
+
+        for (String str : configs)
         {
-            case CREEPER:
+            if (str.equals("LIGHTNING"))
+            {
                 world.strikeLightning(player.getLocation());
-                break;
-            case ZOMBIE:
-            case HUSK:
-            case DROWNED:
-            case ZOMBIE_VILLAGER:
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 140,1));
-                break;
-            case SKELETON:
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 1));
-                break;
-            case SPIDER:
-                player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 160, 1));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 220, 300));
-                break;
-            case PHANTOM:
-                player.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 30, 3));
-                break;
+                continue;
+            }
+            String[] parts = str.split(",");
+            PotionEffectType[] types = PotionEffectType.values();
+            String effectName = parts[0];
+            int ticks = (int) (20f * Float.parseFloat(parts[1]));
+            int amp = Integer.parseInt(parts[2]);
+
+            for (PotionEffectType type : types)
+            {
+                if (type.getName().equals(effectName))
+                {
+                    player.addPotionEffect(new PotionEffect(type, ticks, amp));
+                    break;
+                }
+            }
+            //Effect not found. Meh
         }
     }
 
@@ -262,7 +202,7 @@ public class BloodmoonActuator implements Listener, Runnable
 
         Player deadplayer = event.getEntity();
 
-        world.strikeLightningEffect(deadplayer.getLocation());
+        if (configReader.GetLightningEffectConfig()) world.strikeLightningEffect(deadplayer.getLocation());
 
         String deathMessage = event.getDeathMessage();
 
