@@ -14,18 +14,22 @@ public class BloodmoonCommandExecutor implements CommandExecutor
     {
         if (sender instanceof Player)
         {
+            LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
             Player playerSender;
             playerSender = (Player) sender;
             World playerWorld = playerSender.getWorld();
 
             if (BloodmoonActuator.GetActuator(playerWorld).isInProgress())
             {
-                playerSender.sendMessage(ChatColor.RED + "BloodMoon is taking place right now");
+                playerSender.sendMessage(ChatColor.RED + localeReader.GetLocaleString("BloodMoonRightNow"));
                 return true;
             }
 
             int remainingDays = PeriodicNightCheck.GetDaysRemaining(playerWorld);
-            playerSender.sendMessage("There is " + remainingDays + " days until the next " + ChatColor.DARK_RED + "BloodMoon");
+            String remainingDaysString = localeReader.GetLocaleString("DaysBeforeBloodMoon");
+
+            playerSender.sendMessage(remainingDaysString.replace("$d", String.valueOf(remainingDays)));
+
             return true;
         }
         return false;

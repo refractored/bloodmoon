@@ -4,21 +4,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.spectralmemories.sqlaccess.FieldType;
 import org.spectralmemories.sqlaccess.SQLAccess;
 import org.spectralmemories.sqlaccess.SQLField;
 
-import java.sql.ResultSet;
+
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,14 +22,6 @@ public class PeriodicNightCheck implements Runnable, Listener
 {
 
     public static final int DAY = 24000;
-    public static final String A_BLOOD_MOON_IS_ON_ITS_WAY_TOMORROW = "A BloodMoon is on its way tomorrow...";
-    public static final String DAYS_UNTIL_NEXT_BLOOD_MOON = " days until next BloodMoon";
-    public static final String THE_SKY_IS_DARKER_THAN_USUAL_TONIGHT = "The sky is darker than usual tonight..";
-    public static final String THE_BLOOD_MOON_IS_UPON_US = "The BloodMoon is upon us";
-    public static final String DYING_DURING_A_BLOOD_MOON_RESULTS_IN_INVENTORY_AND_EXP_LOSS_BEWARE = "Dying during a BloodMoon results in inventory and exp loss. Beware";
-    public static final String EXPERIENCE_IS_QUADRUPLED_AND_MOBS_HAVE_RANDOM_DROPS = "Experience is multiplied, and mobs have random drops";
-    public static final String MOBS_ARE_STRONGER_AND_APPLY_SPECIAL_EFFECTS = "Mobs are stronger and apply special effects";
-    public static final String THE_BLOOD_MOON_FADES_AWAY_FOR_NOW = "The BloodMoon fades away... For now";
 
     private static Map<World, PeriodicNightCheck> nightChecks;
 
@@ -44,14 +31,12 @@ public class PeriodicNightCheck implements Runnable, Listener
     private World world;
     private BloodmoonActuator actuator;
 
-    private static int DAYS_BEFORE_BLOOD_MOON;
-
     public PeriodicNightCheck(World world, BloodmoonActuator actuator)
     {
-        DAYS_BEFORE_BLOOD_MOON = Bloodmoon.GetInstance().getConfigReader().GetIntervalConfig();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
         this.actuator = actuator;
         this.world = world;
-        daysBeforeBloodMoon = (DAYS_BEFORE_BLOOD_MOON - 1); //Workaround
+        daysBeforeBloodMoon = (configReader.GetIntervalConfig() - 1); //Workaround
         checkupAfter = world.getFullTime();
 
         AddCheck(this);
@@ -85,7 +70,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     public static int GetBloodMoonInterval ()
     {
-        return DAYS_BEFORE_BLOOD_MOON;
+        return Bloodmoon.GetInstance().getConfigReader().GetIntervalConfig();
     }
 
     public int GetRemainingDays ()
@@ -171,6 +156,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     private void Check11 ()
     {
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         if (world.getTime() > 11000)
         {
             if (world.getFullTime() <= checkupAfter) return;
@@ -182,7 +168,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
                     for (Player player : world.getPlayers())
                     {
-                        player.sendMessage(ChatColor.GOLD + A_BLOOD_MOON_IS_ON_ITS_WAY_TOMORROW);
+                        player.sendMessage(ChatColor.GOLD + localeReader.GetLocaleString("BloodMoonTomorrow"));
                     }
 
                 }
@@ -190,7 +176,8 @@ public class PeriodicNightCheck implements Runnable, Listener
                 {
                     for (Player player : world.getPlayers())
                     {
-                        player.sendMessage("" + daysBeforeBloodMoon + "" + ChatColor.DARK_GREEN + DAYS_UNTIL_NEXT_BLOOD_MOON);
+                        String message = localeReader.GetLocaleString("DaysBeforeBloodMoon");
+                        player.sendMessage(ChatColor.DARK_GREEN + message.replace("$d", String.valueOf(daysBeforeBloodMoon)));
                     }
                 }
                 SetDaysRemaining(daysBeforeBloodMoon - 1);
@@ -202,33 +189,44 @@ public class PeriodicNightCheck implements Runnable, Listener
 
             for (Player player : world.getPlayers())
             {
-                player.sendMessage(ChatColor.DARK_PURPLE + THE_SKY_IS_DARKER_THAN_USUAL_TONIGHT);
+                player.sendMessage(ChatColor.DARK_PURPLE + localeReader.GetLocaleString("BloodMoonTonight"));
             }
             checkupAfter = getTodayZero() + 12000;
         }
     }
     private void Check13 ()
     {
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
         //Check if its Blood Moon night, then time is over 13000, and if its the day after the day 0 warning
         if (world.getFullTime() >= checkupAfter && world.getTime() >= 12000 && daysBeforeBloodMoon == 0)
         {
 
             for (Player player : world.getPlayers())
             {
-                player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + THE_BLOOD_MOON_IS_UPON_US);
-                player.sendMessage(ChatColor.RED + DYING_DURING_A_BLOOD_MOON_RESULTS_IN_INVENTORY_AND_EXP_LOSS_BEWARE);
-                player.sendMessage(ChatColor.RED + EXPERIENCE_IS_QUADRUPLED_AND_MOBS_HAVE_RANDOM_DROPS);
-                player.sendMessage(ChatColor.RED + MOBS_ARE_STRONGER_AND_APPLY_SPECIAL_EFFECTS);
+                player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + localeReader.GetLocaleString("BloodMoonWarningTitle"));
+                player.sendMessage(ChatColor.RED + localeReader.GetLocaleString("BloodMoonWarningBody"));
+
+                if (configReader.GetInventoryLossConfig())
+                {
+                    player.sendMessage(ChatColor.RED + localeReader.GetLocaleString("DyingResultsInInventoryLoss"));
+                }
+                if (configReader.GetExperienceLossConfig())
+                {
+                    player.sendMessage(ChatColor.RED + localeReader.GetLocaleString("DyingResultsInExperienceLoss"));
+                }
             }
 
             actuator.StartBloodMoon();
 
             checkupAfter = getNextEvening();
-            daysBeforeBloodMoon = (DAYS_BEFORE_BLOOD_MOON - 1);
+            daysBeforeBloodMoon = (configReader.GetIntervalConfig() - 1);
         }
     }
     private void CheckDay ()
     {
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
         if (actuator.isInProgress())
         {
             //If Blood Moon is in progress but its daytime, stop it
@@ -238,23 +236,13 @@ public class PeriodicNightCheck implements Runnable, Listener
                 actuator.StopBloodMoon();
                 for (Player player : world.getPlayers())
                 {
-                    player.sendMessage(ChatColor.GREEN + THE_BLOOD_MOON_FADES_AWAY_FOR_NOW);
-                    player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 100.0f, 1.2f);
+                    player.sendMessage(ChatColor.GREEN + localeReader.GetLocaleString("BloodMoonEndingMessage"));
+                    if (configReader.GetBloodMoonEndSoundConfig())
+                        player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 100.0f, 1.2f);
                 }
                 checkupAfter = 0; //This avoids some bugs when players use /time set 0, which resets time to 0
             }
 
-            //We have a night bar now
-            /*else if (world.getFullTime() > bloodMoonTimeReminder)
-            {
-                long timeLeft = 24000 - world.getTime();
-                timeLeft = (long) Math.ceil(timeLeft / 1000f);
-                for (Player player : world.getPlayers())
-                {
-                    player.sendMessage(ChatColor.GOLD + "" + timeLeft + "h until BloodMoon ends");
-                }
-                bloodMoonTimeReminder = world.getFullTime() + 1000;
-            }*/
         }
 
     }
@@ -276,6 +264,7 @@ public class PeriodicNightCheck implements Runnable, Listener
     }
 
 
+    //We need to make sure the checkAt var is reset when time is manually changed
     @EventHandler
     public void onCommandIssued (PlayerCommandPreprocessEvent event)
     {

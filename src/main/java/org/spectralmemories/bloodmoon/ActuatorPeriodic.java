@@ -30,15 +30,22 @@ public class ActuatorPeriodic implements Runnable
     public void run()
     {
         if (mustStop) return;
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
 
-        for (Player player : world.getPlayers())
+        if (configReader.GetBloodMoonPeriodicSoundConfig())
         {
-            player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 50.0f, 0.7f);
+            for (Player player : world.getPlayers())
+            {
+                player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 50.0f, 0.7f);
+            }
         }
-        world.setStorm(true);
-        world.setThundering(true);
-        world.setThunderDuration(20 * 10 * 60);
-        world.setWeatherDuration(20 * 10 * 60);
+        if (configReader.GetThunderingConfig())
+        {
+            world.setStorm(true);
+            world.setThundering(true);
+            world.setThunderDuration(20 * 10 * 60);
+            world.setWeatherDuration(20 * 10 * 60);
+        }
         Bloodmoon.GetInstance().GetScheduler().runTaskLater(Bloodmoon.GetInstance(), this, random.nextInt(200) + 320);
     }
 }

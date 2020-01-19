@@ -1,10 +1,6 @@
 package org.spectralmemories.bloodmoon;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -16,6 +12,7 @@ public class ConfigReader implements Closeable
     public static final String BLOOD_MOON_INTERVAL = "BloodMoonInterval";
     public static final String PLAYER_LOSES_ITEM_UPON_BLOOD_MOON_DEATH = "ItemDespawnUponDeath";
     public static final String PLAYER_LOSES_EXP_UPON_BLOOD_MOON_DEATH = "ExperienceDespawnsUponDeath";
+    public static final String NULL_CONFIG = "null";
     public static final int DEFAULT_INTERVAL = 5;
     public static final boolean LIGTHNINGEFFECT_DEFAULT = true;
     public static final boolean DEFAULT_INV_LOSS = true;
@@ -36,6 +33,21 @@ public class ConfigReader implements Closeable
     public static final String PHANTOMEFFECTS = "PHANTOMEffects";
     public static final String SPIDEREFFECTS = "SPIDEREffects";
     public static final String LIGHTNING_EFFECT_ON_PLAYER_DEATH = "LightningEffectOnPlayerDeath";
+    public static final String PLAY_SOUND_UPON_BLOOD_MOON_END = "PlaySoundUponBloodMoonEnd";
+    public static final String PLAY_PERIODIC_SOUNDS_DURING_BLOOD_MOON = "PlayPeriodicSoundsDuringBloodMoon";
+    public static final boolean PLAY_SOUND_ON_END_DEFAULT = true;
+    public static final boolean PLAY_PERIODIC_SOUND_DEFAULT = true;
+    public static final String ZOMBIE_VILLAGEREFFECT = "ZOMBIE_VILLAGEREffects";
+    public static final String DROWNEDEFFECT = "DROWNEDEffects";
+    public static final String HUSKEFFECT = "HUSKEffects";
+    public static final String DARKEN_SKY = "DarkenSky";
+    public static final boolean DARKEN_SKY_DEFAULT = true;
+    public static final String PLAY_SOUND_UPON_HIT = "PlaySoundUponHit";
+    public static final String LIGHTNING_EFFECT_ON_MOB_DEATH = "LightningEffectOnMobDeath";
+    public static final String THUNDER_DURING_BLOOD_MOON = "ThunderDuringBloodMoon";
+    public static final boolean MOB_LIGHTNING_EFFECT_DEFAULT = true;
+    public static final boolean SOUND_ON_HIT_DEFAULT = true;
+    public static final boolean THUNDER_DEFAULT = true;
 
     File configFile;
     Map <String, Object> cache;
@@ -52,7 +64,7 @@ public class ConfigReader implements Closeable
             FileWriter writer = new FileWriter(configFile, true);
 
             writer.write("#Plugin version. Please do not tamper\n");
-            writer.write(CONFIG_VERSION + ": " + Bloodmoon.GetInstance().getDescription().getVersion() + "\n");
+            writer.write(CONFIG_VERSION + ": " + Bloodmoon.GetInstance().getDescription().getVersion() + "\n\n");
             writer.write("#Interval in days between BloodMoons\n");
             writer.write(BLOOD_MOON_INTERVAL + ": " + String.valueOf(DEFAULT_INTERVAL) + "\n");
             writer.write("#Do items despawn upon death?\n");
@@ -69,6 +81,18 @@ public class ConfigReader implements Closeable
             writer.write(MOB_HEALTH_MULT + ": " + String.valueOf(MOB_HEALTH_MULT_DEFAULT) + "\n");
             writer.write("#Should there be a lightning effect on player death?\n");
             writer.write(LIGHTNING_EFFECT_ON_PLAYER_DEATH + ": " + String.valueOf(LIGTHNINGEFFECT_DEFAULT) + "\n");
+            writer.write("#Adds a lightning effect when a mob dies\n");
+            writer.write(LIGHTNING_EFFECT_ON_MOB_DEATH + ": " + String.valueOf(MOB_LIGHTNING_EFFECT_DEFAULT) + "\n");
+            writer.write("#Should there be a jingle when a BloodMoon ends?\n");
+            writer.write(PLAY_SOUND_UPON_BLOOD_MOON_END + ": " + String.valueOf(PLAY_SOUND_ON_END_DEFAULT) + "\n");
+            writer.write("#Should there be periodic creepy sounds during a BloodMoon?\n");
+            writer.write(PLAY_PERIODIC_SOUNDS_DURING_BLOOD_MOON + ": " + String.valueOf(PLAY_PERIODIC_SOUND_DEFAULT) + "\n");
+            writer.write("#Adds a dark tone during a BloodMoon\n");
+            writer.write(DARKEN_SKY + ": " + String.valueOf(DARKEN_SKY_DEFAULT) + "\n");
+            writer.write("#Plays a sound when a player gets hit\n");
+            writer.write(PLAY_SOUND_UPON_HIT + ": " + String.valueOf(SOUND_ON_HIT_DEFAULT) + "\n");
+            writer.write("#Effect of rain and thunder during the BloodMoon\n");
+            writer.write(THUNDER_DURING_BLOOD_MOON + ": " + String.valueOf(THUNDER_DEFAULT) + "\n");
             writer.write("#List of items that can drop. Items listed more than once have a higher chance to drop");
             writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
             writer.write(DROP_ITEM_LIST + ":\n");
@@ -100,6 +124,12 @@ public class ConfigReader implements Closeable
             writer.write("#Additional effects include: 'LIGHTNING'\n");
             writer.write(ZOMBIEEFFECTS + ":\n");
             writer.write("  - \"WITHER,7,1\"\n");
+            writer.write(HUSKEFFECT + ":\n");
+            writer.write("  - \"WITHER,7,1\"\n");
+            writer.write(DROWNEDEFFECT + ":\n");
+            writer.write("  - \"WITHER,7,1\"\n");
+            writer.write(ZOMBIE_VILLAGEREFFECT + ":\n");
+            writer.write("  - \"WITHER,7,1\"\n");
             writer.write(SKELETONEFFECTS + ":\n");
             writer.write("  - \"SLOW,3.5,1\"\n");
             writer.write(CREEPEREFFECTS + ":\n");
@@ -116,7 +146,7 @@ public class ConfigReader implements Closeable
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            System.out.println("Error: could not generate " + Bloodmoon.CONFIG_FILE);
         }
     }
 
@@ -130,6 +160,9 @@ public class ConfigReader implements Closeable
         GetMinItemsDropConfig();
         GetMobDamageMultConfig();
         GetMobHealthMultConfig();
+        GetBloodMoonPeriodicSoundConfig();
+        GetBloodMoonEndSoundConfig();
+        GetItemListConfig();
     }
 
     public void RefreshConfigs ()
@@ -146,10 +179,10 @@ public class ConfigReader implements Closeable
         try
         {
             Object interval = GetConfig(DROP_ITEM_LIST);
-            if (interval == null)
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
                 System.out.println("Warning: could not load item list!");
-                interval = new Material[0];
+                return new Material[0];
             }
             ArrayList<String > list = (ArrayList<String>) interval;
 
@@ -173,7 +206,7 @@ public class ConfigReader implements Closeable
         try
         {
             Object interval = GetConfig(mob + "Effects");
-            if (interval == null)
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
                 return new String[0];
             }
@@ -182,6 +215,7 @@ public class ConfigReader implements Closeable
         }
         catch (FileNotFoundException e)
         {
+
             return new String[0];
         }
     }
@@ -201,6 +235,114 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return DEFAULT_INTERVAL;
+        }
+    }
+
+    public boolean GetBloodMoonEndSoundConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PLAY_SOUND_UPON_BLOOD_MOON_END);
+            if (interval == null)
+            {
+                CreateConfig(PLAY_SOUND_UPON_BLOOD_MOON_END, String.valueOf(PLAY_SOUND_ON_END_DEFAULT));
+                interval = PLAY_SOUND_ON_END_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return PLAY_SOUND_ON_END_DEFAULT;
+        }
+    }
+
+    public boolean GetDarkenSkyConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(DARKEN_SKY);
+            if (interval == null)
+            {
+                CreateConfig(DARKEN_SKY, String.valueOf(DARKEN_SKY_DEFAULT));
+                interval = DARKEN_SKY_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return DARKEN_SKY_DEFAULT;
+        }
+    }
+
+    public boolean GetPlayerDamageSoundConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PLAY_SOUND_UPON_HIT);
+            if (interval == null)
+            {
+                CreateConfig(PLAY_SOUND_UPON_HIT, String.valueOf(SOUND_ON_HIT_DEFAULT));
+                interval = SOUND_ON_HIT_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return SOUND_ON_HIT_DEFAULT;
+        }
+    }
+
+    public boolean GetThunderingConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(LIGHTNING_EFFECT_ON_MOB_DEATH);
+            if (interval == null)
+            {
+                CreateConfig(LIGHTNING_EFFECT_ON_MOB_DEATH, String.valueOf(THUNDER_DEFAULT));
+                interval = THUNDER_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return THUNDER_DEFAULT;
+        }
+    }
+
+    public boolean GetMobDeathThunderConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(THUNDER_DURING_BLOOD_MOON);
+            if (interval == null)
+            {
+                CreateConfig(THUNDER_DURING_BLOOD_MOON, String.valueOf(MOB_LIGHTNING_EFFECT_DEFAULT));
+                interval = MOB_LIGHTNING_EFFECT_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return MOB_LIGHTNING_EFFECT_DEFAULT;
+        }
+    }
+
+    public boolean GetBloodMoonPeriodicSoundConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PLAY_PERIODIC_SOUNDS_DURING_BLOOD_MOON);
+            if (interval == null)
+            {
+                CreateConfig(PLAY_PERIODIC_SOUNDS_DURING_BLOOD_MOON, String.valueOf(PLAY_PERIODIC_SOUND_DEFAULT));
+                interval = PLAY_PERIODIC_SOUND_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return PLAY_PERIODIC_SOUND_DEFAULT;
         }
     }
 

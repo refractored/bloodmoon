@@ -24,7 +24,6 @@ import java.util.*;
 
 public class BloodmoonActuator implements Listener, Runnable
 {
-    public static final String DURING_A_BLOOD_MOON = " during a BloodMoon!";
     //Eligible mobs
     public final EntityType[] rewardedTypes = {
             EntityType.ZOMBIE,
@@ -95,7 +94,25 @@ public class BloodmoonActuator implements Listener, Runnable
 
     private void ShowNightBar ()
     {
-        nightBar = Bukkit.createBossBar("BloodMoon", BarColor.RED, BarStyle.SEGMENTED_12, BarFlag.CREATE_FOG, BarFlag.DARKEN_SKY);
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+
+        if (configReader.GetDarkenSkyConfig())
+        {
+            nightBar = Bukkit.createBossBar(localeReader.GetLocaleString("BloodMoonTitleBar"),
+                    BarColor.RED,
+                    BarStyle.SEGMENTED_12,
+                    BarFlag.CREATE_FOG,
+                    BarFlag.DARKEN_SKY
+            );
+        }
+        else
+        {
+            nightBar = Bukkit.createBossBar(localeReader.GetLocaleString("BloodMoonTitleBar"),
+                    BarColor.RED,
+                    BarStyle.SEGMENTED_12
+            );
+        }
         nightBar.setProgress(0.0);
         Bloodmoon.GetInstance().GetScheduler().runTaskLater(Bloodmoon.GetInstance(), this,0);
 
@@ -149,6 +166,7 @@ public class BloodmoonActuator implements Listener, Runnable
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
 
         String[] configs = configReader.GetMobEffectConfig(mob.name());
+        System.out.println(mob.name());
 
         for (String str : configs)
         {
@@ -198,6 +216,7 @@ public class BloodmoonActuator implements Listener, Runnable
     {
         if (!isInProgress()) return; //Only during BloodMoon
 
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
 
         Player deadplayer = event.getEntity();
@@ -206,9 +225,9 @@ public class BloodmoonActuator implements Listener, Runnable
 
         String deathMessage = event.getDeathMessage();
 
-        if (! deathMessage.contains("BloodMoon"))
+        if (! deathMessage.contains(localeReader.GetLocaleString("DeathSuffix")))
         {
-            deathMessage += DURING_A_BLOOD_MOON;
+            deathMessage += " " + localeReader.GetLocaleString("DeathSuffix");
 
             event.setDeathMessage(deathMessage);
         }
@@ -233,7 +252,11 @@ public class BloodmoonActuator implements Listener, Runnable
 
         if (event.getEntity() instanceof Player) return; //Handled in another method
 
-        world.strikeLightningEffect(event.getEntity().getLocation());
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+
+        if (configReader.GetMobDeathThunderConfig())
+            world.strikeLightningEffect(event.getEntity().getLocation());
+
         event.setDroppedExp(event.getDroppedExp() * 4); //4x exp
         LivingEntity entity = event.getEntity();
 
@@ -248,7 +271,6 @@ public class BloodmoonActuator implements Listener, Runnable
 
         List<ItemStack> bonusDrops = new ArrayList<>();
 
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
         int min = configReader.GetMinItemsDropConfig();
         int max= configReader.GetMaxItemsDropConfig();
 
@@ -269,7 +291,6 @@ public class BloodmoonActuator implements Listener, Runnable
     public void onEntityDamage (EntityDamageByEntityEvent event)
     {
         if (!isInProgress()) return; //Only during BloodMoon
-
 
         Entity receiver = event.getEntity();
         Entity damager = event.getDamager();
@@ -298,7 +319,8 @@ public class BloodmoonActuator implements Listener, Runnable
                         //Player is damaged by monster
                         event.setDamage(event.getDamage() * configReader.GetMobDamageMultConfig());
                         ApplySpecialEffect((Player) receiver, type);
-                        ((Player) receiver).playSound(receiver.getLocation(), Sound.AMBIENT_CAVE, 80.0f, 1.5f);
+                        if (configReader.GetPlayerDamageSoundConfig())
+                            ((Player) receiver).playSound(receiver.getLocation(), Sound.AMBIENT_CAVE, 80.0f, 1.5f);
                     }
                 }
              }

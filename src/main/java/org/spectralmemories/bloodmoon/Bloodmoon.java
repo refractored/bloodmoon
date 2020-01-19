@@ -22,8 +22,10 @@ public final class Bloodmoon extends JavaPlugin
     public static final String CACHE_DB = "cache.db";
     public static final String CONFIG_FILE = "config.yml";
     public static final String SLASH = "/";
+    public static final String LOCALES_YML = "locales.yml";
     private static SQLAccess sqlAccess;
     private static ConfigReader configReader;
+    private static LocaleReader localeReader;
 
     public final static long NIGHT_CHECK_DELAY = 40;
     private static Bloodmoon instance;
@@ -107,13 +109,44 @@ public final class Bloodmoon extends JavaPlugin
                     configReader.GenerateDefaultFile();
                 }
             }
-            catch (IOException e) {}
+            catch (IOException e)
+            {
+                System.out.println("Error: Could not create config file");
+            }
 
             configReader = new ConfigReader (configFile);
             configReader.ReadAllSettings();
         }
 
         return configReader;
+    }
+
+    public LocaleReader getLocaleReader ()
+    {
+        if (localeReader == null)
+        {
+            File localeFile = new File (getDataFolder () + SLASH + LOCALES_YML);
+
+            try
+            {
+                if (! localeFile.exists())
+                {
+                    localeFile.createNewFile();
+
+                    localeReader = new LocaleReader (localeFile);
+                    localeReader.GenerateDefaultFile();
+                }
+            }
+            catch (IOException e)
+            {
+                System.out.println("Error: Could not create locale file");
+            }
+
+            localeReader = new LocaleReader (localeFile);
+            localeReader.ReadAllEntries();
+        }
+
+        return localeReader;
     }
 
     public void CreateFolder ()
@@ -156,6 +189,7 @@ public final class Bloodmoon extends JavaPlugin
 
         getSqlAccess();
         getConfigReader();
+        getLocaleReader();
 
         nightChecks = new ArrayList<>();
         actuators = new ArrayList<>();
@@ -178,7 +212,7 @@ public final class Bloodmoon extends JavaPlugin
         getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
         getCommand("startbloodmoon").setExecutor(new BloodMoonStartExecutor());
         getCommand("endbloodmoon").setExecutor(new BloodMoonEndExecutor());
-
+        getCommand("reloadbloodmoon").setExecutor(new BloodMoonReloadExecutor());
     }
 
     @Override

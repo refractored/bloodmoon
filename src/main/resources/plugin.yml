@@ -1,5 +1,5 @@
 name: Bloodmoon
-version: 0.4
+version: 0.5
 main: org.spectralmemories.bloodmoon.Bloodmoon
 api-version: 1.15
 authors: [SpectralMemories]
@@ -17,6 +17,10 @@ commands:
     description: Ends a BloodMoon now
     permission: "bloodmoon.end"
     permission-message: "You do not have the permission to do that"
+  reloadbloodmoon:
+    description: Reloads both the config and the locale file
+    permission: "bloodmoon.reload"
+    permission-message: "You do not have the permission to do that"
 permissions:
   bloodmoon.bloodmoon:
     description: Allows to run the bloodmoon command
@@ -26,4 +30,7 @@ permissions:
     default: op
   bloodmoon.end:
     description: Allows to end a bloodmoon
+    default: op
+  bloodmoon.reload:
+    description: Allows to reload config files
     default: op
