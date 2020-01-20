@@ -48,6 +48,9 @@ public class ConfigReader implements Closeable
     public static final boolean MOB_LIGHTNING_EFFECT_DEFAULT = true;
     public static final boolean SOUND_ON_HIT_DEFAULT = true;
     public static final boolean THUNDER_DEFAULT = true;
+    public static final String EXP_MULTIPLICATOR = "ExperienceDropMult";
+    public static final int EXP_MULTIPLICATOR_DEFAULT = 4;
+    public static final String BLACKLISTED_WORLDS = "BlacklistedWorlds";
 
     File configFile;
     Map <String, Object> cache;
@@ -75,6 +78,8 @@ public class ConfigReader implements Closeable
             writer.write(ITEM_DROPS_MAXIMUM + ": " + String.valueOf(MAX_ITEM_DROP_DEFAULT) + "\n");
             writer.write("#Minimum item amount to drop per mob death\n");
             writer.write(ITEM_DROPS_MINIMUM + ": " + String.valueOf(MIN_ITEM_DROP_DEFAULT) + "\n");
+            writer.write("#Mob experience drop multiplicator. Whole number only");
+            writer.write(EXP_MULTIPLICATOR + ": " + String.valueOf(EXP_MULTIPLICATOR_DEFAULT) + "\n");
             writer.write("#Mob damage multiplier. Whole number only\n");
             writer.write(MOB_DAMAGE_MULT + ": " + String.valueOf(MOB_DAMAGE_MULT_DEFAULT) + "\n");
             writer.write("#Mob health multiplier. Whole number only\n");
@@ -140,7 +145,10 @@ public class ConfigReader implements Closeable
             writer.write(SPIDEREFFECTS + ":\n");
             writer.write("  - \"POISON,4,1\"\n");
             writer.write("  - \"CONFUSION,6,999\"\n");
-
+            writer.write("#Blacklisted Worlds. These worlds will be ignored\n");
+            writer.write("#Note that this setting requires a server reststopart to take effect\n");
+            writer.write(BLACKLISTED_WORLDS + ":\n");
+            writer.write("  - \"BlacklistedWorldName\"\n");
 
             writer.close();
         }
@@ -215,7 +223,24 @@ public class ConfigReader implements Closeable
         }
         catch (FileNotFoundException e)
         {
+            return new String[0];
+        }
+    }
 
+    public String[] GetBlacklistWorldsConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(BLACKLISTED_WORLDS);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
+            {
+                return new String[0];
+            }
+            ArrayList<String> worlds = (ArrayList<String>) interval;
+            return worlds.toArray(new String[worlds.size()]);
+        }
+        catch (FileNotFoundException e)
+        {
             return new String[0];
         }
     }
@@ -235,6 +260,24 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return DEFAULT_INTERVAL;
+        }
+    }
+
+    public int GetExpMultConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(EXP_MULTIPLICATOR);
+            if (interval == null)
+            {
+                CreateConfig(EXP_MULTIPLICATOR, String.valueOf(EXP_MULTIPLICATOR_DEFAULT));
+                interval = EXP_MULTIPLICATOR_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return EXP_MULTIPLICATOR_DEFAULT;
         }
     }
 

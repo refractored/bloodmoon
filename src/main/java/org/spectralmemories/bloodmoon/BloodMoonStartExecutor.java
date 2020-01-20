@@ -15,10 +15,17 @@ public class BloodMoonStartExecutor implements CommandExecutor
         {
             Player playerSender;
             playerSender = (Player) sender;
+            LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
 
             World world = playerSender.getWorld();
-            PeriodicNightCheck.GetPeriodicNightCheck(world).SetCheckAfter(0);
-            PeriodicNightCheck.GetPeriodicNightCheck(world).SetDaysRemaining(0);
+            PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
+            if (nightCheck == null)
+            {
+                playerSender.sendMessage(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+                return true;
+            }
+            nightCheck.SetCheckAfter(0);
+            nightCheck.SetDaysRemaining(0);
             world.setTime(12000);
             return true;
         }

@@ -19,7 +19,15 @@ public class BloodmoonCommandExecutor implements CommandExecutor
             playerSender = (Player) sender;
             World playerWorld = playerSender.getWorld();
 
-            if (BloodmoonActuator.GetActuator(playerWorld).isInProgress())
+            BloodmoonActuator worldActuator = BloodmoonActuator.GetActuator(playerWorld);
+
+            if (worldActuator == null)
+            {
+                playerSender.sendMessage(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+                return true;
+            }
+
+            if (worldActuator.isInProgress())
             {
                 playerSender.sendMessage(ChatColor.RED + localeReader.GetLocaleString("BloodMoonRightNow"));
                 return true;

@@ -19,7 +19,8 @@ public class LocaleReader implements Closeable
             "BloodMoonEndingMessage",
             "DyingResultsInInventoryLoss",
             "DyingResultsInExperienceLoss",
-            "PluginReloaded"
+            "PluginReloaded",
+            "NoBloodMoonInWorld"
     };
     public static final String[] DEFAULT_LOCALES = {
             "BloodMoon",
@@ -34,9 +35,10 @@ public class LocaleReader implements Closeable
             "The BloodMoon fades away... for now",
             "Dying during a BloodMoon results in complete deletion of inventory",
             "Dying during a BloodMoon resets your experience to zero",
-            "Plugin has been reloaded successfully"
+            "Plugin has been reloaded successfully",
+            "There are no BloodMoon in you current world"
     };
-    public static final String STRING_NOT_FOUND = "[String not found]";
+    public static final String STRING_NOT_FOUND = "[String not found]\nCheck server logs";
     public static final String NULL_LOCALE = "null";
     private File localeFile;
     private Map<String, Object> cache;
@@ -67,7 +69,7 @@ public class LocaleReader implements Closeable
         }
         catch (Exception ignored) {}
 
-        System.out.println("[BloodMoon] WARNING: There was a problem loading the locale '" + id + "'. Please add it to the locales.yml file");
+        System.out.println("[BloodMoon] WARNING: There was a problem loading the locale '" + id + "'. Please add it to the " + Bloodmoon.LOCALES_YML + " file");
         return STRING_NOT_FOUND;
     }
 

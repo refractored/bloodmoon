@@ -54,7 +54,12 @@ public class BloodmoonActuator implements Listener, Runnable
 
     public static BloodmoonActuator GetActuator (World world)
     {
-        return actuators.get(world);
+        try
+        {
+            return actuators.get(world);
+        }
+        catch (Exception ignored){}
+        return null;
     }
 
 
@@ -257,7 +262,7 @@ public class BloodmoonActuator implements Listener, Runnable
         if (configReader.GetMobDeathThunderConfig())
             world.strikeLightningEffect(event.getEntity().getLocation());
 
-        event.setDroppedExp(event.getDroppedExp() * 4); //4x exp
+        event.setDroppedExp(event.getDroppedExp() * configReader.GetExpMultConfig());
         LivingEntity entity = event.getEntity();
 
 

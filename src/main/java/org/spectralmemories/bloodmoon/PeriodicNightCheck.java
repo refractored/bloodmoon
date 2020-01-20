@@ -65,7 +65,12 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     public static PeriodicNightCheck GetPeriodicNightCheck (World world)
     {
-        return nightChecks.get(world);
+        try
+        {
+            return nightChecks.get(world);
+        }
+        catch (Exception ignored){}
+        return null;
     }
 
     public static int GetBloodMoonInterval ()

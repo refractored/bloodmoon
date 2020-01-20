@@ -23,11 +23,12 @@ public final class Bloodmoon extends JavaPlugin
     public static final String CONFIG_FILE = "config.yml";
     public static final String SLASH = "/";
     public static final String LOCALES_YML = "locales.yml";
+    public final static long NIGHT_CHECK_DELAY = 40;
+
     private static SQLAccess sqlAccess;
     private static ConfigReader configReader;
     private static LocaleReader localeReader;
 
-    public final static long NIGHT_CHECK_DELAY = 40;
     private static Bloodmoon instance;
 
     private static List<PeriodicNightCheck> nightChecks;
@@ -194,8 +195,18 @@ public final class Bloodmoon extends JavaPlugin
         nightChecks = new ArrayList<>();
         actuators = new ArrayList<>();
 
+        String[] blacklistedWorlds = getConfigReader().GetBlacklistWorldsConfig();
+
         for (World world : GetOverworlds())
         {
+            boolean mustStop = false;
+            for (String worldName : blacklistedWorlds)
+            {
+                if (world.getName().equals(worldName)) mustStop = true;
+                break;
+            }
+            if (mustStop) continue;
+
             BloodmoonActuator actuator = new BloodmoonActuator(world);
             PeriodicNightCheck nightCheck = new PeriodicNightCheck(world, actuator);
 

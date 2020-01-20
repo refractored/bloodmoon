@@ -1,7 +1,7 @@
 name: Bloodmoon
-version: 0.5
+version: 0.5.2
 main: org.spectralmemories.bloodmoon.Bloodmoon
-api-version: 1.15
+api-version: 1.14
 authors: [SpectralMemories]
 description: A bloon moon shines every couple of nights
 commands:
