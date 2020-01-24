@@ -30,7 +30,7 @@ public class ActuatorPeriodic implements Runnable
     public void run()
     {
         if (mustStop) return;
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
         if (configReader.GetBloodMoonPeriodicSoundConfig())
         {

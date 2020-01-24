@@ -12,10 +12,13 @@ public class BloodMoonReloadExecutor implements CommandExecutor
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args)
     {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
-
-        configReader.RefreshConfigs();
         localeReader.RefreshLocales();
+
+        ConfigReader[] configReaders = Bloodmoon.GetInstance().getAllConfigReaders();
+        for (ConfigReader configReader : configReaders)
+        {
+            configReader.RefreshConfigs();
+        }
 
         if (sender instanceof Player)
         {

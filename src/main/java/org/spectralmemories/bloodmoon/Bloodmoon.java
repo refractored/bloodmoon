@@ -1,6 +1,5 @@
 package org.spectralmemories.bloodmoon;
 
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -15,7 +14,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class Bloodmoon extends JavaPlugin
 {
@@ -26,7 +27,6 @@ public final class Bloodmoon extends JavaPlugin
     public final static long NIGHT_CHECK_DELAY = 40;
 
     private static SQLAccess sqlAccess;
-    private static ConfigReader configReader;
     private static LocaleReader localeReader;
 
     private static Bloodmoon instance;
@@ -34,10 +34,19 @@ public final class Bloodmoon extends JavaPlugin
     private static List<PeriodicNightCheck> nightChecks;
     private static List<BloodmoonActuator> actuators;
     private static List<World> overworlds;
+    private static Map<World, ConfigReader> configReaders;
+    private static List<ConfigReader> allConfigReaders;
 
     public static Bloodmoon GetInstance ()
     {
         return instance;
+    }
+
+    private List<World> BlackListedWorlds;
+
+    public List<World> getBlacklistedWorlds()
+    {
+        return BlackListedWorlds;
     }
 
     public static List<World> GetOverworlds ()
@@ -94,32 +103,22 @@ public final class Bloodmoon extends JavaPlugin
         return sqlAccess;
     }
 
-    public ConfigReader getConfigReader ()
+    public ConfigReader getConfigReader (World world)
     {
-        if (configReader == null)
+        try
         {
-            File configFile = new File (getDataFolder () + SLASH + CONFIG_FILE);
-
-            try
-            {
-                if (! configFile.exists())
-                {
-                    configFile.createNewFile();
-
-                    configReader = new ConfigReader (configFile);
-                    configReader.GenerateDefaultFile();
-                }
-            }
-            catch (IOException e)
-            {
-                System.out.println("Error: Could not create config file");
-            }
-
-            configReader = new ConfigReader (configFile);
-            configReader.ReadAllSettings();
+            return configReaders.get(world);
         }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-        return configReader;
+    public ConfigReader[] getAllConfigReaders ()
+    {
+        return allConfigReaders.toArray(new ConfigReader[allConfigReaders.size()]);
     }
 
     public LocaleReader getLocaleReader ()
@@ -181,6 +180,34 @@ public final class Bloodmoon extends JavaPlugin
         }
     }
 
+    //Create a config reader, setting it up if it does not exist
+    private ConfigReader CreateSingleConfigReader (World world)
+    {
+        File worldFolder = new File (getDataFolder() + SLASH + world.getName());
+        if (! worldFolder.exists()) worldFolder.mkdir();
+
+        File configFile = new File (worldFolder.getAbsolutePath() + SLASH + CONFIG_FILE);
+        if (! configFile.exists())
+        {
+            try
+            {
+                configFile.createNewFile();
+                ConfigReader reader = new ConfigReader(configFile);
+                reader.GenerateDefaultFile();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        ConfigReader reader = new ConfigReader(configFile);
+        reader.ReadAllSettings();
+        configReaders.put(world, reader);
+        allConfigReaders.add(reader);
+        return reader;
+    }
+
     @Override
     public void onEnable()
     {
@@ -189,23 +216,23 @@ public final class Bloodmoon extends JavaPlugin
         CreateFolder();
 
         getSqlAccess();
-        getConfigReader();
         getLocaleReader();
 
         nightChecks = new ArrayList<>();
         actuators = new ArrayList<>();
 
-        String[] blacklistedWorlds = getConfigReader().GetBlacklistWorldsConfig();
+        BlackListedWorlds = new ArrayList<>();
+        configReaders = new HashMap<>();
+        allConfigReaders = new ArrayList<>();
 
         for (World world : GetOverworlds())
         {
-            boolean mustStop = false;
-            for (String worldName : blacklistedWorlds)
+            ConfigReader configReader = CreateSingleConfigReader(world);
+            if (configReader.GetIsBlacklistedConfig())
             {
-                if (world.getName().equals(worldName)) mustStop = true;
-                break;
+                BlackListedWorlds.add(world);
+                continue;
             }
-            if (mustStop) continue;
 
             BloodmoonActuator actuator = new BloodmoonActuator(world);
             PeriodicNightCheck nightCheck = new PeriodicNightCheck(world, actuator);
@@ -224,6 +251,10 @@ public final class Bloodmoon extends JavaPlugin
         getCommand("startbloodmoon").setExecutor(new BloodMoonStartExecutor());
         getCommand("endbloodmoon").setExecutor(new BloodMoonEndExecutor());
         getCommand("reloadbloodmoon").setExecutor(new BloodMoonReloadExecutor());
+
+        getCommand("testsuite").setExecutor(new TestCommandExecutor());
+
+        CheckOlderConfigs();
     }
 
     @Override
@@ -241,13 +272,25 @@ public final class Bloodmoon extends JavaPlugin
         }
 
         if (sqlAccess != null) sqlAccess.close();
-        if (configReader != null)
+        for (ConfigReader configReader : allConfigReaders)
         {
-            try
+            if (configReader != null)
             {
-                configReader.close();
+                try
+                {
+                    configReader.close();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
             }
-            catch (IOException ignored) {}
         }
+    }
+
+    private void CheckOlderConfigs ()
+    {
+        File oldConfig = new File (getDataFolder() + SLASH + CONFIG_FILE);
+        if (oldConfig.exists()) System.out.println("[Deprecated] BloodMoon/config.yml is no longer used. Use per-world configuration instead");
     }
 }

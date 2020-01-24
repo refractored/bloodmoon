@@ -26,7 +26,7 @@ public class BloodMoonEndExecutor implements CommandExecutor
             }
 
             nightCheck.SetCheckAfter(0);
-            nightCheck.SetDaysRemaining(PeriodicNightCheck.GetBloodMoonInterval() - 1);
+            nightCheck.SetDaysRemaining(nightCheck.GetBloodMoonInterval() - 1);
             world.setTime(0);
             return true;
         }

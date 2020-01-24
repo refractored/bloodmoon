@@ -50,7 +50,8 @@ public class ConfigReader implements Closeable
     public static final boolean THUNDER_DEFAULT = true;
     public static final String EXP_MULTIPLICATOR = "ExperienceDropMult";
     public static final int EXP_MULTIPLICATOR_DEFAULT = 4;
-    public static final String BLACKLISTED_WORLDS = "BlacklistedWorlds";
+    public static final String IS_BLACKLISTED = "IsBlacklisted";
+    public static final boolean IS_BLACKLISTED_DEFAULT = false;
 
     File configFile;
     Map <String, Object> cache;
@@ -68,6 +69,8 @@ public class ConfigReader implements Closeable
 
             writer.write("#Plugin version. Please do not tamper\n");
             writer.write(CONFIG_VERSION + ": " + Bloodmoon.GetInstance().getDescription().getVersion() + "\n\n");
+            writer.write("#Wether or not a BloodMoon happens in this world\n#Requires a server restart upon changes\n");
+            writer.write(IS_BLACKLISTED + ": " + String.valueOf(IS_BLACKLISTED_DEFAULT) + "\n");
             writer.write("#Interval in days between BloodMoons\n");
             writer.write(BLOOD_MOON_INTERVAL + ": " + String.valueOf(DEFAULT_INTERVAL) + "\n");
             writer.write("#Do items despawn upon death?\n");
@@ -78,7 +81,7 @@ public class ConfigReader implements Closeable
             writer.write(ITEM_DROPS_MAXIMUM + ": " + String.valueOf(MAX_ITEM_DROP_DEFAULT) + "\n");
             writer.write("#Minimum item amount to drop per mob death\n");
             writer.write(ITEM_DROPS_MINIMUM + ": " + String.valueOf(MIN_ITEM_DROP_DEFAULT) + "\n");
-            writer.write("#Mob experience drop multiplicator. Whole number only");
+            writer.write("#Mob experience drop multiplicator. Whole number only\n");
             writer.write(EXP_MULTIPLICATOR + ": " + String.valueOf(EXP_MULTIPLICATOR_DEFAULT) + "\n");
             writer.write("#Mob damage multiplier. Whole number only\n");
             writer.write(MOB_DAMAGE_MULT + ": " + String.valueOf(MOB_DAMAGE_MULT_DEFAULT) + "\n");
@@ -145,10 +148,6 @@ public class ConfigReader implements Closeable
             writer.write(SPIDEREFFECTS + ":\n");
             writer.write("  - \"POISON,4,1\"\n");
             writer.write("  - \"CONFUSION,6,999\"\n");
-            writer.write("#Blacklisted Worlds. These worlds will be ignored\n");
-            writer.write("#Note that this setting requires a server reststopart to take effect\n");
-            writer.write(BLACKLISTED_WORLDS + ":\n");
-            writer.write("  - \"BlacklistedWorldName\"\n");
 
             writer.close();
         }
@@ -171,6 +170,7 @@ public class ConfigReader implements Closeable
         GetBloodMoonPeriodicSoundConfig();
         GetBloodMoonEndSoundConfig();
         GetItemListConfig();
+        GetIsBlacklistedConfig();
     }
 
     public void RefreshConfigs ()
@@ -180,7 +180,7 @@ public class ConfigReader implements Closeable
 
     //============================================================================================================
 
-    //TODO: add per-world overrides
+    //Todo: add per-world overrides
 
     public Material[] GetItemListConfig ()
     {
@@ -227,21 +227,21 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public String[] GetBlacklistWorldsConfig ()
+    public boolean GetIsBlacklistedConfig ()
     {
         try
         {
-            Object interval = GetConfig(BLACKLISTED_WORLDS);
-            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
+            Object interval = GetConfig(IS_BLACKLISTED);
+            if (interval == null)
             {
-                return new String[0];
+                CreateConfig(IS_BLACKLISTED, String.valueOf(IS_BLACKLISTED_DEFAULT));
+                interval = IS_BLACKLISTED_DEFAULT;
             }
-            ArrayList<String> worlds = (ArrayList<String>) interval;
-            return worlds.toArray(new String[worlds.size()]);
+            return (boolean) interval;
         }
         catch (FileNotFoundException e)
         {
-            return new String[0];
+            return IS_BLACKLISTED_DEFAULT;
         }
     }
 
@@ -357,10 +357,10 @@ public class ConfigReader implements Closeable
     {
         try
         {
-            Object interval = GetConfig(THUNDER_DURING_BLOOD_MOON);
+            Object interval = GetConfig(LIGHTNING_EFFECT_ON_MOB_DEATH);
             if (interval == null)
             {
-                CreateConfig(THUNDER_DURING_BLOOD_MOON, String.valueOf(MOB_LIGHTNING_EFFECT_DEFAULT));
+                CreateConfig(LIGHTNING_EFFECT_ON_MOB_DEATH, String.valueOf(MOB_LIGHTNING_EFFECT_DEFAULT));
                 interval = MOB_LIGHTNING_EFFECT_DEFAULT;
             }
             return (boolean) interval;

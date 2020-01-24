@@ -100,7 +100,7 @@ public class BloodmoonActuator implements Listener, Runnable
     private void ShowNightBar ()
     {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
         if (configReader.GetDarkenSkyConfig())
         {
@@ -157,7 +157,7 @@ public class BloodmoonActuator implements Listener, Runnable
 
         Random random = new Random(); //We want to regenerate it every time to ensure randomness
 
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         Material[] selection = configReader.GetItemListConfig();
 
         int amount = selection.length;
@@ -168,10 +168,9 @@ public class BloodmoonActuator implements Listener, Runnable
 
     private void ApplySpecialEffect (Player player, EntityType mob)
     {
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
         String[] configs = configReader.GetMobEffectConfig(mob.name());
-        System.out.println(mob.name());
 
         for (String str : configs)
         {
@@ -203,7 +202,7 @@ public class BloodmoonActuator implements Listener, Runnable
         return inProgress;
     }
 
-    //Todo: check if all events are happening in our world
+
     //Todo: watch for playerTP to other dimensions
 
     //Events
@@ -222,9 +221,10 @@ public class BloodmoonActuator implements Listener, Runnable
         if (!isInProgress()) return; //Only during BloodMoon
 
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
         Player deadplayer = event.getEntity();
+        if (deadplayer.getWorld() != world) return; //Wrong world
 
         if (configReader.GetLightningEffectConfig()) world.strikeLightningEffect(deadplayer.getLocation());
 
@@ -257,13 +257,12 @@ public class BloodmoonActuator implements Listener, Runnable
 
         if (event.getEntity() instanceof Player) return; //Handled in another method
 
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
-
-        if (configReader.GetMobDeathThunderConfig())
-            world.strikeLightningEffect(event.getEntity().getLocation());
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
         event.setDroppedExp(event.getDroppedExp() * configReader.GetExpMultConfig());
         LivingEntity entity = event.getEntity();
+
+        if (entity.getWorld() != world) return; //Wrong world
 
 
         boolean eligible = false;
@@ -273,6 +272,9 @@ public class BloodmoonActuator implements Listener, Runnable
         }
 
         if (! eligible) return; //Not eligible for reward
+
+        if (configReader.GetMobDeathThunderConfig())
+            world.strikeLightningEffect(event.getEntity().getLocation());
 
         List<ItemStack> bonusDrops = new ArrayList<>();
 
@@ -300,6 +302,7 @@ public class BloodmoonActuator implements Listener, Runnable
         Entity receiver = event.getEntity();
         Entity damager = event.getDamager();
 
+        if (receiver.getWorld() != world || damager.getWorld() != world) return; //Wrong world
         if (damager instanceof Projectile) //if its arrow damage
         {
             ProjectileSource source = ((Projectile) damager).getShooter(); //Get the shooter as Source
@@ -313,7 +316,7 @@ public class BloodmoonActuator implements Listener, Runnable
 
         if (receiver instanceof LivingEntity && damager instanceof LivingEntity)
         {
-            ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+            ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
              if (receiver instanceof Player)
              {
 

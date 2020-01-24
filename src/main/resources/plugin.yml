@@ -1,5 +1,5 @@
-name: Bloodmoon
-version: 0.5.2
+name: BloodMoon
+version: 0.6
 main: org.spectralmemories.bloodmoon.Bloodmoon
 api-version: 1.14
 authors: [SpectralMemories]
@@ -21,6 +21,11 @@ commands:
     description: Reloads both the config and the locale file
     permission: "bloodmoon.reload"
     permission-message: "You do not have the permission to do that"
+  #remove it before building
+  testsuite:
+    description: Runs tests
+    permission-message: "Nope"
+    permission: "bloodmoon.reload"
 permissions:
   bloodmoon.bloodmoon:
     description: Allows to run the bloodmoon command

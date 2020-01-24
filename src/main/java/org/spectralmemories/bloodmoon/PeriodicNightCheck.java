@@ -1,6 +1,5 @@
 package org.spectralmemories.bloodmoon;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -11,7 +10,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.spectralmemories.sqlaccess.FieldType;
 import org.spectralmemories.sqlaccess.SQLAccess;
 import org.spectralmemories.sqlaccess.SQLField;
-
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -33,7 +31,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     public PeriodicNightCheck(World world, BloodmoonActuator actuator)
     {
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         this.actuator = actuator;
         this.world = world;
         daysBeforeBloodMoon = (configReader.GetIntervalConfig() - 1); //Workaround
@@ -73,9 +71,9 @@ public class PeriodicNightCheck implements Runnable, Listener
         return null;
     }
 
-    public static int GetBloodMoonInterval ()
+    public int GetBloodMoonInterval ()
     {
-        return Bloodmoon.GetInstance().getConfigReader().GetIntervalConfig();
+        return Bloodmoon.GetInstance().getConfigReader(world).GetIntervalConfig();
     }
 
     public int GetRemainingDays ()
@@ -115,7 +113,7 @@ public class PeriodicNightCheck implements Runnable, Listener
         }
         catch (SQLException e)
         {
-            Bukkit.broadcastMessage(e.getMessage());
+            e.printStackTrace();
         }
 
         String sql;
@@ -136,7 +134,7 @@ public class PeriodicNightCheck implements Runnable, Listener
         }
         catch (SQLException e)
         {
-            Bukkit.broadcastMessage(e.getMessage());
+            e.printStackTrace();
         }
 
     }
@@ -202,7 +200,7 @@ public class PeriodicNightCheck implements Runnable, Listener
     private void Check13 ()
     {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         //Check if its Blood Moon night, then time is over 13000, and if its the day after the day 0 warning
         if (world.getFullTime() >= checkupAfter && world.getTime() >= 12000 && daysBeforeBloodMoon == 0)
         {
@@ -231,7 +229,7 @@ public class PeriodicNightCheck implements Runnable, Listener
     private void CheckDay ()
     {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         if (actuator.isInProgress())
         {
             //If Blood Moon is in progress but its daytime, stop it
