@@ -280,9 +280,18 @@ public final class Bloodmoon extends JavaPlugin
                 }
                 catch (IOException e)
                 {
+                    System.out.println("[Error");
                     e.printStackTrace();
                 }
             }
+        }
+        try
+        {
+            localeReader.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
 

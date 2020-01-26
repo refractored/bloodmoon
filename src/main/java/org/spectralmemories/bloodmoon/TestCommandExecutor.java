@@ -192,7 +192,7 @@ public class TestCommandExecutor implements CommandExecutor
         sender.sendMessage("Tests completed! " + ((totalTests == passedTests) ? "All tests passed!" : "Some tests failed!"));
     }
 
-    //Tests here
+    //Tests here. They will NOT be run in order
     //===================================================================================
     private boolean TestTest ()
     {
@@ -223,7 +223,7 @@ public class TestCommandExecutor implements CommandExecutor
             return false;
         }
         actuator.StopBloodMoon();
-        return ! (actuator.isInProgress());
+        return (! actuator.isInProgress());
     }
 
     private boolean TestDefaultSettings ()

@@ -12,7 +12,7 @@ Bugfixes:
 
 Misc:
 - Unit tests have been implemented to increase overall release quality
-- Commands have been reworked
+- Commands have been reworked. See plugin home page for the new list
 - Plugin cache now stores BloodMoon status more accurately
 - You can now disable sleeping during BloodMoons
 - You can now disable special reward from spawner created mobs

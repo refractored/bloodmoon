@@ -96,6 +96,7 @@ public class BloodmoonActuator implements Listener, Runnable
 
         actuatorPeriodic.Stop();
         actuatorPeriodic = null;
+        blacklistedMobs.clear();
     }
 
     private void StopStorm ()
