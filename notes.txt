@@ -1,17 +1,26 @@
 [0.6] The multiverse update
 
 Features:
-- Configurations are now loaded on a per-world basis
+- Configurations are now loaded on a per-world basis. See notes
+- Locales can now contain color codes and other text alterations (bold, italic etc)
 
 Bugfixes:
 - Fixed a bug where events happening in non-bloodmoon worlds were still treated as part of a bloodmoon
 - Fixed the default config file
+- Fixed a bug where some configs where ignored
+- Fixed a bug which caused an error when disabling the plugin
 
 Misc:
 - Unit tests have been implemented to increase overall release quality
+- Commands have been reworked
+- Plugin cache now stores BloodMoon status more accurately
+- You can now disable sleeping during BloodMoons
+- You can now disable special reward from spawner created mobs
 
 Notes:
 - Plugin name internally changed from Bloodmoon to BloodMoon, and thus, the plugin folder's name is now changed, at least on Linux. Since
 Windows handles capital letters in filenames differently, I am unsure if you need to manually transfer your config files
 - The old BloodMoon/config.yml is deprecated, so simply copy your configs to the new config files. Please review the newly generated config
 file, as there was some slight changes in the config file structure
+- Commands and permissions have been reworked. Please ensure your permissions are setup correctly
+- New locales have been added. Be sure to add them from https://gitlab.com/SpectralMemories/bloodmoon/-/wikis/Default-Locales

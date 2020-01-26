@@ -6,21 +6,7 @@ authors: [SpectralMemories]
 description: A bloon moon shines every couple of nights
 commands:
   bloodmoon:
-    description: Shows the days left before the next BloodMoon
-    permission: "bloodmoon.bloodmoon"
-    permission-message: "You do not have the permission to do that"
-  startbloodmoon:
-    description: Starts a BloodMoon now
-    permission: "bloodmoon.start"
-    permission-message: "You do not have the permission to do that"
-  endbloodmoon:
-    description: Ends a BloodMoon now
-    permission: "bloodmoon.end"
-    permission-message: "You do not have the permission to do that"
-  reloadbloodmoon:
-    description: Reloads both the config and the locale file
-    permission: "bloodmoon.reload"
-    permission-message: "You do not have the permission to do that"
+    description: Base command. Should be followed by either show, start, stop or reload
   #remove it before building
   testsuite:
     description: Runs tests
@@ -28,12 +14,15 @@ commands:
     permission: "bloodmoon.reload"
 permissions:
   bloodmoon.bloodmoon:
-    description: Allows to run the bloodmoon command
+    description: Allows to run the base bloodmoon command
+    default: true
+  bloodmoon.show:
+    description: Allows to see when a new bloodmoon will take place
     default: true
   bloodmoon.start:
     description: Allows to start a bloodmoon
     default: op
-  bloodmoon.end:
+  bloodmoon.stop:
     description: Allows to end a bloodmoon
     default: op
   bloodmoon.reload:

@@ -6,6 +6,7 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.spectralmemories.sqlaccess.SQLAccess;
@@ -35,42 +36,69 @@ public class TestCommandExecutor implements CommandExecutor
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args)
     {
-        //This command will run a test suite to
+        CommandSender target = null;
         if (sender instanceof Player)
         {
-            Setup (sender);
-
-            StartReport();
-
-            Method[] tests = this.getClass().getDeclaredMethods();
-
-            for (Method test : tests)
+            target = sender;
+        }
+        else if (sender instanceof ConsoleCommandSender)
+        {
+            if (args.length != 1)
             {
-                if (test.getName().startsWith("Test"))
+                sender.sendMessage("Please specify a player name to use for tests");
+                return false;
+            }
+            else
+            {
+                Player playerFound = Bukkit.getPlayer(args[0]);
+                if (playerFound != null)
                 {
-                    totalTests++;
-                    try
-                    {
-                        boolean result = (boolean) test.invoke(this);
-                        Report(test.getName(), result);
-                        if (result) passedTests++;
-                    } catch (Exception e){
-                        try
-                        {
-                            writer.write("There was an error running the test " + test.getName() + "\n");
-                            writer.write(e.getMessage());
-                            break;
-                        } catch (Exception ignored) {}
-                    }
+                    target = playerFound;
+                }
+                else
+                {
+                    sender.sendMessage("[Error] Could not find player " + args[0]);
+                    return false;
                 }
             }
-
-            Summarize();
-
-            Finalize (player);
-            return true;
         }
-        return false;
+        else
+        {
+            return false;
+        }
+
+        //This command will run a test suite to
+        Setup (target);
+
+        StartReport();
+
+        Method[] tests = this.getClass().getDeclaredMethods();
+
+        for (Method test : tests)
+        {
+            if (test.getName().startsWith("Test"))
+            {
+                totalTests++;
+                try
+                {
+                    boolean result = (boolean) test.invoke(this);
+                    Report(test.getName(), result);
+                    if (result) passedTests++;
+                } catch (Exception e){
+                    try
+                    {
+                        writer.write("There was an error running the test " + test.getName() + "\n");
+                        writer.write(e.getMessage());
+                        break;
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+
+        Summarize();
+
+        Finalize (sender);
+        return true;
     }
 
     private void StartReport ()
@@ -159,9 +187,9 @@ public class TestCommandExecutor implements CommandExecutor
         passedTests = 0;
     }
 
-    private void Finalize (Player player)
+    private void Finalize (CommandSender sender)
     {
-        player.sendMessage("Tests completed! " + ((totalTests == passedTests) ? "All tests passed!" : "Some tests failed!"));
+        sender.sendMessage("Tests completed! " + ((totalTests == passedTests) ? "All tests passed!" : "Some tests failed!"));
     }
 
     //Tests here
@@ -251,7 +279,7 @@ public class TestCommandExecutor implements CommandExecutor
     {
         try
         {
-            return (Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "reloadbloodmoon"));
+            return (Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "bloodmoon reload"));
         }
         catch (Exception ignored) {}
         return false;

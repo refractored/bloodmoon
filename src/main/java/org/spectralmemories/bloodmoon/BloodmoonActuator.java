@@ -12,12 +12,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.SpawnerSpawnEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
-
 
 import java.util.*;
 
@@ -45,6 +48,8 @@ public class BloodmoonActuator implements Listener, Runnable
     private BossBar nightBar;
     private ActuatorPeriodic actuatorPeriodic;
 
+    private List<LivingEntity> blacklistedMobs;
+
     private void AddActuator (BloodmoonActuator instance)
     {
         if (actuators == null) actuators = new HashMap<>();
@@ -68,6 +73,7 @@ public class BloodmoonActuator implements Listener, Runnable
         this.world = world;
         inProgress = false;
         AddActuator(this);
+        blacklistedMobs = new ArrayList<>();
     }
 
     public void StartBloodMoon ()
@@ -75,6 +81,7 @@ public class BloodmoonActuator implements Listener, Runnable
         inProgress = true;
 
         ShowNightBar();
+        BroadcastBloodMoonWarning();
 
         actuatorPeriodic = new ActuatorPeriodic(world);
         actuatorPeriodic.run();
@@ -136,6 +143,11 @@ public class BloodmoonActuator implements Listener, Runnable
         nightBar = null;
     }
 
+    private void HideNightBarPlayer (Player player)
+    {
+        if (nightBar != null) nightBar.removePlayer(player);
+    }
+
     private void UpdateNightBar ()
     {
         long timeTotal = 12000;
@@ -150,6 +162,34 @@ public class BloodmoonActuator implements Listener, Runnable
     private void HandleReconnectingPlayer (Player player)
     {
         if (isInProgress() && nightBar != null) nightBar.addPlayer(player);
+        BroadcastBloodMoonWarningPlayer(player);
+    }
+
+    private void BroadcastBloodMoonWarning ()
+    {
+
+        for (Player player : world.getPlayers())
+        {
+            BroadcastBloodMoonWarningPlayer(player);
+        }
+    }
+
+    private void BroadcastBloodMoonWarningPlayer (Player player)
+    {
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
+
+        player.sendMessage(localeReader.GetLocaleString("BloodMoonWarningTitle"));
+        player.sendMessage(localeReader.GetLocaleString("BloodMoonWarningBody"));
+
+        if (configReader.GetInventoryLossConfig())
+        {
+            player.sendMessage(localeReader.GetLocaleString("DyingResultsInInventoryLoss"));
+        }
+        if (configReader.GetExperienceLossConfig())
+        {
+            player.sendMessage(localeReader.GetLocaleString("DyingResultsInExperienceLoss"));
+        }
     }
 
     private Material GetRandomBonus ()
@@ -203,15 +243,58 @@ public class BloodmoonActuator implements Listener, Runnable
     }
 
 
-    //Todo: watch for playerTP to other dimensions
 
     //Events
     @EventHandler
     public void onPlayerConnect (PlayerJoinEvent event)
     {
-        if (isInProgress())
+        if (isInProgress() && event.getPlayer().getWorld() == world)
         {
             HandleReconnectingPlayer (event.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onPlayerTeleport (PlayerTeleportEvent event)
+    {
+         World to = event.getTo().getWorld();
+         World from = event.getFrom().getWorld();
+         if (to != world && from != world) return; //None of our concern
+
+         if (from != to)
+         {
+            if (to == world && isInProgress())
+            {
+                //Someone entered our bm world
+                HandleReconnectingPlayer(event.getPlayer());
+            }
+            if (from == world && isInProgress())
+            {
+                //Someone left our bm world
+                HideNightBarPlayer(event.getPlayer());
+            }
+         }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn (PlayerRespawnEvent event)
+    {
+        World from = event.getPlayer().getWorld();
+        World to = event.getRespawnLocation().getWorld();
+        if (to != world && from != world) return; //None of our concern
+
+        if (from != to)
+        {
+            if (to == world && isInProgress())
+            {
+                //Someone respawned in our bm world
+                HandleReconnectingPlayer(event.getPlayer());
+            }
+            if (from == world && isInProgress())
+            {
+                //Someone respawned out of our bm world
+                HideNightBarPlayer(event.getPlayer());
+            }
         }
     }
 
@@ -245,7 +328,46 @@ public class BloodmoonActuator implements Listener, Runnable
 
 
         if (configReader.GetInventoryLossConfig()) event.getDrops().clear();
+    }
 
+    @EventHandler
+    public void onPlayerSleeps (PlayerBedEnterEvent event)
+    {
+        if (event.getPlayer().getWorld() == world)
+        {
+            if (isInProgress())
+            {
+                ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
+                if (configReader.GetPreventSleepingConfig())
+                {
+                    LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+
+                    event.getPlayer().sendMessage(localeReader.GetLocaleString("BedNotAllowed"));
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onMobSpawn (SpawnerSpawnEvent event)
+    {
+        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
+
+        if (configReader.GetMobsFromSpawnerNoRewardConfig() && event.getEntity().getWorld() == world && isInProgress())
+        {
+            for (EntityType type : rewardedTypes)
+            {
+                if (event.getEntityType() == type)
+                {
+                    if (event.getEntity() instanceof LivingEntity)
+                    {
+                        blacklistedMobs.add((LivingEntity) event.getEntity());
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -259,11 +381,16 @@ public class BloodmoonActuator implements Listener, Runnable
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
-        event.setDroppedExp(event.getDroppedExp() * configReader.GetExpMultConfig());
         LivingEntity entity = event.getEntity();
 
         if (entity.getWorld() != world) return; //Wrong world
 
+        if (blacklistedMobs.contains(entity))
+        {
+            //This mob was explicitely blacklisted. ignore it
+            blacklistedMobs.remove(entity);
+            return;
+        }
 
         boolean eligible = false;
         for (EntityType type : rewardedTypes)
@@ -272,6 +399,8 @@ public class BloodmoonActuator implements Listener, Runnable
         }
 
         if (! eligible) return; //Not eligible for reward
+
+        event.setDroppedExp(event.getDroppedExp() * configReader.GetExpMultConfig());
 
         if (configReader.GetMobDeathThunderConfig())
             world.strikeLightningEffect(event.getEntity().getLocation());

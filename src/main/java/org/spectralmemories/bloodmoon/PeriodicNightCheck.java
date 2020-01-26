@@ -1,6 +1,5 @@
 package org.spectralmemories.bloodmoon;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -117,25 +116,31 @@ public class PeriodicNightCheck implements Runnable, Listener
         }
 
         String sql;
-        int days = (actuator.isInProgress()) ? 0 : daysBeforeBloodMoon;
+        int days = (actuator.isInProgress()) ? -1 : daysBeforeBloodMoon;
+        long checkAt = (actuator.isInProgress()) ? 0 : checkupAfter;
         if (exists)
         {
-            sql = "UPDATE " + tableName + " SET days = " + days + ", checkAt = " + checkupAfter;
+            sql = "UPDATE " + tableName + " SET days = " + (days + 1) + ", checkAt = " + checkAt;
             sql += " WHERE world = '" + worldUid + "';";
         }
         else
         {
-            sql = "INSERT INTO " + tableName + " VALUES('" + worldUid + "', " + days + ", " + checkupAfter + ");";
+            sql = "INSERT INTO " + tableName + " VALUES('" + worldUid + "', " + (days + 1) + ", " + checkAt + ");";
         }
 
         try
         {
-            if (! access.ExecuteSQLOperation(sql)) throw new SQLException();
+            if (! access.ExecuteSQLOperation(sql))
+            {
+                System.out.println("[Warning] There was an issue updating plugin");
+            }
         }
         catch (SQLException e)
         {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         }
+
 
     }
 
@@ -171,7 +176,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
                     for (Player player : world.getPlayers())
                     {
-                        player.sendMessage(ChatColor.GOLD + localeReader.GetLocaleString("BloodMoonTomorrow"));
+                        player.sendMessage(localeReader.GetLocaleString("BloodMoonTomorrow"));
                     }
 
                 }
@@ -180,7 +185,7 @@ public class PeriodicNightCheck implements Runnable, Listener
                     for (Player player : world.getPlayers())
                     {
                         String message = localeReader.GetLocaleString("DaysBeforeBloodMoon");
-                        player.sendMessage(ChatColor.DARK_GREEN + message.replace("$d", String.valueOf(daysBeforeBloodMoon)));
+                        player.sendMessage(message.replace("$d", String.valueOf(daysBeforeBloodMoon)));
                     }
                 }
                 SetDaysRemaining(daysBeforeBloodMoon - 1);
@@ -192,7 +197,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
             for (Player player : world.getPlayers())
             {
-                player.sendMessage(ChatColor.DARK_PURPLE + localeReader.GetLocaleString("BloodMoonTonight"));
+                player.sendMessage(localeReader.GetLocaleString("BloodMoonTonight"));
             }
             checkupAfter = getTodayZero() + 12000;
         }
@@ -204,21 +209,6 @@ public class PeriodicNightCheck implements Runnable, Listener
         //Check if its Blood Moon night, then time is over 13000, and if its the day after the day 0 warning
         if (world.getFullTime() >= checkupAfter && world.getTime() >= 12000 && daysBeforeBloodMoon == 0)
         {
-
-            for (Player player : world.getPlayers())
-            {
-                player.sendMessage(ChatColor.DARK_RED + "" + ChatColor.BOLD + localeReader.GetLocaleString("BloodMoonWarningTitle"));
-                player.sendMessage(ChatColor.RED + localeReader.GetLocaleString("BloodMoonWarningBody"));
-
-                if (configReader.GetInventoryLossConfig())
-                {
-                    player.sendMessage(ChatColor.RED + localeReader.GetLocaleString("DyingResultsInInventoryLoss"));
-                }
-                if (configReader.GetExperienceLossConfig())
-                {
-                    player.sendMessage(ChatColor.RED + localeReader.GetLocaleString("DyingResultsInExperienceLoss"));
-                }
-            }
 
             actuator.StartBloodMoon();
 
@@ -239,11 +229,11 @@ public class PeriodicNightCheck implements Runnable, Listener
                 actuator.StopBloodMoon();
                 for (Player player : world.getPlayers())
                 {
-                    player.sendMessage(ChatColor.GREEN + localeReader.GetLocaleString("BloodMoonEndingMessage"));
+                    player.sendMessage(localeReader.GetLocaleString("BloodMoonEndingMessage"));
                     if (configReader.GetBloodMoonEndSoundConfig())
                         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 100.0f, 1.2f);
                 }
-                checkupAfter = 0; //This avoids some bugs when players use /time set 0, which resets time to 0
+                checkupAfter = 0; //This avoids some bugs when players use /time set 0
             }
 
         }

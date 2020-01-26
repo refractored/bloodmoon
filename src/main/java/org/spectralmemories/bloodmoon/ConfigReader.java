@@ -52,6 +52,11 @@ public class ConfigReader implements Closeable
     public static final int EXP_MULTIPLICATOR_DEFAULT = 4;
     public static final String IS_BLACKLISTED = "IsBlacklisted";
     public static final boolean IS_BLACKLISTED_DEFAULT = false;
+    public static final String VERSION_CONFIG = "ConfigVersion";
+    public static final String PREVENT_SLEEPING = "PreventSleeping";
+    public static final boolean PREVENT_SLEEPING_DEFAULT = true;
+    public static final String MOBS_FROM_SPAWNER_NO_REWARD = "MobsFromSpawnerNoReward";
+    public static final boolean MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT = false;
 
     File configFile;
     Map <String, Object> cache;
@@ -101,7 +106,11 @@ public class ConfigReader implements Closeable
             writer.write(PLAY_SOUND_UPON_HIT + ": " + String.valueOf(SOUND_ON_HIT_DEFAULT) + "\n");
             writer.write("#Effect of rain and thunder during the BloodMoon\n");
             writer.write(THUNDER_DURING_BLOOD_MOON + ": " + String.valueOf(THUNDER_DEFAULT) + "\n");
-            writer.write("#List of items that can drop. Items listed more than once have a higher chance to drop");
+            writer.write("#Prevents sleeping during a BloodMoon\n");
+            writer.write(PREVENT_SLEEPING + ": " + PREVENT_SLEEPING_DEFAULT + "\n");
+            writer.write("#Prevents mob created by spawner from dropping any reward\n");
+            writer.write(MOBS_FROM_SPAWNER_NO_REWARD + ": " + MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT + "\n");
+            writer.write("#List of items that can drop. Items listed more than once have a higher chance to drop\n");
             writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
             writer.write(DROP_ITEM_LIST + ":\n");
             writer.write("  - GOLD_INGOT\n");
@@ -160,6 +169,8 @@ public class ConfigReader implements Closeable
     //Useful to ensure every nodes are setup
     public void ReadAllSettings ()
     {
+        if (GetIsBlacklistedConfig()) return; //skip others
+
         GetExperienceLossConfig();
         GetInventoryLossConfig();
         GetIntervalConfig();
@@ -170,7 +181,8 @@ public class ConfigReader implements Closeable
         GetBloodMoonPeriodicSoundConfig();
         GetBloodMoonEndSoundConfig();
         GetItemListConfig();
-        GetIsBlacklistedConfig();
+        GetPreventSleepingConfig();
+        GetMobsFromSpawnerNoRewardConfig ();
     }
 
     public void RefreshConfigs ()
@@ -180,7 +192,22 @@ public class ConfigReader implements Closeable
 
     //============================================================================================================
 
-    //Todo: add per-world overrides
+    public String GetFileVersion ()
+    {
+        try
+        {
+            Object interval = GetConfig(VERSION_CONFIG);
+            if (interval == null)
+            {
+                interval = "NaN";
+            }
+            return String.valueOf(interval);
+        }
+        catch (FileNotFoundException e)
+        {
+            return "NaN";
+        }
+    }
 
     public Material[] GetItemListConfig ()
     {
@@ -242,6 +269,42 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return IS_BLACKLISTED_DEFAULT;
+        }
+    }
+
+    public boolean GetMobsFromSpawnerNoRewardConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(MOBS_FROM_SPAWNER_NO_REWARD);
+            if (interval == null)
+            {
+                CreateConfig(MOBS_FROM_SPAWNER_NO_REWARD, String.valueOf(MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT));
+                interval = MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT;
+        }
+    }
+
+    public boolean GetPreventSleepingConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PREVENT_SLEEPING);
+            if (interval == null)
+            {
+                CreateConfig(PREVENT_SLEEPING, String.valueOf(PREVENT_SLEEPING_DEFAULT));
+                interval = PREVENT_SLEEPING_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return PREVENT_SLEEPING_DEFAULT;
         }
     }
 

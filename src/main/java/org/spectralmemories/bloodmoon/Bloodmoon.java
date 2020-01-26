@@ -248,10 +248,8 @@ public final class Bloodmoon extends JavaPlugin
         }
 
         getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
-        getCommand("startbloodmoon").setExecutor(new BloodMoonStartExecutor());
-        getCommand("endbloodmoon").setExecutor(new BloodMoonEndExecutor());
-        getCommand("reloadbloodmoon").setExecutor(new BloodMoonReloadExecutor());
 
+        //TODO: remove before release
         getCommand("testsuite").setExecutor(new TestCommandExecutor());
 
         CheckOlderConfigs();
@@ -290,7 +288,37 @@ public final class Bloodmoon extends JavaPlugin
 
     private void CheckOlderConfigs ()
     {
+        System.out.println("[BloodMoon] This plugin is still in its infancy. If you encounter a bug, please report it to https://www.spigotmc.org/threads/bloodmoon.412741/");
+
         File oldConfig = new File (getDataFolder() + SLASH + CONFIG_FILE);
         if (oldConfig.exists()) System.out.println("[Deprecated] BloodMoon/config.yml is no longer used. Use per-world configuration instead");
+
+        String localesVersion = getLocaleReader().GetFileVersion();
+        if (localesVersion.equals("NaN"))
+        {
+            System.out.println("[Error] locales.yml has no valid version tag. Consider regenerating it");
+            return;
+        }
+        if (! GetMajorVersions(localesVersion).equals(GetMajorVersions(getDescription().getVersion())))
+            System.out.println("[Warning] Locales file was not updated since the last major update. Regenerating it is *highly* recommended");
+        for (World world : overworlds)
+        {
+            if (BlackListedWorlds.contains(world)) continue;
+
+            String configVersion = getConfigReader(world).GetFileVersion();
+            if (configVersion.equals("NaN"))
+            {
+                System.out.println("[Error] " + world.getName() + "/config.yml has no valid version tag. Consider regenerating it");
+                return;
+            }
+            if (! GetMajorVersions(configVersion).equals(GetMajorVersions(getDescription().getVersion())))
+                System.out.println("[Warning] Config file for world " + world.getName() + " was not updated since the last major update. Regenerating it is *highly* recommended");
+        }
+    }
+
+    private static String GetMajorVersions (String version)
+    {
+        String[] segments = version.split("\\.");
+        return segments[0] + "." + segments[1];
     }
 }
