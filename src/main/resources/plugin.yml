@@ -9,11 +9,14 @@ description: A bloon moon shines every couple of nights
 commands:
   bloodmoon:
     description: Base command. Should be followed by either show, start, stop or reload
-  #remove it before building
-  testsuite:
-    description: Runs tests
-    permission-message: "Nope"
-    permission: "bloodmoon.reload"
+    permission: "bloodmoon.bloodmoon"
+    permission-message: "You do not have the permission to do this"
+  #Uncomment this section to unlock the testsuite command. Official releases will obviously pass all tests, but if you want to
+  #Run them yourself, knock yourself out!
+  #testsuite:
+  #  description: Runs the integrated test suite. Usually only developers use this, there is however little harm to do it yourself. Test results will be in the BloodMoon folder
+  #  permission: "bloodmoon.testsuite"
+  #  permission-message: "You do not have the permission to do this"
 permissions:
   bloodmoon.bloodmoon:
     description: Allows to run the base bloodmoon command
@@ -30,3 +33,7 @@ permissions:
   bloodmoon.reload:
     description: Allows to reload config files
     default: op
+  #Required for the testsuite command
+  #bloodmoon.testsuite:
+  #  description: Allows to run the testsuite command. You most likely don't need this
+  #  default: op
