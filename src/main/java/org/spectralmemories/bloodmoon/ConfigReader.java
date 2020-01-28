@@ -1,6 +1,7 @@
 package org.spectralmemories.bloodmoon;
 
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -57,13 +58,20 @@ public class ConfigReader implements Closeable
     public static final boolean PREVENT_SLEEPING_DEFAULT = true;
     public static final String MOBS_FROM_SPAWNER_NO_REWARD = "MobsFromSpawnerNoReward";
     public static final boolean MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT = false;
+    public static final String SHIELD_PREVENTS_EFFECTS = "ShieldPreventsEffects";
+    public static final boolean SHIELD_PREVENTS_EFFECTS_DEFAULT = true;
+    public static final String PERMANENT_BLOOD_MOON = "PermanentBloodMoon";
+    public static final boolean PERMANENT_BLOODMOON_DEFAULT = false;
 
-    File configFile;
-    Map <String, Object> cache;
+    private File configFile;
+    private Map <String, Object> cache;
+    private World world;
 
-    public ConfigReader (File file)
+
+    public ConfigReader (File file, World world)
     {
         configFile = file;
+        this.world = world;
     }
 
     public void GenerateDefaultFile ()
@@ -74,8 +82,11 @@ public class ConfigReader implements Closeable
 
             writer.write("#Plugin version. Please do not tamper\n");
             writer.write(CONFIG_VERSION + ": " + Bloodmoon.GetInstance().getDescription().getVersion() + "\n\n");
+            writer.write("#Config file for world " + world.getName() + " (UUID: " + world.getUID().toString() + ")\n\n");
             writer.write("#Wether or not a BloodMoon happens in this world\n#Requires a server restart upon changes\n");
             writer.write(IS_BLACKLISTED + ": " + String.valueOf(IS_BLACKLISTED_DEFAULT) + "\n");
+            writer.write("#Sets a permanent BloodMoon in this world\n#Obviously the interval option is ignored where this is on\n");
+            writer.write(PERMANENT_BLOOD_MOON + ": " + String.valueOf(PERMANENT_BLOODMOON_DEFAULT) + "\n");
             writer.write("#Interval in days between BloodMoons\n");
             writer.write(BLOOD_MOON_INTERVAL + ": " + String.valueOf(DEFAULT_INTERVAL) + "\n");
             writer.write("#Do items despawn upon death?\n");
@@ -107,9 +118,11 @@ public class ConfigReader implements Closeable
             writer.write("#Effect of rain and thunder during the BloodMoon\n");
             writer.write(THUNDER_DURING_BLOOD_MOON + ": " + String.valueOf(THUNDER_DEFAULT) + "\n");
             writer.write("#Prevents sleeping during a BloodMoon\n");
-            writer.write(PREVENT_SLEEPING + ": " + PREVENT_SLEEPING_DEFAULT + "\n");
+            writer.write(PREVENT_SLEEPING + ": " + String.valueOf(PREVENT_SLEEPING_DEFAULT) + "\n");
             writer.write("#Prevents mob created by spawner from dropping any reward\n");
-            writer.write(MOBS_FROM_SPAWNER_NO_REWARD + ": " + MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT + "\n");
+            writer.write(MOBS_FROM_SPAWNER_NO_REWARD + ": " + String.valueOf(MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT) + "\n");
+            writer.write("#Prevents special effects from being applied when a player raises their shield\n");
+            writer.write(SHIELD_PREVENTS_EFFECTS + ": " + String.valueOf(SHIELD_PREVENTS_EFFECTS_DEFAULT) + "\n");
             writer.write("#List of items that can drop. Items listed more than once have a higher chance to drop\n");
             writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
             writer.write(DROP_ITEM_LIST + ":\n");
@@ -135,8 +148,8 @@ public class ConfigReader implements Closeable
             writer.write("  - COAL_BLOCK\n");
             writer.write("  - REDSTONE_BLOCK\n");
             writer.write("  - LAPIS_BLOCK\n");
-            writer.write("#Mob effects on hit. Format:\n");
-            writer.write("#[Effect], [Duration in seconds], [Effect amplifier. Use 1 if you're unsure]\n");
+            writer.write("#Mob effects on hit. Format (with no spaces in between):\n");
+            writer.write("#[Effect],[Duration in seconds],[Effect amplifier. Use 1 if you're unsure]\n");
             writer.write("#For a complete list of effects, refert to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/potion/PotionEffectType.html\n");
             writer.write("#Additional effects include: 'LIGHTNING'\n");
             writer.write(ZOMBIEEFFECTS + ":\n");
@@ -150,13 +163,12 @@ public class ConfigReader implements Closeable
             writer.write(SKELETONEFFECTS + ":\n");
             writer.write("  - \"SLOW,3.5,1\"\n");
             writer.write(CREEPEREFFECTS + ":\n");
-            writer.write("  - \"SLOW,4,6\"\n");
             writer.write("  - \"LIGHTNING\"\n");
             writer.write(PHANTOMEFFECTS + ":\n");
             writer.write("  - \"LEVITATION,1.5,3\"\n");
             writer.write(SPIDEREFFECTS + ":\n");
             writer.write("  - \"POISON,4,1\"\n");
-            writer.write("  - \"CONFUSION,6,999\"\n");
+            writer.write("  - \"CONFUSION,6,9999\"\n");
 
             writer.close();
         }
@@ -183,6 +195,8 @@ public class ConfigReader implements Closeable
         GetItemListConfig();
         GetPreventSleepingConfig();
         GetMobsFromSpawnerNoRewardConfig ();
+        GetShieldPreventEffects ();
+        GetPermanentBloodMoonConfig ();
     }
 
     public void RefreshConfigs ()
@@ -269,6 +283,42 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return IS_BLACKLISTED_DEFAULT;
+        }
+    }
+
+    public boolean GetPermanentBloodMoonConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PERMANENT_BLOOD_MOON);
+            if (interval == null)
+            {
+                CreateConfig(PERMANENT_BLOOD_MOON, String.valueOf(PERMANENT_BLOODMOON_DEFAULT));
+                interval = PERMANENT_BLOODMOON_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return PERMANENT_BLOODMOON_DEFAULT;
+        }
+    }
+
+    public boolean GetShieldPreventEffects ()
+    {
+        try
+        {
+            Object interval = GetConfig(SHIELD_PREVENTS_EFFECTS);
+            if (interval == null)
+            {
+                CreateConfig(SHIELD_PREVENTS_EFFECTS, String.valueOf(SHIELD_PREVENTS_EFFECTS_DEFAULT));
+                interval = SHIELD_PREVENTS_EFFECTS_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return SHIELD_PREVENTS_EFFECTS_DEFAULT;
         }
     }
 

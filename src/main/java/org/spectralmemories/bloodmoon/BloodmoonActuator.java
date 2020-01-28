@@ -1,7 +1,10 @@
 package org.spectralmemories.bloodmoon;
 
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
@@ -74,6 +77,11 @@ public class BloodmoonActuator implements Listener, Runnable
         inProgress = false;
         AddActuator(this);
         blacklistedMobs = new ArrayList<>();
+
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
+        {
+            StartBloodMoon();
+        }
     }
 
     public void StartBloodMoon ()
@@ -89,6 +97,10 @@ public class BloodmoonActuator implements Listener, Runnable
 
     public void StopBloodMoon ()
     {
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
+        {
+            return;
+        }
         inProgress = false;
 
         StopStorm ();
@@ -151,6 +163,11 @@ public class BloodmoonActuator implements Listener, Runnable
 
     private void UpdateNightBar ()
     {
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
+        {
+            if (nightBar != null) nightBar.setProgress (1.0);
+            return;
+        }
         long timeTotal = 12000;
         long currentTime = world.getTime();
         long timeLeft = PeriodicNightCheck.DAY - currentTime;
@@ -220,6 +237,8 @@ public class BloodmoonActuator implements Listener, Runnable
                 world.strikeLightning(player.getLocation());
                 continue;
             }
+
+
             String[] parts = str.split(",");
             PotionEffectType[] types = PotionEffectType.values();
             String effectName = parts[0];
@@ -454,6 +473,7 @@ public class BloodmoonActuator implements Listener, Runnable
                 {
                     if (damager.getType() == type)
                     {
+                        if (event.getFinalDamage() == 0 && configReader.GetShieldPreventEffects()) return; //Hit was shielded. We shall not apply configs
                         //Player is damaged by monster
                         event.setDamage(event.getDamage() * configReader.GetMobDamageMultConfig());
                         ApplySpecialEffect((Player) receiver, type);

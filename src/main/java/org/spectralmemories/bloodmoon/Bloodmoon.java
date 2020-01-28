@@ -33,9 +33,11 @@ public final class Bloodmoon extends JavaPlugin
 
     private static List<PeriodicNightCheck> nightChecks;
     private static List<BloodmoonActuator> actuators;
-    private static List<World> overworlds;
+    private static List<World> bloodmoonWorlds;
     private static Map<World, ConfigReader> configReaders;
     private static List<ConfigReader> allConfigReaders;
+
+    private static WorldManager worldManager;
 
     public static Bloodmoon GetInstance ()
     {
@@ -49,19 +51,9 @@ public final class Bloodmoon extends JavaPlugin
         return BlackListedWorlds;
     }
 
-    public static List<World> GetOverworlds ()
+    public static List<World> GetBloodMoonWorlds()
     {
-        if (overworlds == null)
-        {
-            overworlds = new ArrayList<>();
-            List<World> worlds = Bloodmoon.GetInstance().getServer().getWorlds();
-            for (World world : worlds)
-            {
-                if (world.getEnvironment() == World.Environment.NORMAL) overworlds.add(world);
-            }
-        }
-
-        return overworlds;
+        return bloodmoonWorlds;
     }
 
     public BukkitScheduler GetScheduler ()
@@ -192,7 +184,7 @@ public final class Bloodmoon extends JavaPlugin
             try
             {
                 configFile.createNewFile();
-                ConfigReader reader = new ConfigReader(configFile);
+                ConfigReader reader = new ConfigReader(configFile, world);
                 reader.GenerateDefaultFile();
             }
             catch (IOException e)
@@ -201,7 +193,7 @@ public final class Bloodmoon extends JavaPlugin
                 return null;
             }
         }
-        ConfigReader reader = new ConfigReader(configFile);
+        ConfigReader reader = new ConfigReader(configFile, world);
         reader.ReadAllSettings();
         configReaders.put(world, reader);
         allConfigReaders.add(reader);
@@ -218,34 +210,22 @@ public final class Bloodmoon extends JavaPlugin
         getSqlAccess();
         getLocaleReader();
 
+        worldManager = new WorldManager();
+
         nightChecks = new ArrayList<>();
         actuators = new ArrayList<>();
 
         BlackListedWorlds = new ArrayList<>();
         configReaders = new HashMap<>();
         allConfigReaders = new ArrayList<>();
+        bloodmoonWorlds = new ArrayList<>();
 
-        for (World world : GetOverworlds())
+        for (World world : getServer().getWorlds())
         {
-            ConfigReader configReader = CreateSingleConfigReader(world);
-            if (configReader.GetIsBlacklistedConfig())
-            {
-                BlackListedWorlds.add(world);
-                continue;
-            }
-
-            BloodmoonActuator actuator = new BloodmoonActuator(world);
-            PeriodicNightCheck nightCheck = new PeriodicNightCheck(world, actuator);
-
-            GetScheduler().runTaskLater(this, nightCheck, 0);
-            getServer().getPluginManager().registerEvents(nightCheck, this);
-            getServer().getPluginManager().registerEvents(actuator, this);
-
-            nightChecks.add(nightCheck);
-            actuators.add(actuator);
-
-            LoadCache(world);
+            LoadWorld(world);
         }
+
+        getServer().getPluginManager().registerEvents (worldManager, this);
 
         getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
 
@@ -253,6 +233,36 @@ public final class Bloodmoon extends JavaPlugin
         getCommand("testsuite").setExecutor(new TestCommandExecutor());
 
         CheckOlderConfigs();
+    }
+
+    public void LoadWorld (World world)
+    {
+        if (world.getEnvironment() != World.Environment.NORMAL)
+        {
+            return;
+        }
+
+        ConfigReader configReader = CreateSingleConfigReader(world);
+        if (configReader.GetIsBlacklistedConfig())
+        {
+            BlackListedWorlds.add(world);
+            return;
+        }
+
+        BloodmoonActuator actuator = new BloodmoonActuator(world);
+        getServer().getPluginManager().registerEvents(actuator, this);
+        actuators.add(actuator);
+
+        if (! configReader.GetPermanentBloodMoonConfig())
+        {
+            PeriodicNightCheck nightCheck = new PeriodicNightCheck(world, actuator);
+            GetScheduler().runTaskLater(this, nightCheck, 0);
+            getServer().getPluginManager().registerEvents(nightCheck, this);
+            nightChecks.add(nightCheck);
+            LoadCache(world);
+        }
+
+        bloodmoonWorlds.add(world);
     }
 
     @Override
@@ -310,7 +320,7 @@ public final class Bloodmoon extends JavaPlugin
         }
         if (! GetMajorVersions(localesVersion).equals(GetMajorVersions(getDescription().getVersion())))
             System.out.println("[Warning] Locales file was not updated since the last major update. Regenerating it is *highly* recommended");
-        for (World world : overworlds)
+        for (World world : bloodmoonWorlds)
         {
             if (BlackListedWorlds.contains(world)) continue;
 
@@ -322,6 +332,9 @@ public final class Bloodmoon extends JavaPlugin
             }
             if (! GetMajorVersions(configVersion).equals(GetMajorVersions(getDescription().getVersion())))
                 System.out.println("[Warning] Config file for world " + world.getName() + " was not updated since the last major update. Regenerating it is *highly* recommended");
+            if (getConfigReader(world).GetIntervalConfig() < 1)
+                System.out.println("[Warning] BloodMoonInterval config is set to 0 or less.\nThis may cause problem, please use the PermanentBloodMoon option instead");
+
         }
     }
 

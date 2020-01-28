@@ -3,6 +3,7 @@
 Features:
 - Configurations are now loaded on a per-world basis. See notes
 - Locales can now contain color codes and other text alterations (bold, italic etc)
+- BloodMoon can now be permanent
 
 Bugfixes:
 - Fixed a bug where events happening in non-bloodmoon worlds were still treated as part of a bloodmoon
@@ -16,6 +17,7 @@ Misc:
 - Plugin cache now stores BloodMoon status more accurately
 - You can now disable sleeping during BloodMoons
 - You can now disable special reward from spawner created mobs
+- Increased overall plugin robustness; many scenarios will give human-readable warnings instead of crashing the plugin
 
 Notes:
 - Plugin name internally changed from Bloodmoon to BloodMoon, and thus, the plugin folder's name is now changed, at least on Linux. Since

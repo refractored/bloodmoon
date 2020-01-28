@@ -26,7 +26,10 @@ public class LocaleReader implements Closeable
             "CommandNotFound",
             "NoPermission",
             "AllowedCommands",
-            "BedNotAllowed"
+            "BedNotAllowed",
+            "WorldIsPermanentBloodMoon",
+            "CannotStopBloodMoon",
+            "GeneralError"
     };
     public static final String[] DEFAULT_LOCALES = {
             "BloodMoon",
@@ -46,7 +49,10 @@ public class LocaleReader implements Closeable
             "&cCommand&o&f $d &r&cdoes not exist!",
             "&cYou do not have the permission to do that!",
             "&6Supported commands are: &f&o$d",
-            "&cYou cannot sleep during a &4BloodMoon"
+            "&cYou cannot sleep during a &4BloodMoon",
+            "&cThis whole world is permanently in a BloodMoon!",
+            "&cYou cannot stop the BloodMoon in this world!",
+            "&c&oThere was an error processing your request"
     };
     public static final String STRING_NOT_FOUND = "[String not found]";
     public static final String VERSION_CONFIG = "LocalesVersion";

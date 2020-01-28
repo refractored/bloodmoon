@@ -1,6 +1,8 @@
 name: BloodMoon
 version: 0.6
 main: org.spectralmemories.bloodmoon.Bloodmoon
+softdepend:
+  - "Mutliverse-Core"
 api-version: 1.14
 authors: [SpectralMemories]
 description: A bloon moon shines every couple of nights

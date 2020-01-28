@@ -279,7 +279,7 @@ public class TestCommandExecutor implements CommandExecutor
     {
         try
         {
-            return (Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "bloodmoon reload"));
+            player.performCommand("bloodmoon reload");
         }
         catch (Exception ignored) {}
         return false;

@@ -11,7 +11,6 @@ public class BloodmoonCommandExecutor implements CommandExecutor
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
-
         if (sender instanceof Player)
         {
             Player player = (Player) sender;
@@ -76,6 +75,12 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(playerWorld);
 
+        if (configReader.GetPermanentBloodMoonConfig())
+        {
+            playerSender.sendMessage(localeReader.GetLocaleString("WorldIsPermanentBloodMoon"));
+            return true;
+        }
+
 
         BloodmoonActuator worldActuator = BloodmoonActuator.GetActuator(playerWorld);
 
@@ -92,7 +97,16 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         }
 
         int remainingDays = PeriodicNightCheck.GetDaysRemaining(playerWorld);
-        String remainingDaysString = localeReader.GetLocaleString("DaysBeforeBloodMoon");
+        String remainingDaysString;
+        if (remainingDays < 0)
+        {
+            System.out.println("[Error] remainingDays was inferior to 0. Please regenerate both the cache and the config for world " + playerWorld.getName());
+            remainingDaysString = localeReader.GetLocaleString("GeneralError");
+        }
+        else
+        {
+            remainingDaysString = localeReader.GetLocaleString("DaysBeforeBloodMoon");
+        }
 
         playerSender.sendMessage(remainingDaysString.replace("$d", String.valueOf(remainingDays)));
         return true;
@@ -102,6 +116,8 @@ public class BloodmoonCommandExecutor implements CommandExecutor
     {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
 
+
+
         if (! CheckPermission(playerSender, "start"))
         {
             playerSender.sendMessage("NoPermission");
@@ -109,6 +125,13 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         }
 
         World world = playerSender.getWorld();
+
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
+        {
+            playerSender.sendMessage(localeReader.GetLocaleString("WorldIsPermanentBloodMoon"));
+            return true;
+        }
+
         PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
         if (nightCheck == null)
         {
@@ -132,6 +155,13 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         }
 
         World world = playerSender.getWorld();
+
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
+        {
+            playerSender.sendMessage(localeReader.GetLocaleString("CannotStopBloodMoon"));
+            return true;
+        }
+
         PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
         if (nightCheck == null)
         {
