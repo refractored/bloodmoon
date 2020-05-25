@@ -62,6 +62,22 @@ public class ConfigReader implements Closeable
     public static final boolean SHIELD_PREVENTS_EFFECTS_DEFAULT = true;
     public static final String PERMANENT_BLOOD_MOON = "PermanentBloodMoon";
     public static final boolean PERMANENT_BLOODMOON_DEFAULT = false;
+    public static final String COMMANDS_ON_END = "CommandsOnEnd";
+    public static final String COMMANDS_ON_START = "CommandsOnStart";
+    public static final String ZOMBIEBOSSEFFECTS = "ZOMBIEBOSSEffects";
+    public static final String ENABLE_ZOMBIE_BOSS = "EnableZombieBoss";
+    public static final String ZOMBIE_BOSS_HEALTH = "ZombieBossHealth";
+    public static final String ZOMBIE_BOSS_DAMAGE = "ZombieBossDamage";
+    public static final String ZOMBIE_BOSS_POWER_SET = "ZombieBossPowerSet";
+    public static final boolean ENABLE_ZOMBIE_BOSS_DEFAULT = false;
+    public static final int ZOMBIE_BOSS_HEALTH_DEFAULT = 50;
+    public static final int ZOMBIE_BOSS_DAMAGE_DEFAULT = 7;
+    public static final String ZOMBIE_BOSS_ITEM_MULTIPLIER = "ZombieBossItemMultiplier";
+    public static final String ZOMBIE_BOSS_EXP_MULTIPLIER = "ZombieBossExpMultiplier";
+    public static final int DEFAULT_ZOMBIE_BOSS_ITEM_MULTIPLIER = 10;
+    public static final int DEFAULT_ZOMBIE_BOSS_EXP_MULTIPLIER = 10;
+    public static final String BLOOD_MOON_SPAWN_MOB_RATE = "BloodMoonSpawnMobRate";
+    public static final int DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE = 10;
 
     private File configFile;
     private Map <String, Object> cache;
@@ -85,7 +101,7 @@ public class ConfigReader implements Closeable
             writer.write("#Config file for world " + world.getName() + " (UUID: " + world.getUID().toString() + ")\n\n");
             writer.write("#Wether or not a BloodMoon happens in this world\n#Requires a server restart upon changes\n");
             writer.write(IS_BLACKLISTED + ": " + String.valueOf(IS_BLACKLISTED_DEFAULT) + "\n");
-            writer.write("#Sets a permanent BloodMoon in this world\n#Obviously the interval option is ignored where this is on\n");
+            writer.write("#Sets a permanent BloodMoon in this world\n#Obviously the interval option is ignored when this is on\n");
             writer.write(PERMANENT_BLOOD_MOON + ": " + String.valueOf(PERMANENT_BLOODMOON_DEFAULT) + "\n");
             writer.write("#Interval in days between BloodMoons\n");
             writer.write(BLOOD_MOON_INTERVAL + ": " + String.valueOf(DEFAULT_INTERVAL) + "\n");
@@ -123,6 +139,8 @@ public class ConfigReader implements Closeable
             writer.write(MOBS_FROM_SPAWNER_NO_REWARD + ": " + String.valueOf(MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT) + "\n");
             writer.write("#Prevents special effects from being applied when a player raises their shield\n");
             writer.write(SHIELD_PREVENTS_EFFECTS + ": " + String.valueOf(SHIELD_PREVENTS_EFFECTS_DEFAULT) + "\n");
+            writer.write("#Mob spawn rate during a BloodMoon.\n#0 means no mob at all, 25 is average, and anything above 100 is honestly insane\n");
+            writer.write(BLOOD_MOON_SPAWN_MOB_RATE + ": " + String.valueOf(DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE) + "\n");
             writer.write("#List of items that can drop. Items listed more than once have a higher chance to drop\n");
             writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
             writer.write(DROP_ITEM_LIST + ":\n");
@@ -148,6 +166,16 @@ public class ConfigReader implements Closeable
             writer.write("  - COAL_BLOCK\n");
             writer.write("  - REDSTONE_BLOCK\n");
             writer.write("  - LAPIS_BLOCK\n");
+            writer.write("#These are AOE powers affecting all players around the boss\n");
+            writer.write("#Accepted values are:\n");
+            writer.write("#LIGHTNING,[range],[cooldown]\n");
+            writer.write("#FIRE,[range],[cooldown],[duration]\n");
+            writer.write("#UNDERLING,[range],[cooldown],[amount]\n");
+            writer.write("#BLIND,[range],[cooldown],[duration]\n");
+            writer.write("#POISON,[range],[cooldown],[duration],[amplifier]\n");
+            writer.write("#WITHER,[range],[cooldown],[duration],[amplifier]\n");
+            writer.write("ZombieBossPowerSet:\n");
+            writer.write("  - \"WITHER,12,20,5,1\"\n");
             writer.write("#Mob effects on hit. Format (with no spaces in between):\n");
             writer.write("#[Effect],[Duration in seconds],[Effect amplifier. Use 1 if you're unsure]\n");
             writer.write("#For a complete list of effects, refert to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/potion/PotionEffectType.html\n");
@@ -169,6 +197,22 @@ public class ConfigReader implements Closeable
             writer.write(SPIDEREFFECTS + ":\n");
             writer.write("  - \"POISON,4,1\"\n");
             writer.write("  - \"CONFUSION,6,9999\"\n");
+            writer.write("ENDERMANEffects:\n");
+            writer.write("  - \"SLOW,2.5,2\"\n");
+            writer.write("ZOMBIEBOSSEffects:\n");
+            writer.write("  - \"WITHER,9,2\"\n");
+            writer.write("\n#These commands will be ran right as a BloodMoon starts\n");
+            writer.write("#You must append a ;s, ;f or ;p at the end of the command:\n");
+            writer.write("#using ;s runs the command as the server. Once\n");
+            writer.write("#using ;f runs the command as the server, for each player. use $p as the player placeholder\n");
+            writer.write("#using ;p runs the command as the player, for each player. $p also applies\n");
+            writer.write("#For all options, $w will be replaced by the world name\n");
+            writer.write("#Note that these commands will be the very first and very last operations\n#ran when starting and ending a BloodMoon\n");
+            writer.write("CommandsOnStart:\n");
+            writer.write("#  - \"some command;s\"\n");
+            writer.write("#Commands ran at the end of the BloodMoon\n");
+            writer.write("CommandsOnEnd:\n");
+            writer.write("#  - \"command on player $p on world $w;p\"\n");
 
             writer.close();
         }
@@ -197,6 +241,14 @@ public class ConfigReader implements Closeable
         GetMobsFromSpawnerNoRewardConfig ();
         GetShieldPreventEffects ();
         GetPermanentBloodMoonConfig ();
+        this.GetPreBloodMoonCommands();
+        this.GetPostBloodMoonCommands();
+        GetZombieBossDamage();
+        GetZombieBossExpMultiplier();
+        GetZombieBossHealth();
+        GetZombieBossItemMultiplier();
+        GetEnableZombieBossConfig();
+        GetZombieBossPowerSet();
     }
 
     public void RefreshConfigs ()
@@ -394,6 +446,24 @@ public class ConfigReader implements Closeable
         }
     }
 
+    public int GetSpawnRateConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(BLOOD_MOON_SPAWN_MOB_RATE);
+            if (interval == null)
+            {
+                CreateConfig(BLOOD_MOON_SPAWN_MOB_RATE, String.valueOf(DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE));
+                interval = DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE;
+        }
+    }
+
     public boolean GetBloodMoonEndSoundConfig ()
     {
         try
@@ -463,6 +533,34 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return THUNDER_DEFAULT;
+        }
+    }
+
+    public String[] GetPreBloodMoonCommands() {
+        try {
+            Object interval = this.GetConfig("CommandsOnStart");
+            if (interval != null && !String.valueOf(interval).equals("null")) {
+                ArrayList<String> effects = (ArrayList)interval;
+                return (String[])effects.toArray(new String[effects.size()]);
+            } else {
+                return new String[0];
+            }
+        } catch (FileNotFoundException var3) {
+            return new String[0];
+        }
+    }
+
+    public String[] GetPostBloodMoonCommands() {
+        try {
+            Object interval = this.GetConfig("CommandsOnEnd");
+            if (interval != null && !String.valueOf(interval).equals("null")) {
+                ArrayList<String> effects = (ArrayList)interval;
+                return (String[])effects.toArray(new String[effects.size()]);
+            } else {
+                return new String[0];
+            }
+        } catch (FileNotFoundException var3) {
+            return new String[0];
         }
     }
 
@@ -589,6 +687,90 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return MAX_ITEM_DROP_DEFAULT;
+        }
+    }
+
+    public String[] GetZombieBossPowerSet() {
+        try {
+            Object interval = this.GetConfig("ZombieBossPowerSet");
+            if (interval != null && !String.valueOf(interval).equals("null")) {
+                ArrayList<String> effects = (ArrayList)interval;
+                return (String[])effects.toArray(new String[effects.size()]);
+            } else {
+                return new String[0];
+            }
+        } catch (FileNotFoundException var3) {
+            return new String[0];
+        }
+    }
+
+    public boolean GetEnableZombieBossConfig() {
+        try {
+            Object interval = this.GetConfig("EnableZombieBoss");
+            if (interval == null) {
+                this.CreateConfig("EnableZombieBoss", String.valueOf(false));
+                interval = false;
+            }
+
+            return (Boolean)interval;
+        } catch (FileNotFoundException var2) {
+            return false;
+        }
+    }
+
+    public int GetZombieBossItemMultiplier() {
+        try {
+            Object interval = this.GetConfig("ZombieBossItemMultiplier");
+            if (interval == null) {
+                this.CreateConfig("ZombieBossItemMultiplier", String.valueOf(10));
+                interval = 10;
+            }
+
+            return (Integer)interval;
+        } catch (FileNotFoundException var2) {
+            return 10;
+        }
+    }
+
+    public int GetZombieBossExpMultiplier() {
+        try {
+            Object interval = this.GetConfig("ZombieBossExpMultiplier");
+            if (interval == null) {
+                this.CreateConfig("ZombieBossExpMultiplier", String.valueOf(10));
+                interval = 10;
+            }
+
+            return (Integer)interval;
+        } catch (FileNotFoundException var2) {
+            return 10;
+        }
+    }
+
+    public int GetZombieBossHealth() {
+        try {
+            Object interval = this.GetConfig("ZombieBossHealth");
+            if (interval == null) {
+                this.CreateConfig("ZombieBossHealth", String.valueOf(50));
+                interval = 50;
+            }
+
+            return (Integer)interval;
+        } catch (FileNotFoundException var2) {
+            return 50;
+        }
+    }
+
+    public int GetZombieBossDamage() {
+        try {
+            Object interval = this.GetConfig("ZombieBossDamage");
+            if (interval == null) {
+                this.CreateConfig("ZombieBossDamage", String.valueOf(7));
+                interval = 7;
+            }
+
+            return (Integer)interval;
+        } catch (FileNotFoundException var2) {
+            return 7;
         }
     }
 

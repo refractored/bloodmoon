@@ -173,20 +173,11 @@ public class PeriodicNightCheck implements Runnable, Listener
 
                 if (daysBeforeBloodMoon == 1)
                 {
-
-                    for (Player player : world.getPlayers())
-                    {
-                        player.sendMessage(localeReader.GetLocaleString("BloodMoonTomorrow"));
-                    }
-
+                    LocaleReader.MessageAllLocale("BloodMoonTomorrow", null, null, world);
                 }
                 else
                 {
-                    for (Player player : world.getPlayers())
-                    {
-                        String message = localeReader.GetLocaleString("DaysBeforeBloodMoon");
-                        player.sendMessage(message.replace("$d", String.valueOf(daysBeforeBloodMoon)));
-                    }
+                    LocaleReader.MessageAllLocale("DaysBeforeBloodMoon", new String[]{"$d"}, new String[]{String.valueOf(daysBeforeBloodMoon)}, world);
                 }
                 SetDaysRemaining(daysBeforeBloodMoon - 1);
                 checkupAfter = getNextEvening();
@@ -194,11 +185,7 @@ public class PeriodicNightCheck implements Runnable, Listener
             }
 
             //Day 0: prepare for Blood Moon
-
-            for (Player player : world.getPlayers())
-            {
-                player.sendMessage(localeReader.GetLocaleString("BloodMoonTonight"));
-            }
+            LocaleReader.MessageAllLocale("BloodMoonTonight", null, null, world);
             checkupAfter = getTodayZero() + 12000;
         }
     }
@@ -227,9 +214,9 @@ public class PeriodicNightCheck implements Runnable, Listener
             {
 
                 actuator.StopBloodMoon();
+                LocaleReader.MessageAllLocale("BloodMoonEndingMessage", null, null, world);
                 for (Player player : world.getPlayers())
                 {
-                    player.sendMessage(localeReader.GetLocaleString("BloodMoonEndingMessage"));
                     if (configReader.GetBloodMoonEndSoundConfig())
                         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 100.0f, 1.2f);
                 }

@@ -1,6 +1,9 @@
 package org.spectralmemories.bloodmoon;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -29,7 +32,10 @@ public class LocaleReader implements Closeable
             "BedNotAllowed",
             "WorldIsPermanentBloodMoon",
             "CannotStopBloodMoon",
-            "GeneralError"
+            "GeneralError",
+            "ZombieBossSpawned",
+            "ZombieBossName",
+            "BossSlain"
     };
     public static final String[] DEFAULT_LOCALES = {
             "BloodMoon",
@@ -52,12 +58,16 @@ public class LocaleReader implements Closeable
             "&cYou cannot sleep during a &4BloodMoon",
             "&cThis whole world is permanently in a BloodMoon!",
             "&cYou cannot stop the BloodMoon in this world!",
-            "&c&oThere was an error processing your request"
+            "&c&oThere was an error processing your request",
+            "&f&l$b &fhas arrived!",
+            "The Tough One",
+            "&l$p &2has slain &f$b!"
     };
     public static final String STRING_NOT_FOUND = "[String not found]";
     public static final String VERSION_CONFIG = "LocalesVersion";
 
     public static final String NULL_LOCALE = "null";
+    public static final String VOID_STRING = "%void%";
     private File localeFile;
     private Map<String, Object> cache;
     private Map<String, String> specialCharacters;
@@ -107,6 +117,57 @@ public class LocaleReader implements Closeable
 
     //===========================================================
 
+    public static void BroadcastLocale (String id, String[] args, String[] replacements)
+    {
+        String locale = Bloodmoon.GetInstance().getLocaleReader().GetLocaleString(id);
+        if(locale.length() > 0)
+        {
+            if(args != null && replacements != null && args.length == replacements.length)
+            {
+                for (int i = 0; i < args.length; i++)
+                {
+                    locale = locale.replace(args[i], replacements[i]);
+                }
+            }
+            Bukkit.broadcastMessage(locale);
+        }
+    }
+
+    public static void MessageAllLocale (String id, String[] args, String[] replacements, World world)
+    {
+        String locale = Bloodmoon.GetInstance().getLocaleReader().GetLocaleString(id);
+        if(locale.length() > 0)
+        {
+            if(args != null && replacements != null && args.length == replacements.length)
+            {
+                for (int i = 0; i < args.length; i++)
+                {
+                    locale = locale.replace(args[i], replacements[i]);
+                }
+            }
+            for (Player player : world.getPlayers())
+            {
+                player.sendMessage(locale);
+            }
+        }
+    }
+
+    public static void MessageLocale (String id, String[] args, String[] replacements, Player player)
+    {
+        String locale = Bloodmoon.GetInstance().getLocaleReader().GetLocaleString(id);
+        if(locale.length() > 0)
+        {
+            if(args != null && replacements != null && args.length == replacements.length)
+            {
+                for (int i = 0; i < args.length; i++)
+                {
+                    locale = locale.replace(args[i], replacements[i]);
+                }
+            }
+            player.sendMessage(locale);
+        }
+    }
+
     public String GetLocaleString (String id)
     {
         try
@@ -115,6 +176,7 @@ public class LocaleReader implements Closeable
 
             String value = String.valueOf(locale);
             if (value.equals(NULL_LOCALE)) throw new Exception();
+            if (value.equals(VOID_STRING)) return "";
             value = value.replace("$n", "\n");
 
             for (String key : specialCharactersList)
@@ -199,6 +261,7 @@ public class LocaleReader implements Closeable
             writer.write("LocalesVersion: " + Bloodmoon.GetInstance().getDescription().getVersion() + "\n\n");
             writer.write("#Locales file. use $n to create a new line\n");
             writer.write("#Some entries can accept a parameter, which will be $d\n");
+            writer.write("#You can completely silence a line by assigning \"%void%\"");
             writer.write("#You can use color codes. Refer to https://dev.bukkit.org/projects/color-chat for more info\n\n");
             int i = 0;
             for (String str : LOCALES_IDS)

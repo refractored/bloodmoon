@@ -21,7 +21,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
             if (args.length == 0)
             {
-                player.sendMessage(localeReader.GetLocaleString("AllowedCommands").replace("$d", "show, start, stop, reload"));
+                LocaleReader.MessageLocale("AllowedCommands", new String[]{"$d"}, new String[]{"show, start, stop, reload, spawnzombieboss, killbosses [rewards]"}, player);
                 return false;
             }
 
@@ -47,9 +47,31 @@ public class BloodmoonCommandExecutor implements CommandExecutor
                 player.sendMessage("Command end is deprecated. Please use 'stop'");
                 return ExecuteStop(player);
             }
+            else if (arg0.equalsIgnoreCase("spawnzombieboss"))
+            {
+                return ExecuteSpawnZombieBoss(player);
+            }
+            else if (arg0.equalsIgnoreCase("killbosses"))
+            {
+                boolean param = false;
+                if (args.length >= 2) {
+                    param = Boolean.parseBoolean(args[1]);
+                }
+
+                return ExecuteKillBosses(player, param);
+            }
+            else if (arg0.equalsIgnoreCase("spawnlimit"))
+            {
+                int param = 0;
+                if (args.length >= 2) {
+                    param = Integer.parseInt(args[1]);
+                }
+
+                return ExecuteChangeSpawnMax(player, param);
+            }
             else
             {
-                player.sendMessage(localeReader.GetLocaleString("CommandNotFound").replace("$d", arg0));
+                LocaleReader.MessageLocale("CommandNotFound", new String[]{"$d"}, new String[]{arg0}, player);
                 return false;
             }
         }
@@ -61,15 +83,20 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         }
     }
 
+    private boolean ExecuteChangeSpawnMax (Player playerSender, int value)
+    {
+        playerSender.getWorld().setMonsterSpawnLimit(value);
+        playerSender.sendMessage("Monster Spawn set to " + String.valueOf(playerSender.getWorld().getMonsterSpawnLimit()));
+        return true;
+    }
+
     private boolean ExecuteShow (Player playerSender)
     {
         World playerWorld = playerSender.getWorld();
 
-        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-
         if (! CheckPermission(playerSender, "show"))
         {
-            playerSender.sendMessage("NoPermission");
+            LocaleReader.MessageLocale("NoPermission", null, null, playerSender);
             return false;
         }
 
@@ -77,7 +104,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
         if (configReader.GetPermanentBloodMoonConfig())
         {
-            playerSender.sendMessage(localeReader.GetLocaleString("WorldIsPermanentBloodMoon"));
+            LocaleReader.MessageLocale("WorldIsPermanentBloodMoon", null, null, playerSender);
             return true;
         }
 
@@ -86,29 +113,27 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
         if (worldActuator == null)
         {
-            playerSender.sendMessage(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+            LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, playerSender);
             return true;
         }
 
         if (worldActuator.isInProgress())
         {
-            playerSender.sendMessage(localeReader.GetLocaleString("BloodMoonRightNow"));
+            LocaleReader.MessageLocale("BloodMoonRightNow", null, null, playerSender);
             return true;
         }
 
         int remainingDays = PeriodicNightCheck.GetDaysRemaining(playerWorld);
-        String remainingDaysString;
         if (remainingDays < 0)
         {
             System.out.println("[Error] remainingDays was inferior to 0. Please regenerate both the cache and the config for world " + playerWorld.getName());
-            remainingDaysString = localeReader.GetLocaleString("GeneralError");
+            LocaleReader.MessageLocale("GeneralError", null, null, playerSender);
         }
         else
         {
-            remainingDaysString = localeReader.GetLocaleString("DaysBeforeBloodMoon");
+            LocaleReader.MessageLocale("DaysBeforeBloodMoon", new String[]{"$d"}, new String[]{String.valueOf(remainingDays)}, playerSender);
         }
 
-        playerSender.sendMessage(remainingDaysString.replace("$d", String.valueOf(remainingDays)));
         return true;
     }
 
@@ -120,7 +145,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
         if (! CheckPermission(playerSender, "start"))
         {
-            playerSender.sendMessage("NoPermission");
+            LocaleReader.MessageLocale("NoPermission", null, null, playerSender);
             return false;
         }
 
@@ -128,14 +153,14 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
         {
-            playerSender.sendMessage(localeReader.GetLocaleString("WorldIsPermanentBloodMoon"));
+            LocaleReader.MessageLocale("WorldIsPermanentBloodMoon", null, null, playerSender);
             return true;
         }
 
         PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
         if (nightCheck == null)
         {
-            playerSender.sendMessage(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+            LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, playerSender);
             return true;
         }
         nightCheck.SetCheckAfter(0);
@@ -150,7 +175,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
         if (! CheckPermission(playerSender, "stop"))
         {
-            playerSender.sendMessage("NoPermission");
+            LocaleReader.MessageLocale("NoPermission", null, null, playerSender);
             return false;
         }
 
@@ -158,14 +183,14 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
         {
-            playerSender.sendMessage(localeReader.GetLocaleString("CannotStopBloodMoon"));
+            LocaleReader.MessageLocale("CannotStopBloodMoon", null, null, playerSender);
             return true;
         }
 
         PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
         if (nightCheck == null)
         {
-            playerSender.sendMessage(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+            LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, playerSender);
             return true;
         }
 
@@ -173,6 +198,38 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         nightCheck.SetDaysRemaining(nightCheck.GetBloodMoonInterval() - 1);
         world.setTime(0);
         return true;
+    }
+
+    private boolean ExecuteSpawnZombieBoss(Player playerSender) {
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+        if (!this.CheckPermission(playerSender, "spawnzombieboss")) {
+            LocaleReader.MessageLocale("NoPermission", null, null, playerSender);
+            return false;
+        } else {
+            BloodmoonActuator actuator = BloodmoonActuator.GetActuator(playerSender.getWorld());
+            if (actuator == null) {
+            }
+
+            actuator.SpawnZombieBoss();
+            return true;
+        }
+    }
+
+    private boolean ExecuteKillBosses(Player playerSender, boolean giveRewards) {
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+        if (!this.CheckPermission(playerSender, "killbosses")) {
+            LocaleReader.MessageLocale("NoPermission", null, null, playerSender);
+            return false;
+        } else {
+            BloodmoonActuator actuator = BloodmoonActuator.GetActuator(playerSender.getWorld());
+            if (actuator == null) {
+                LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, playerSender);
+                return true;
+            } else {
+                actuator.KillBosses(giveRewards);
+                return true;
+            }
+        }
     }
 
     private boolean ExecuteReload (CommandSender sender)
@@ -184,9 +241,10 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         {
             if (! CheckPermission((Player) sender, "reload"))
             {
-                sender.sendMessage("NoPermission");
+                LocaleReader.MessageLocale("NoPermission", null, null, (Player) sender);
                 return false;
             }
+            LocaleReader.MessageLocale("PluginReloaded", null, null, (Player) sender);
         }
 
         localeReader.RefreshLocales();
@@ -196,8 +254,6 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         {
             configReader.RefreshConfigs();
         }
-
-        sender.sendMessage(localeReader.GetLocaleString("PluginReloaded"));
 
         return true;
     }
