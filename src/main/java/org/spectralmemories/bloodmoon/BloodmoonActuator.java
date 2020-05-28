@@ -22,10 +22,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.*;
 
 
-public class BloodmoonActuator implements Listener, Runnable
+public class BloodmoonActuator implements Listener, Runnable, Closeable
 {
     //Eligible mobs
     public final EntityType[] rewardedTypes = {
@@ -125,23 +127,33 @@ public class BloodmoonActuator implements Listener, Runnable
         world.setMonsterSpawnLimit(originalMaxSpawn);
     }
 
-    public void KillBosses(boolean giveRewards) {
-        Iterator var2 = this.bosses.iterator();
+    public void KillBosses() {
+        KillBosses(false);
+    }
+    public void KillBosses(boolean giveRewards)
+    {
+        KillBosses(giveRewards, true);
+    }
+
+    public void KillBosses (boolean giveRewards, boolean effects)
+    {
+        KillBosses(giveRewards, effects, true);
+    }
+
+    public void KillBosses(boolean giveRewards, boolean effects, boolean respawn) {
+        Iterator var2 = bosses.iterator();
 
         while(var2.hasNext()) {
             IBoss IBoss = (IBoss)var2.next();
-            IBoss.Kill(giveRewards);
+            IBoss.Kill(giveRewards, effects, respawn);
         }
 
-        this.bosses.clear();
+        bosses.clear();
     }
 
-    public void KillBosses() {
-        this.KillBosses(false);
-    }
 
     private void RunPreCommand() {
-        String[] commands = Bloodmoon.GetInstance().getConfigReader(this.world).GetPreBloodMoonCommands();
+        String[] commands = Bloodmoon.GetInstance().getConfigReader(world).GetPreBloodMoonCommands();
         String[] var2 = commands;
         int var3 = commands.length;
 
@@ -149,26 +161,26 @@ public class BloodmoonActuator implements Listener, Runnable
             String command = var2[var4];
             String[] components = command.split(";");
             if (components[1].equalsIgnoreCase("s")) {
-                String finalCommand = components[0].replace("$w", this.world.getName());
+                String finalCommand = components[0].replace("$w", world.getName());
                 Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), finalCommand);
             } else {
                 Iterator var7;
                 Player player;
                 String finalCommand;
                 if (components[1].equalsIgnoreCase("p")) {
-                    var7 = this.world.getPlayers().iterator();
+                    var7 = world.getPlayers().iterator();
 
                     while(var7.hasNext()) {
                         player = (Player)var7.next();
-                        finalCommand = components[0].replace("$w", this.world.getName()).replace("$p", player.getName());
+                        finalCommand = components[0].replace("$w", world.getName()).replace("$p", player.getName());
                         player.performCommand(finalCommand);
                     }
                 } else if (components[1].equalsIgnoreCase("f")) {
-                    var7 = this.world.getPlayers().iterator();
+                    var7 = world.getPlayers().iterator();
 
                     while(var7.hasNext()) {
                         player = (Player)var7.next();
-                        finalCommand = components[0].replace("$w", this.world.getName()).replace("$p", player.getName());
+                        finalCommand = components[0].replace("$w", world.getName()).replace("$p", player.getName());
                         Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), finalCommand);
                     }
                 } else {
@@ -180,7 +192,7 @@ public class BloodmoonActuator implements Listener, Runnable
     }
 
     private void RunPostCommand() {
-        String[] commands = Bloodmoon.GetInstance().getConfigReader(this.world).GetPostBloodMoonCommands();
+        String[] commands = Bloodmoon.GetInstance().getConfigReader(world).GetPostBloodMoonCommands();
         String[] var2 = commands;
         int var3 = commands.length;
 
@@ -188,26 +200,26 @@ public class BloodmoonActuator implements Listener, Runnable
             String command = var2[var4];
             String[] components = command.split(";");
             if (components[1].equalsIgnoreCase("s")) {
-                String finalCommand = components[0].replace("$w", this.world.getName());
+                String finalCommand = components[0].replace("$w", world.getName());
                 Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), finalCommand);
             } else {
                 Iterator var7;
                 Player player;
                 String finalCommand;
                 if (components[1].equalsIgnoreCase("p")) {
-                    var7 = this.world.getPlayers().iterator();
+                    var7 = world.getPlayers().iterator();
 
                     while(var7.hasNext()) {
                         player = (Player)var7.next();
-                        finalCommand = components[0].replace("$w", this.world.getName()).replace("$p", player.getName());
+                        finalCommand = components[0].replace("$w", world.getName()).replace("$p", player.getName());
                         player.performCommand(finalCommand);
                     }
                 } else if (components[1].equalsIgnoreCase("f")) {
-                    var7 = this.world.getPlayers().iterator();
+                    var7 = world.getPlayers().iterator();
 
                     while(var7.hasNext()) {
                         player = (Player)var7.next();
-                        finalCommand = components[0].replace("$w", this.world.getName()).replace("$p", player.getName());
+                        finalCommand = components[0].replace("$w", world.getName()).replace("$p", player.getName());
                         Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), finalCommand);
                     }
                 } else {
@@ -219,33 +231,33 @@ public class BloodmoonActuator implements Listener, Runnable
     }
 
     public void SpawnBosses() {
+        ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         Bloodmoon.GetInstance().getServer().getScheduler().scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                BloodmoonActuator.this.SpawnZombieBoss();
+                if (reader.GetEnableZombieBossConfig()) SpawnZombieBoss();
             }
         }, (long)((new Random()).nextInt(2000) + 400));
     }
 
     public void SpawnZombieBoss() {
-        ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(this.world);
-        if (reader.GetEnableZombieBossConfig() && this.world.getPlayers().size() > 0) {
-            List<Player> players = this.world.getPlayers();
+        if (world.getPlayers().size() > 0) {
+            List<Player> players = world.getPlayers();
             Random rnd = new Random();
             int index = rnd.nextInt(players.size());
             Player chosenOne = (Player)players.get(index);
             Location spawn = chosenOne.getLocation();
             Location newLocation = spawn.clone();
             newLocation.add((double)(rnd.nextInt(10) + 10), 0.0D, (double)(rnd.nextInt(10) + 10));
-            newLocation.setY((double)this.world.getHighestBlockYAt(newLocation));
+            newLocation.setY((double)world.getHighestBlockYAt(newLocation));
             ZombieIBoss zombieBoss = new ZombieIBoss(newLocation);
             zombieBoss.Start();
-            this.bosses.add(zombieBoss);
+            bosses.add(zombieBoss);
         }
 
     }
 
     public void AddToBlacklist(LivingEntity entity) {
-        this.blacklistedMobs.add(entity);
+        blacklistedMobs.add(entity);
     }
 
     private void StopStorm ()
@@ -328,7 +340,6 @@ public class BloodmoonActuator implements Listener, Runnable
 
     private void BroadcastBloodMoonWarning ()
     {
-
         for (Player player : world.getPlayers())
         {
             BroadcastBloodMoonWarningPlayer(player);
@@ -370,7 +381,7 @@ public class BloodmoonActuator implements Listener, Runnable
     private void ApplySpecialEffect (Player player, LivingEntity mob)
     {
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-        String mobTypeName = mob.getName().toUpperCase();
+        String mobTypeName = mob.getType().name().toUpperCase();
         for (IBoss boss : bosses)
         {
             if(boss.GetHost() == mob)
@@ -411,7 +422,8 @@ public class BloodmoonActuator implements Listener, Runnable
 
     public boolean isInProgress ()
     {
-        return inProgress;
+        ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
+        return inProgress || reader.GetPermanentBloodMoonConfig();
     }
 
 
@@ -552,7 +564,7 @@ public class BloodmoonActuator implements Listener, Runnable
                 Player killer = boss.GetHost().getKiller();
                 if (killer != null) {
 
-                    LocaleReader.MessageAllLocale("BossSlain", new String[]{"$p", "$b"}, new String[]{boss.GetName(), killer.getName()}, world);
+                    LocaleReader.MessageAllLocale("BossSlain", new String[]{"$b", "$p"}, new String[]{boss.GetName(), killer.getName()}, world);
                 }
 
                 boss.Kill(killer != null && isInProgress());
@@ -562,8 +574,6 @@ public class BloodmoonActuator implements Listener, Runnable
         }
 
         if (!isInProgress()) return; //Only during BloodMoon
-
-
 
         if (event.getEntity() instanceof Player) return; //Handled in another method
 
@@ -619,10 +629,10 @@ public class BloodmoonActuator implements Listener, Runnable
         Entity damager = event.getDamager();
 
         if (receiver.getWorld() != world || damager.getWorld() != world) return; //Wrong world
-        if (damager instanceof Projectile) //if its arrow damage
+        if (damager instanceof Projectile) //if its any damage dealing projectile
         {
             ProjectileSource source = ((Projectile) damager).getShooter(); //Get the shooter as Source
-            if (source instanceof LivingEntity) //Source is alive
+            if (source instanceof LivingEntity) //Source is a mob, not a block
             {
                 damager = (LivingEntity) source;
             }
@@ -645,6 +655,8 @@ public class BloodmoonActuator implements Listener, Runnable
                         ApplySpecialEffect((Player) receiver, (LivingEntity) damager);
                         if (configReader.GetPlayerDamageSoundConfig())
                             ((Player) receiver).playSound(receiver.getLocation(), Sound.AMBIENT_CAVE, 80.0f, 1.5f);
+                        if(configReader.GetPlayerHitParticleConfig())
+                            world.spawnParticle(Particle.FLAME, receiver.getLocation(), 60);
                     }
                 }
              }
@@ -656,6 +668,9 @@ public class BloodmoonActuator implements Listener, Runnable
                      {
                          //Player dealt damage to monster
                          event.setDamage((int) Math.ceil(event.getDamage() / configReader.GetMobHealthMultConfig()));
+                         if(configReader.GetMobHitParticleConfig())
+                             world.spawnParticle(Particle.CRIT_MAGIC, receiver.getLocation(), 60);
+
                      }
                  }
              }
@@ -670,5 +685,12 @@ public class BloodmoonActuator implements Listener, Runnable
             UpdateNightBar();
             Bloodmoon.GetInstance().GetScheduler().runTaskLater(Bloodmoon.GetInstance(), this,20);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+
+        KillBosses(false, false);
+        world.save();
     }
 }

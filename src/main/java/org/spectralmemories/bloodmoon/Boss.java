@@ -42,7 +42,7 @@ public abstract class Boss implements IBoss, Listener {
     }
 
     protected void ParseSpells() {
-        String[] spells = this.reader.GetZombieBossPowerSet();
+        String[] spells = reader.GetZombieBossPowerSet();
         String[] var2 = spells;
         int var3 = spells.length;
         int var4 = 0;
@@ -133,10 +133,10 @@ public abstract class Boss implements IBoss, Listener {
 
                     switch(var13) {
                         case 0:
-                            this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
-                                    if (Boss.this.HasTarget()) {
-                                        Boss.this.Lightning(range);
+                                    if (HasTarget()) {
+                                        Lightning(range);
                                     }
 
                                 }
@@ -144,10 +144,10 @@ public abstract class Boss implements IBoss, Listener {
                             break;
                         case 1:
                             int finalThirdParameter4 = thirdParameter;
-                            this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
-                                    if (Boss.this.HasTarget()) {
-                                        Boss.this.Fire(range, (float) finalThirdParameter4);
+                                    if (HasTarget()) {
+                                        Fire(range, (float) finalThirdParameter4);
                                     }
 
                                 }
@@ -155,10 +155,10 @@ public abstract class Boss implements IBoss, Listener {
                             break;
                         case 2:
                             int finalThirdParameter1 = thirdParameter;
-                            this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
-                                    if (Boss.this.HasTarget()) {
-                                        Boss.this.Blind(range, (float) finalThirdParameter1);
+                                    if (HasTarget()) {
+                                        Blind(range, (float) finalThirdParameter1);
                                     }
 
                                 }
@@ -166,10 +166,10 @@ public abstract class Boss implements IBoss, Listener {
                             break;
                         case 3:
                             int finalThirdParameter = thirdParameter;
-                            this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
-                                    if (Boss.this.HasTarget()) {
-                                        Boss.this.Underlings(range, finalThirdParameter);
+                                    if (HasTarget()) {
+                                        Underlings(range, finalThirdParameter);
                                     }
 
                                 }
@@ -178,10 +178,10 @@ public abstract class Boss implements IBoss, Listener {
                         case 4:
                             int finalFourthParameter = fourthParameter;
                             int finalThirdParameter3 = thirdParameter;
-                            this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
-                                    if (Boss.this.HasTarget()) {
-                                        Boss.this.Poison(range, (float) finalThirdParameter3, finalFourthParameter);
+                                    if (HasTarget()) {
+                                        Poison(range, (float) finalThirdParameter3, finalFourthParameter);
                                     }
 
                                 }
@@ -190,10 +190,10 @@ public abstract class Boss implements IBoss, Listener {
                         case 5:
                             int finalFourthParameter1 = fourthParameter;
                             int finalThirdParameter2 = thirdParameter;
-                            this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
-                                    if (Boss.this.HasTarget()) {
-                                        Boss.this.Wither(range, (float) finalThirdParameter2, finalFourthParameter1);
+                                    if (HasTarget()) {
+                                        Wither(range, (float) finalThirdParameter2, finalFourthParameter1);
                                     }
 
                                 }
@@ -210,7 +210,7 @@ public abstract class Boss implements IBoss, Listener {
     }
 
     private boolean HasTarget() {
-        Monster monster = (Monster)this.host;
+        Monster monster = (Monster)host;
         if (monster != null) {
             return monster.getTarget() != null;
         } else {
@@ -218,27 +218,13 @@ public abstract class Boss implements IBoss, Listener {
         }
     }
 
-    @EventHandler
-    public void OnMobDeath (EntityDeathEvent event)
-    {
-        if (event.getEntity() == host)
-        {
-            Kill(event.getEntity().getKiller() != null);
-        }
-    }
-
-    protected void MonitorDeath()
-    {
-        Bloodmoon.GetInstance().getServer().getPluginManager().registerEvents(this, Bloodmoon.GetInstance());
-    }
-
     private LivingEntity[] GetNearbyEntities(int range) {
         List<LivingEntity> entities = new ArrayList();
-        Iterator var3 = this.world.getNearbyEntities(this.host.getLocation(), (double)range, (double)range, (double)range).iterator();
+        Iterator var3 = world.getNearbyEntities(host.getLocation(), (double)range, (double)range, (double)range).iterator();
 
         while(var3.hasNext()) {
             Entity entity = (Entity)var3.next();
-            if (entity instanceof LivingEntity && entity != this.host && !(entity instanceof Monster)) {
+            if (entity instanceof LivingEntity && entity != host && !(entity instanceof Monster)) {
                 entities.add((LivingEntity)entity);
             }
         }
@@ -247,35 +233,35 @@ public abstract class Boss implements IBoss, Listener {
     }
 
     protected void Lightning(final int range) {
-        this.world.spawnParticle(Particle.EXPLOSION_HUGE, this.host.getLocation(), 100);
-        this.world.playSound(this.host.getLocation(), Sound.ENTITY_TNT_PRIMED, 1.0F, 1.0F);
-        this.host.setAI(false);
-        this.scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+        world.spawnParticle(Particle.EXPLOSION_HUGE, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.ENTITY_TNT_PRIMED, 1.0F, 1.0F);
+        host.setAI(false);
+        scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                Boss.this.world.spawnParticle(Particle.EXPLOSION_HUGE, Boss.this.host.getLocation(), 100);
-                Boss.this.world.playSound(Boss.this.host.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0F, 1.0F);
-                LivingEntity[] var1 = Boss.this.GetNearbyEntities(range);
+                world.spawnParticle(Particle.EXPLOSION_HUGE, host.getLocation(), 100);
+                world.playSound(host.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0F, 1.0F);
+                LivingEntity[] var1 = GetNearbyEntities(range);
                 int var2 = var1.length;
 
                 for(int var3 = 0; var3 < var2; ++var3) {
                     LivingEntity entity = var1[var3];
-                    Boss.this.world.strikeLightning(entity.getLocation());
+                    world.strikeLightning(entity.getLocation());
                 }
 
-                Boss.this.host.setAI(true);
+                host.setAI(true);
             }
-        }, 30L);
+        }, CHANNEL_TIME_TICKS);
     }
 
     protected void Fire(final int range, final float duration) {
-        this.world.spawnParticle(Particle.LAVA, this.host.getLocation(), 100);
-        this.world.playSound(this.host.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0F, 1.0F);
-        this.host.setAI(false);
-        this.scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+        world.spawnParticle(Particle.LAVA, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0F, 1.0F);
+        host.setAI(false);
+        scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                Boss.this.world.spawnParticle(Particle.LAVA, Boss.this.host.getLocation(), 100);
-                Boss.this.world.playSound(Boss.this.host.getLocation(), Sound.BLOCK_FURNACE_FIRE_CRACKLE, 1.0F, 1.0F);
-                LivingEntity[] var1 = Boss.this.GetNearbyEntities(range);
+                world.spawnParticle(Particle.LAVA, host.getLocation(), 100);
+                world.playSound(host.getLocation(), Sound.BLOCK_FURNACE_FIRE_CRACKLE, 1.0F, 1.0F);
+                LivingEntity[] var1 = GetNearbyEntities(range);
                 int var2 = var1.length;
 
                 for(int var3 = 0; var3 < var2; ++var3) {
@@ -283,20 +269,20 @@ public abstract class Boss implements IBoss, Listener {
                     entity.setFireTicks((int)Math.ceil((double)(duration * 20.0F)));
                 }
 
-                Boss.this.host.setAI(true);
+                host.setAI(true);
             }
-        }, 30L);
+        }, CHANNEL_TIME_TICKS);
     }
 
     protected void Blind(final int range, final float duration) {
-        this.world.spawnParticle(Particle.CRIT_MAGIC, this.host.getLocation(), 100);
-        this.world.playSound(this.host.getLocation(), Sound.ENTITY_ENDERMAN_STARE, 1.0F, 1.0F);
-        this.host.setAI(false);
-        this.scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+        world.spawnParticle(Particle.CRIT_MAGIC, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.ENTITY_ENDERMAN_STARE, 1.0F, 1.0F);
+        host.setAI(false);
+        scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                Boss.this.world.spawnParticle(Particle.CRIT_MAGIC, Boss.this.host.getLocation(), 100);
-                Boss.this.world.playSound(Boss.this.host.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
-                LivingEntity[] var1 = Boss.this.GetNearbyEntities(range);
+                world.spawnParticle(Particle.CRIT_MAGIC, host.getLocation(), 100);
+                world.playSound(host.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
+                LivingEntity[] var1 = GetNearbyEntities(range);
                 int var2 = var1.length;
 
                 for(int var3 = 0; var3 < var2; ++var3) {
@@ -304,45 +290,45 @@ public abstract class Boss implements IBoss, Listener {
                     entity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, (int)Math.ceil((double)(duration * 20.0F)), 1));
                 }
 
-                Boss.this.host.setAI(true);
+                host.setAI(true);
             }
-        }, 30L);
+        }, CHANNEL_TIME_TICKS);
     }
 
     protected void Underlings(final int range, final int amount) {
-        this.world.spawnParticle(Particle.WATER_BUBBLE, this.host.getLocation(), 100);
-        this.world.playSound(this.host.getLocation(), Sound.BLOCK_WATER_AMBIENT, 1.0F, 1.0F);
+        world.spawnParticle(Particle.WATER_BUBBLE, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.BLOCK_WATER_AMBIENT, 1.0F, 1.0F);
         final Random rnd = new Random();
-        final BloodmoonActuator actuator = BloodmoonActuator.GetActuator(this.world);
-        this.host.setAI(false);
-        this.scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+        final BloodmoonActuator actuator = BloodmoonActuator.GetActuator(world);
+        host.setAI(false);
+        scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
                 for(int i = 0; i < amount; ++i) {
-                    Location location = Boss.this.host.getLocation().clone();
+                    Location location = host.getLocation().clone();
                     location.add((double)rnd.nextInt(range), 0.0D, (double)rnd.nextInt(range));
-                    location.setY((double)Boss.this.world.getHighestBlockYAt(location));
-                    Entity entity = Boss.this.world.spawn(location, Boss.this.host.getClass());
-                    Boss.this.world.spawnParticle(Particle.PORTAL, location, 100);
-                    Boss.this.world.playSound(location, Sound.ENTITY_ZOMBIE_AMBIENT, 1.0F, 1.0F);
+                    location.setY((double)world.getHighestBlockYAt(location));
+                    Entity entity = world.spawn(location, host.getClass());
+                    world.spawnParticle(Particle.PORTAL, location, 100);
+                    world.playSound(location, Sound.ENTITY_ZOMBIE_AMBIENT, 1.0F, 1.0F);
                     if (actuator != null && entity instanceof LivingEntity) {
                         actuator.AddToBlacklist((LivingEntity)entity);
                     }
                 }
 
-                Boss.this.host.setAI(true);
+                host.setAI(true);
             }
-        }, 30L);
+        }, CHANNEL_TIME_TICKS);
     }
 
     protected void Poison(final int range, final float duration, final int amplifier) {
-        this.world.spawnParticle(Particle.SPIT, this.host.getLocation(), 100);
-        this.world.playSound(this.host.getLocation(), Sound.ENTITY_VEX_AMBIENT, 1.0F, 1.0F);
-        this.host.setAI(false);
-        this.scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+        world.spawnParticle(Particle.SPIT, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.ENTITY_VEX_AMBIENT, 1.0F, 1.0F);
+        host.setAI(false);
+        scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                Boss.this.world.spawnParticle(Particle.SPIT, Boss.this.host.getLocation(), 100);
-                Boss.this.world.playSound(Boss.this.host.getLocation(), Sound.ENTITY_VEX_CHARGE, 1.0F, 1.0F);
-                LivingEntity[] var1 = Boss.this.GetNearbyEntities(range);
+                world.spawnParticle(Particle.SPIT, host.getLocation(), 100);
+                world.playSound(host.getLocation(), Sound.ENTITY_VEX_CHARGE, 1.0F, 1.0F);
+                LivingEntity[] var1 = GetNearbyEntities(range);
                 int var2 = var1.length;
 
                 for(int var3 = 0; var3 < var2; ++var3) {
@@ -350,20 +336,20 @@ public abstract class Boss implements IBoss, Listener {
                     entity.addPotionEffect(new PotionEffect(PotionEffectType.POISON, (int)Math.ceil((double)(duration * 20.0F)), amplifier));
                 }
 
-                Boss.this.host.setAI(true);
+                host.setAI(true);
             }
-        }, 30L);
+        }, CHANNEL_TIME_TICKS);
     }
 
     protected void Wither(final int range, final float duration, final int amplifier) {
-        this.world.spawnParticle(Particle.DAMAGE_INDICATOR, this.host.getLocation(), 100);
-        this.world.playSound(this.host.getLocation(), Sound.ENTITY_BLAZE_AMBIENT, 1.0F, 1.0F);
-        this.host.setAI(false);
-        this.scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+        world.spawnParticle(Particle.DAMAGE_INDICATOR, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.ENTITY_BLAZE_AMBIENT, 1.0F, 1.0F);
+        host.setAI(false);
+        scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                Boss.this.world.spawnParticle(Particle.DAMAGE_INDICATOR, Boss.this.host.getLocation(), 100);
-                Boss.this.world.playSound(Boss.this.host.getLocation(), Sound.ENTITY_BLAZE_DEATH, 1.0F, 1.0F);
-                LivingEntity[] var1 = Boss.this.GetNearbyEntities(range);
+                world.spawnParticle(Particle.DAMAGE_INDICATOR, host.getLocation(), 100);
+                world.playSound(host.getLocation(), Sound.ENTITY_BLAZE_DEATH, 1.0F, 1.0F);
+                LivingEntity[] var1 = GetNearbyEntities(range);
                 int var2 = var1.length;
 
                 for(int var3 = 0; var3 < var2; ++var3) {
@@ -371,8 +357,8 @@ public abstract class Boss implements IBoss, Listener {
                     entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, (int)Math.ceil((double)(duration * 20.0F)), amplifier));
                 }
 
-                Boss.this.host.setAI(true);
+                host.setAI(true);
             }
-        }, 30L);
+        }, CHANNEL_TIME_TICKS);
     }
 }

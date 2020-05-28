@@ -1,3 +1,36 @@
+[0.8] ??
+
+Features:
+    - Can now give custom items
+
+BugFixes:
+    - Mob damage is prevented by WorldGuard zones
+    - Cleanup decompiled classes for readability (Boss, ZombieBoss, ConfigReader)
+
+Misc:
+    - Better loot system
+    - Commands can now be executed via the console and rcon
+
+
+[0.7] The Boss Update
+
+Features:
+- Added a zombie boss
+- Added pre and post BloodMoon commands
+- Mob spawning rate can now be increased or decreased during BloodMoons
+
+Bugfixes:
+- Fixed a bug where mobs were not dropping loot consistently
+
+Misc:
+- Endermen are now handled by the plugin
+- You can now completely suppress a line in locales file
+- Permanent BloodMoon no longer display the BloodMoon progress bar
+- More unit tests have been added to further insure plugin stability
+- Locales and config added. Please regenerate / review the new config and locales yamls
+
+-------------------------------------------------------------------------------------------------------------------
+
 [0.6] The multiverse update
 
 Features:
@@ -26,3 +59,4 @@ Windows handles capital letters in filenames differently, I am unsure if you nee
 file, as there was some slight changes in the config file structure
 - Commands and permissions have been reworked. Please ensure your permissions are setup correctly
 - New locales have been added. Be sure to add them from https://gitlab.com/SpectralMemories/bloodmoon/-/wikis/Default-Locales
+

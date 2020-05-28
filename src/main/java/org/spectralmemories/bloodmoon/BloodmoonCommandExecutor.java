@@ -202,7 +202,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
     private boolean ExecuteSpawnZombieBoss(Player playerSender) {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        if (!this.CheckPermission(playerSender, "spawnzombieboss")) {
+        if (!CheckPermission(playerSender, "spawnzombieboss")) {
             LocaleReader.MessageLocale("NoPermission", null, null, playerSender);
             return false;
         } else {
@@ -217,7 +217,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
     private boolean ExecuteKillBosses(Player playerSender, boolean giveRewards) {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        if (!this.CheckPermission(playerSender, "killbosses")) {
+        if (!CheckPermission(playerSender, "killbosses")) {
             LocaleReader.MessageLocale("NoPermission", null, null, playerSender);
             return false;
         } else {
@@ -226,7 +226,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
                 LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, playerSender);
                 return true;
             } else {
-                actuator.KillBosses(giveRewards);
+                actuator.KillBosses(giveRewards, true, false);
                 return true;
             }
         }

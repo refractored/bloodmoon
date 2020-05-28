@@ -117,6 +117,13 @@ public class LocaleReader implements Closeable
 
     //===========================================================
 
+    /**
+     * Broadcasts a locale to all players regardless of world
+     *
+     * @param id ID of the locale
+     * @param args arguments
+     * @param replacements replacements, in order
+     */
     public static void BroadcastLocale (String id, String[] args, String[] replacements)
     {
         String locale = Bloodmoon.GetInstance().getLocaleReader().GetLocaleString(id);
@@ -133,6 +140,14 @@ public class LocaleReader implements Closeable
         }
     }
 
+    /**
+     * Broadcasts a locale to all players in a world
+     *
+     * @param id ID of the locale
+     * @param args arguments
+     * @param replacements replacements, in order
+     * @param world world to broadcast the message
+     */
     public static void MessageAllLocale (String id, String[] args, String[] replacements, World world)
     {
         String locale = Bloodmoon.GetInstance().getLocaleReader().GetLocaleString(id);
@@ -152,6 +167,14 @@ public class LocaleReader implements Closeable
         }
     }
 
+    /**
+     * Broadcasts a locale to a player
+     *
+     * @param id ID of the locale
+     * @param args arguments
+     * @param replacements replacements, in order
+     * @param player player to broadcast the message to
+     */
     public static void MessageLocale (String id, String[] args, String[] replacements, Player player)
     {
         String locale = Bloodmoon.GetInstance().getLocaleReader().GetLocaleString(id);

@@ -58,7 +58,7 @@ public final class Bloodmoon extends JavaPlugin
 
     public BukkitScheduler GetScheduler ()
     {
-        return this.getServer().getScheduler();
+        return getServer().getScheduler();
     }
 
     private void InitializeSQLAccess ()
@@ -268,7 +268,6 @@ public final class Bloodmoon extends JavaPlugin
     @Override
     public void onDisable()
     {
-
         for (PeriodicNightCheck nightCheck : nightChecks)
         {
             nightCheck.UpdateCacheDatabase();
@@ -277,6 +276,11 @@ public final class Bloodmoon extends JavaPlugin
         for (BloodmoonActuator actuator : actuators)
         {
             if (actuator.isInProgress()) actuator.StopBloodMoon();
+            try {
+                actuator.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         if (sqlAccess != null) sqlAccess.close();
@@ -290,7 +294,7 @@ public final class Bloodmoon extends JavaPlugin
                 }
                 catch (IOException e)
                 {
-                    System.out.println("[Error");
+                    System.out.println("[Error]");
                     e.printStackTrace();
                 }
             }

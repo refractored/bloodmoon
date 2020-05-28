@@ -69,6 +69,8 @@ public class ConfigReader implements Closeable
     public static final String ZOMBIE_BOSS_HEALTH = "ZombieBossHealth";
     public static final String ZOMBIE_BOSS_DAMAGE = "ZombieBossDamage";
     public static final String ZOMBIE_BOSS_POWER_SET = "ZombieBossPowerSet";
+    public static final String ZOMBIE_BOSS_RESPAWN = "ZombieBossRespawn";
+    public static final long DEFAULT_ZOMBIE_RESPAWN_TIME = 24000;
     public static final boolean ENABLE_ZOMBIE_BOSS_DEFAULT = false;
     public static final int ZOMBIE_BOSS_HEALTH_DEFAULT = 50;
     public static final int ZOMBIE_BOSS_DAMAGE_DEFAULT = 7;
@@ -77,7 +79,11 @@ public class ConfigReader implements Closeable
     public static final int DEFAULT_ZOMBIE_BOSS_ITEM_MULTIPLIER = 10;
     public static final int DEFAULT_ZOMBIE_BOSS_EXP_MULTIPLIER = 10;
     public static final String BLOOD_MOON_SPAWN_MOB_RATE = "BloodMoonSpawnMobRate";
-    public static final int DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE = 10;
+    public static final int DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE = 25;
+    public static final String PLAYER_HIT_PARTICLE_EFFECT = "PlayerHitParticleEffect";
+    public static final boolean DEFAULT_PLAYER_HIT_PARTICLE_EFFECT = true;
+    public static final String MOB_HIT_PARTICLE_EFFECT = "MobHitParticleEffect";
+    public static final boolean DEFAULT_MOB_HIT_PARTICLE_EFFECT = true;
 
     private File configFile;
     private Map <String, Object> cache;
@@ -131,6 +137,9 @@ public class ConfigReader implements Closeable
             writer.write(DARKEN_SKY + ": " + String.valueOf(DARKEN_SKY_DEFAULT) + "\n");
             writer.write("#Plays a sound when a player gets hit\n");
             writer.write(PLAY_SOUND_UPON_HIT + ": " + String.valueOf(SOUND_ON_HIT_DEFAULT) + "\n");
+            writer.write("#Plays a particle effect when a mob and / or player gets hit\n");
+            writer.write(PLAYER_HIT_PARTICLE_EFFECT + ": " + String.valueOf(DEFAULT_PLAYER_HIT_PARTICLE_EFFECT) + "\n");
+            writer.write(MOB_HIT_PARTICLE_EFFECT + ": " + String.valueOf(DEFAULT_MOB_HIT_PARTICLE_EFFECT) + "\n");
             writer.write("#Effect of rain and thunder during the BloodMoon\n");
             writer.write(THUNDER_DURING_BLOOD_MOON + ": " + String.valueOf(THUNDER_DEFAULT) + "\n");
             writer.write("#Prevents sleeping during a BloodMoon\n");
@@ -141,8 +150,14 @@ public class ConfigReader implements Closeable
             writer.write(SHIELD_PREVENTS_EFFECTS + ": " + String.valueOf(SHIELD_PREVENTS_EFFECTS_DEFAULT) + "\n");
             writer.write("#Mob spawn rate during a BloodMoon.\n#0 means no mob at all, 25 is average, and anything above 100 is honestly insane\n");
             writer.write(BLOOD_MOON_SPAWN_MOB_RATE + ": " + String.valueOf(DEFAULT_BLOOD_MOON_SPAWN_MOB_RATE) + "\n");
+            writer.write("#Decides if a zombie boss will spawn each BloodMoon\n");
+            writer.write(ENABLE_ZOMBIE_BOSS + ": " + String.valueOf(ENABLE_ZOMBIE_BOSS_DEFAULT) + "\n");
+            writer.write("#When in a permanent BloodMoon, how long (in ticks) before respawning zombie boss after death?\n");
+            writer.write("#20 ticks equals a second, 24000 ticks equals a minecraft day\n");
+            writer.write(ZOMBIE_BOSS_RESPAWN + ": " + String.valueOf(DEFAULT_ZOMBIE_RESPAWN_TIME) + "\n");
             writer.write("#List of items that can drop. Items listed more than once have a higher chance to drop\n");
             writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
+            writer.write("#I understand this system is not optimal, it will be reworked soon\n");
             writer.write(DROP_ITEM_LIST + ":\n");
             writer.write("  - GOLD_INGOT\n");
             writer.write("  - GOLD_INGOT\n");
@@ -241,8 +256,8 @@ public class ConfigReader implements Closeable
         GetMobsFromSpawnerNoRewardConfig ();
         GetShieldPreventEffects ();
         GetPermanentBloodMoonConfig ();
-        this.GetPreBloodMoonCommands();
-        this.GetPostBloodMoonCommands();
+        GetPreBloodMoonCommands();
+        GetPostBloodMoonCommands();
         GetZombieBossDamage();
         GetZombieBossExpMultiplier();
         GetZombieBossHealth();
@@ -500,6 +515,42 @@ public class ConfigReader implements Closeable
         }
     }
 
+    public boolean GetMobHitParticleConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(MOB_HIT_PARTICLE_EFFECT);
+            if (interval == null)
+            {
+                CreateConfig(MOB_HIT_PARTICLE_EFFECT, String.valueOf(DEFAULT_MOB_HIT_PARTICLE_EFFECT));
+                interval = DEFAULT_MOB_HIT_PARTICLE_EFFECT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return DEFAULT_MOB_HIT_PARTICLE_EFFECT;
+        }
+    }
+
+    public boolean GetPlayerHitParticleConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PLAYER_HIT_PARTICLE_EFFECT);
+            if (interval == null)
+            {
+                CreateConfig(PLAYER_HIT_PARTICLE_EFFECT, String.valueOf(DEFAULT_PLAYER_HIT_PARTICLE_EFFECT));
+                interval = DEFAULT_PLAYER_HIT_PARTICLE_EFFECT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return DEFAULT_PLAYER_HIT_PARTICLE_EFFECT;
+        }
+    }
+
     public boolean GetPlayerDamageSoundConfig ()
     {
         try
@@ -538,7 +589,7 @@ public class ConfigReader implements Closeable
 
     public String[] GetPreBloodMoonCommands() {
         try {
-            Object interval = this.GetConfig("CommandsOnStart");
+            Object interval = GetConfig("CommandsOnStart");
             if (interval != null && !String.valueOf(interval).equals("null")) {
                 ArrayList<String> effects = (ArrayList)interval;
                 return (String[])effects.toArray(new String[effects.size()]);
@@ -552,7 +603,7 @@ public class ConfigReader implements Closeable
 
     public String[] GetPostBloodMoonCommands() {
         try {
-            Object interval = this.GetConfig("CommandsOnEnd");
+            Object interval = GetConfig("CommandsOnEnd");
             if (interval != null && !String.valueOf(interval).equals("null")) {
                 ArrayList<String> effects = (ArrayList)interval;
                 return (String[])effects.toArray(new String[effects.size()]);
@@ -692,7 +743,7 @@ public class ConfigReader implements Closeable
 
     public String[] GetZombieBossPowerSet() {
         try {
-            Object interval = this.GetConfig("ZombieBossPowerSet");
+            Object interval = GetConfig("ZombieBossPowerSet");
             if (interval != null && !String.valueOf(interval).equals("null")) {
                 ArrayList<String> effects = (ArrayList)interval;
                 return (String[])effects.toArray(new String[effects.size()]);
@@ -706,9 +757,9 @@ public class ConfigReader implements Closeable
 
     public boolean GetEnableZombieBossConfig() {
         try {
-            Object interval = this.GetConfig("EnableZombieBoss");
+            Object interval = GetConfig("EnableZombieBoss");
             if (interval == null) {
-                this.CreateConfig("EnableZombieBoss", String.valueOf(false));
+                CreateConfig("EnableZombieBoss", String.valueOf(false));
                 interval = false;
             }
 
@@ -720,9 +771,9 @@ public class ConfigReader implements Closeable
 
     public int GetZombieBossItemMultiplier() {
         try {
-            Object interval = this.GetConfig("ZombieBossItemMultiplier");
+            Object interval = GetConfig("ZombieBossItemMultiplier");
             if (interval == null) {
-                this.CreateConfig("ZombieBossItemMultiplier", String.valueOf(10));
+                CreateConfig("ZombieBossItemMultiplier", String.valueOf(10));
                 interval = 10;
             }
 
@@ -732,11 +783,25 @@ public class ConfigReader implements Closeable
         }
     }
 
+    public long GetBossRespawnTime(String bossType) {
+        try {
+            Object interval = GetConfig(bossType + "BossRespawn");
+            if (interval == null) {
+                CreateConfig(bossType + "BossRespawn", String.valueOf(DEFAULT_ZOMBIE_RESPAWN_TIME));
+                interval = DEFAULT_ZOMBIE_RESPAWN_TIME;
+            }
+
+            return (Integer)interval;
+        } catch (FileNotFoundException var2) {
+            return DEFAULT_ZOMBIE_RESPAWN_TIME;
+        }
+    }
+
     public int GetZombieBossExpMultiplier() {
         try {
-            Object interval = this.GetConfig("ZombieBossExpMultiplier");
+            Object interval = GetConfig("ZombieBossExpMultiplier");
             if (interval == null) {
-                this.CreateConfig("ZombieBossExpMultiplier", String.valueOf(10));
+                CreateConfig("ZombieBossExpMultiplier", String.valueOf(10));
                 interval = 10;
             }
 
@@ -748,9 +813,9 @@ public class ConfigReader implements Closeable
 
     public int GetZombieBossHealth() {
         try {
-            Object interval = this.GetConfig("ZombieBossHealth");
+            Object interval = GetConfig("ZombieBossHealth");
             if (interval == null) {
-                this.CreateConfig("ZombieBossHealth", String.valueOf(50));
+                CreateConfig("ZombieBossHealth", String.valueOf(50));
                 interval = 50;
             }
 
@@ -762,9 +827,9 @@ public class ConfigReader implements Closeable
 
     public int GetZombieBossDamage() {
         try {
-            Object interval = this.GetConfig("ZombieBossDamage");
+            Object interval = GetConfig("ZombieBossDamage");
             if (interval == null) {
-                this.CreateConfig("ZombieBossDamage", String.valueOf(7));
+                CreateConfig("ZombieBossDamage", String.valueOf(7));
                 interval = 7;
             }
 

@@ -1,11 +1,11 @@
 name: BloodMoon
-version: 0.6
+version: 0.7
 main: org.spectralmemories.bloodmoon.Bloodmoon
 softdepend:
   - "Mutliverse-Core"
 api-version: 1.14
 authors: [SpectralMemories]
-description: A bloon moon shines every couple of nights
+description: A BloodMoon shines every couple of nights
 commands:
   bloodmoon:
     description: Base command. Should be followed by either show, start, stop or reload
@@ -32,6 +32,12 @@ permissions:
     default: op
   bloodmoon.reload:
     description: Allows to reload config files
+    default: op
+  bloodmoon.spawnzombieboss:
+    description: Allows to spawn zombie boss at will
+    default: op
+  bloodmoon.killbosses:
+    description: Allows to kill all bosses at will
     default: op
   #Required for the testsuite command
   #bloodmoon.testsuite:

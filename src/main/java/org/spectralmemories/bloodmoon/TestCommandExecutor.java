@@ -72,7 +72,7 @@ public class TestCommandExecutor implements CommandExecutor
 
         StartReport();
 
-        Method[] tests = this.getClass().getDeclaredMethods();
+        Method[] tests = getClass().getDeclaredMethods();
 
         for (Method test : tests)
         {

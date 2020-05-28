@@ -26,37 +26,49 @@ public final class ZombieIBoss extends Boss {
     Zombie zombieHost;
 
     public ZombieIBoss(Location location) {
-        this.host = (Monster) location.getWorld().spawnEntity(location, EntityType.ZOMBIE);
-        this.zombieHost = (Zombie)this.host;
-        this.world = this.host.getWorld();
-        this.reader = Bloodmoon.GetInstance().getConfigReader(this.world);
-        this.locales = Bloodmoon.GetInstance().getLocaleReader();
-        this.scheduler = Bloodmoon.GetInstance().GetScheduler();
-        this.tasks = new ArrayList();
+        host = (Monster) location.getWorld().spawnEntity(location, EntityType.ZOMBIE);
+        zombieHost = (Zombie)host;
+        world = host.getWorld();
+        reader = Bloodmoon.GetInstance().getConfigReader(world);
+        locales = Bloodmoon.GetInstance().getLocaleReader();
+        scheduler = Bloodmoon.GetInstance().GetScheduler();
+        tasks = new ArrayList();
     }
 
     public void Start() {
-        this.host.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2147483647, this.reader.GetZombieBossHealth()));
-        this.host.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 2147483647, this.reader.GetZombieBossDamage()));
-        this.host.setCustomName(this.locales.GetLocaleString("ZombieBossName"));
-        this.host.setCustomNameVisible(true);
-        this.zombieHost.setBaby(false);
-        this.Announce();
-        this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+        host.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, Integer.MAX_VALUE, reader.GetZombieBossHealth()));
+        host.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, reader.GetZombieBossDamage()));
+        host.setCustomName(locales.GetLocaleString("ZombieBossName"));
+        host.setCustomNameVisible(true);
+        zombieHost.setBaby(false);
+        Announce();
+        tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                ZombieIBoss.this.world.strikeLightningEffect(ZombieIBoss.this.host.getLocation());
+                world.strikeLightningEffect(host.getLocation());
             }
         }, 0L, 238L));
-        this.tasks.add(this.scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+        tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                ZombieIBoss.this.world.spawnParticle(Particle.PORTAL, ZombieIBoss.this.host.getLocation(), 60);
+                world.spawnParticle(Particle.PORTAL, host.getLocation(), 60);
             }
-        }, 0L, 4L));
-        this.ParseSpells();
-        MonitorDeath();
+        }, 0L, 3L));
+        world.spawnParticle(Particle.EXPLOSION_HUGE, host.getLocation(), 60);
+        ParseSpells();
     }
 
-    public void Kill(boolean reward) {
+    @Override
+    public void Kill(boolean reward)
+    {
+        Kill(reward, true);
+    }
+    @Override
+    public void Kill(boolean reward, boolean effects)
+    {
+        Kill(reward, effects, true);
+    }
+    @Override
+    public void Kill(boolean reward, boolean effects, boolean respawn)
+    {
         Iterator var2 = tasks.iterator();
 
         while(var2.hasNext()) {
@@ -64,70 +76,89 @@ public final class ZombieIBoss extends Boss {
             scheduler.cancelTask(task);
         }
 
-        this.tasks.clear();
+        tasks.clear();
 
         for(int i = 0; i < 5; ++i) {
-            world.strikeLightningEffect(this.host.getLocation());
+            world.strikeLightningEffect(host.getLocation());
         }
 
         int delayBase = 10;
         int strikes = 8;
+        if(effects) {
 
-        for(int i = 0; i < strikes; ++i) {
-            scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
-                public void run() {
-                    ZombieIBoss.this.world.strikeLightningEffect(ZombieIBoss.this.host.getLocation());
-                    ZombieIBoss.this.world.spawnParticle(Particle.EXPLOSION_HUGE, ZombieIBoss.this.host.getLocation(), 20);
-                }
-            }, (long)(delayBase * i));
+            for (int i = 0; i < strikes; ++i) {
+                scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+                    public void run() {
+                        world.strikeLightningEffect(host.getLocation());
+                        world.spawnParticle(Particle.EXPLOSION_HUGE, host.getLocation(), 20);
+                    }
+                }, (long) (delayBase * i));
+            }
         }
 
         if (reward) {
+            if(effects) {
+                scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+                    public void run() {
+                        Reward();
+                    }
+                }, (long) (delayBase * strikes + 40));
+            }else{
+                Reward();
+            }
+        }
+
+        //Respawn boss if in perma-bloodmoon
+        if(reader.GetPermanentBloodMoonConfig() && effects && respawn)
+        {
             scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+                @Override
                 public void run() {
-                    ZombieIBoss.this.Reward();
+                    BloodmoonActuator.GetActuator(world).SpawnZombieBoss();
                 }
-            }, (long)(delayBase * strikes + 40));
+            }, reader.GetBossRespawnTime("Zombie"));
         }
 
         host.remove();
     }
 
+
+
     public LivingEntity GetHost() {
-        return this.host;
+        return host;
     }
 
     public String GetName() {
-        return this.locales.GetLocaleString("ZombieBossName");
+        return locales.GetLocaleString("ZombieBossName");
     }
 
     public void Reward() {
-        int max = this.reader.GetMaxItemsDropConfig();
-        int min = this.reader.GetMinItemsDropConfig();
+        int max = reader.GetMaxItemsDropConfig();
+        int min = reader.GetMinItemsDropConfig();
         Random rnd = new Random();
         int amount = rnd.nextInt(max - min) + min;
         if (amount == 0) {
             ++amount;
         }
 
-        amount *= this.reader.GetZombieBossItemMultiplier();
-        BloodmoonActuator actuator = BloodmoonActuator.GetActuator(this.world);
+        amount *= reader.GetZombieBossItemMultiplier();
+        BloodmoonActuator actuator = BloodmoonActuator.GetActuator(world);
 
         int expDrop;
         for(expDrop = 0; expDrop < amount; ++expDrop) {
-            this.world.dropItemNaturally(this.host.getLocation(), new ItemStack(actuator.GetRandomBonus()));
+            world.dropItemNaturally(host.getLocation(), new ItemStack(actuator.GetRandomBonus()));
         }
 
         expDrop = rnd.nextInt(2) + 1;
-        expDrop *= this.reader.GetZombieBossExpMultiplier() * this.reader.GetExpMultConfig();
+        expDrop *= reader.GetZombieBossExpMultiplier() * reader.GetExpMultConfig();
 
         for(int i = 0; i < expDrop; ++i) {
-            ExperienceOrb orb = (ExperienceOrb)this.world.spawn(this.host.getLocation(), ExperienceOrb.class);
+            ExperienceOrb orb = (ExperienceOrb)world.spawn(host.getLocation(), ExperienceOrb.class);
             orb.setExperience(100);
         }
 
-        this.world.playSound(this.host.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
-        this.world.spawnParticle(Particle.CLOUD, this.host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0F, 1.0F);
+        world.spawnParticle(Particle.CLOUD, host.getLocation(), 100);
     }
 
     @Override
