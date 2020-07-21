@@ -5,16 +5,16 @@
 
 package org.spectralmemories.bloodmoon;
 
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 
 public interface IBoss {
     void Start();
     void Announce();
-    void Kill(boolean var1);
-    void Kill(boolean var1, boolean var2);
-    void Kill(boolean var1, boolean var2, boolean var3);
+    void Kill(boolean reward);
+    void Kill(boolean reward, boolean effects);
+    void Kill(boolean reward, boolean effects, boolean respawn);
 
-    LivingEntity GetHost();
+    Monster GetHost();
 
     String GetName();
 }

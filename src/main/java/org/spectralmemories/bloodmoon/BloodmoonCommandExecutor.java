@@ -6,6 +6,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * This class is the only class capable of interpreting commands
+ */
 public class BloodmoonCommandExecutor implements CommandExecutor
 {
     @Override

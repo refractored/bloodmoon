@@ -6,6 +6,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigReader implements Closeable
@@ -155,32 +156,15 @@ public class ConfigReader implements Closeable
             writer.write("#When in a permanent BloodMoon, how long (in ticks) before respawning zombie boss after death?\n");
             writer.write("#20 ticks equals a second, 24000 ticks equals a minecraft day\n");
             writer.write(ZOMBIE_BOSS_RESPAWN + ": " + String.valueOf(DEFAULT_ZOMBIE_RESPAWN_TIME) + "\n");
-            writer.write("#List of items that can drop. Items listed more than once have a higher chance to drop\n");
+            writer.write("#List of items that can drop, using the [ITEM_CODE]:[WEIGHT]\n");
+            writer.write("#The percent chance of an item dropping is equal to [item weight] / [total weight] * 100\n");
             writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
-            writer.write("#I understand this system is not optimal, it will be reworked soon\n");
             writer.write(DROP_ITEM_LIST + ":\n");
-            writer.write("  - GOLD_INGOT\n");
-            writer.write("  - GOLD_INGOT\n");
-            writer.write("  - GOLD_INGOT\n");
-            writer.write("  - GOLD_INGOT\n");
-            writer.write("  - GOLD_INGOT\n");
-            writer.write("  - GOLD_INGOT\n");
-            writer.write("  - IRON_INGOT\n");
-            writer.write("  - IRON_INGOT\n");
-            writer.write("  - IRON_INGOT\n");
-            writer.write("  - IRON_INGOT\n");
-            writer.write("  - IRON_INGOT\n");
-            writer.write("  - IRON_BLOCK\n");
-            writer.write("  - IRON_BLOCK\n");
-            writer.write("  - GOLD_BLOCK\n");
-            writer.write("  - GOLD_BLOCK\n");
-            writer.write("  - DIAMOND\n");
-            writer.write("  - DIAMOND\n");
-            writer.write("  - TOTEM_OF_UNDYING\n");
-            writer.write("  - DIAMOND_BLOCK\n");
-            writer.write("  - COAL_BLOCK\n");
-            writer.write("  - REDSTONE_BLOCK\n");
-            writer.write("  - LAPIS_BLOCK\n");
+            writer.write("  - \"IRON_INGOT:10\"\n");
+            writer.write("  - \"GOLD_INGOT:5\"\n");
+            writer.write("  - \"DIAMOND:1\"\n");
+            writer.write("  - \"IRON_BLOCK:5\"\n");
+            writer.write("  - \"GOLD_BLOCK:2\"\n");
             writer.write("#These are AOE powers affecting all players around the boss\n");
             writer.write("#Accepted values are:\n");
             writer.write("#LIGHTNING,[range],[cooldown]\n");
@@ -290,7 +274,7 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public Material[] GetItemListConfig ()
+    public Map<String, Integer> GetItemListConfig ()
     {
         try
         {
@@ -298,22 +282,22 @@ public class ConfigReader implements Closeable
             if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
                 System.out.println("Warning: could not load item list!");
-                return new Material[0];
+                return null;
             }
-            ArrayList<String > list = (ArrayList<String>) interval;
+            ArrayList<String> list = (ArrayList<String>) interval;
 
-            Material[] materials = new Material[list.size()];
-            int i = 0;
-            for (String str : list)
-            {
-                materials [i++] = Material.valueOf(str);
+            Map<String, Integer> items = new HashMap<>();
+            for(String item : list){
+                String[] parts = item.split(":");
+                items.put(parts[0], Integer.parseInt(parts[1]));
             }
-            return materials;
+
+            return items;
         }
         catch (Exception e)
         {
             System.out.println("Warning: could not load item list!");
-            return new Material[0];
+            return null;
         }
     }
 

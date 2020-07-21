@@ -69,10 +69,10 @@ public final class ZombieIBoss extends Boss {
     @Override
     public void Kill(boolean reward, boolean effects, boolean respawn)
     {
-        Iterator var2 = tasks.iterator();
+        Iterator taskIterator = tasks.iterator();
 
-        while(var2.hasNext()) {
-            Integer task = (Integer)var2.next();
+        while(taskIterator.hasNext()) {
+            Integer task = (Integer)taskIterator.next();
             scheduler.cancelTask(task);
         }
 
@@ -124,7 +124,7 @@ public final class ZombieIBoss extends Boss {
 
 
 
-    public LivingEntity GetHost() {
+    public Monster GetHost() {
         return host;
     }
 

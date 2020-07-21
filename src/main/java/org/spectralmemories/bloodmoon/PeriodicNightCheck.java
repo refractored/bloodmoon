@@ -251,9 +251,12 @@ public class PeriodicNightCheck implements Runnable, Listener
         Player sender = event.getPlayer();
         String command = event.getMessage();
 
-        if (command.startsWith("/time set"))
+        if (command.startsWith("/time set")
+            || command.startsWith("/night")
+            || command.startsWith("/day")
+        )
         {
-            if (sender.getWorld() == world)
+            if (sender.getWorld() == world && !event.isCancelled())
             {
                 SetCheckAfter(0);
             }

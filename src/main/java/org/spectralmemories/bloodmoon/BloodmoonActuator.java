@@ -26,7 +26,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 
-
+/**
+ * This is the class that handles most interaction during a BloodMoon
+ */
 public class BloodmoonActuator implements Listener, Runnable, Closeable
 {
     //Eligible mobs
@@ -119,7 +121,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         StopStorm ();
         HideNightBar();
 
-        actuatorPeriodic.Stop();
+        actuatorPeriodic.close();
         actuatorPeriodic = null;
         blacklistedMobs.clear();
         KillBosses();
@@ -370,12 +372,26 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         Random random = new Random(); //We want to regenerate it every time to ensure randomness
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-        Material[] selection = configReader.GetItemListConfig();
+        Map<String, Integer> items = configReader.GetItemListConfig();
+        Map<String, Integer[]> indexes = new HashMap<>();
+        int totalWeight = 0;
 
-        int amount = selection.length;
+        for(Map.Entry<String, Integer> entry : items.entrySet()){
+            indexes.put(entry.getKey(), new Integer[]{totalWeight, totalWeight + entry.getValue()});
+            totalWeight += entry.getValue();
+        }
 
-        return selection [random.nextInt(amount)];
+        int rng = random.nextInt(totalWeight);
 
+        for(Map.Entry<String, Integer[]> entry : indexes.entrySet()){
+            int min = entry.getValue()[0];
+            int max = entry.getValue()[1];
+
+            if(rng >= min && rng < max){
+                return Material.valueOf(entry.getKey());
+            }
+        }
+        return null;
     }
 
     private void ApplySpecialEffect (Player player, LivingEntity mob)
@@ -677,6 +693,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         }
     }
 
+    /**
+     * Runs the actuator's checkup routine. Called internally, you don't need to call it yourself
+     */
     @Override
     public void run()
     {
@@ -687,8 +706,13 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         }
     }
 
+    /**
+     * Closes the actuator. You should discard it after doing so
+     */
     @Override
-    public void close() throws IOException {
+    public void close()
+    {
+        if(bosses.isEmpty()) return; //Nothing to do
 
         KillBosses(false, false);
         world.save();

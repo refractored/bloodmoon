@@ -246,8 +246,6 @@ public class TestCommandExecutor implements CommandExecutor
         if (! (configReader.GetDarkenSkyConfig())) return false;
         if (! (configReader.GetThunderingConfig())) return false;
 
-        Material[] materials = configReader.GetItemListConfig();
-        if (materials == null || materials.length != 22) return false;
 
         String[] zombieEff = configReader.GetMobEffectConfig("ZOMBIE");
         if (zombieEff == null || zombieEff.length != 1 || ! zombieEff[0].equals("WITHER,7,1")) return false;

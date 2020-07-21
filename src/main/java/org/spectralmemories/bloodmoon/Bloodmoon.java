@@ -18,11 +18,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
+ */
 public final class Bloodmoon extends JavaPlugin
 {
     public static final String CACHE_DB = "cache.db";
+    /**
+     * The config file
+     */
     public static final String CONFIG_FILE = "config.yml";
     public static final String SLASH = "/";
+    /**
+     * The locale file
+     */
     public static final String LOCALES_YML = "locales.yml";
     public final static long NIGHT_CHECK_DELAY = 40;
 
@@ -39,6 +48,11 @@ public final class Bloodmoon extends JavaPlugin
 
     private static WorldManager worldManager;
 
+    /**
+     * Returns the Bloodmoon instance
+     * This method has a very low latency
+     * @return The Bloodmoon singleton instance
+     */
     public static Bloodmoon GetInstance ()
     {
         return instance;
@@ -46,16 +60,28 @@ public final class Bloodmoon extends JavaPlugin
 
     private List<World> BlackListedWorlds;
 
+    /**
+     * Returns blacklisted worlds
+     * @return Blacklisted worlds
+     */
     public List<World> getBlacklistedWorlds()
     {
         return BlackListedWorlds;
     }
 
+    /**
+     * Returns worlds where bloodmoons apply, either periodically or permanently
+     * @return Bloodmoon enabled worlds
+     */
     public static List<World> GetBloodMoonWorlds()
     {
         return bloodmoonWorlds;
     }
 
+    /**
+     * Returns the server scheduler. Mostly a shortcut
+     * @return scheduler
+     */
     public BukkitScheduler GetScheduler ()
     {
         return getServer().getScheduler();
@@ -89,12 +115,21 @@ public final class Bloodmoon extends JavaPlugin
         }
     }
 
+    /**
+     * Returns the SQLAccess object initialized at startup
+     * @return the SQLAccess instance
+     */
     public SQLAccess getSqlAccess ()
     {
         if (sqlAccess == null) InitializeSQLAccess();
         return sqlAccess;
     }
 
+    /**
+     * Returns the initialized ConfigReader for a world. May return null if none was found
+     * @param world The world in question
+     * @return The ConfigReader for that world
+     */
     public ConfigReader getConfigReader (World world)
     {
         try
@@ -108,11 +143,19 @@ public final class Bloodmoon extends JavaPlugin
         }
     }
 
+    /**
+     * Returns all valid ConfigReaders found
+     * @return all ConfigReaders
+     */
     public ConfigReader[] getAllConfigReaders ()
     {
         return allConfigReaders.toArray(new ConfigReader[allConfigReaders.size()]);
     }
 
+    /**
+     * Returns the LocaleReader
+     * @return LocaleReader
+     */
     public LocaleReader getLocaleReader ()
     {
         if (localeReader == null)
@@ -141,6 +184,9 @@ public final class Bloodmoon extends JavaPlugin
         return localeReader;
     }
 
+    /**
+     * Creates the BloodMoon folder if it does not exist
+     */
     public void CreateFolder ()
     {
         File folder = getDataFolder();
@@ -200,6 +246,9 @@ public final class Bloodmoon extends JavaPlugin
         return reader;
     }
 
+    /**
+     * Enables the plugin
+     */
     @Override
     public void onEnable()
     {
@@ -235,6 +284,10 @@ public final class Bloodmoon extends JavaPlugin
         CheckOlderConfigs();
     }
 
+    /**
+     * Loads a world and reads its config
+     * @param world The world to load
+     */
     public void LoadWorld (World world)
     {
         if (world.getEnvironment() != World.Environment.NORMAL)
@@ -265,6 +318,9 @@ public final class Bloodmoon extends JavaPlugin
         bloodmoonWorlds.add(world);
     }
 
+    /**
+     * Disables the plugin
+     */
     @Override
     public void onDisable()
     {
@@ -276,11 +332,7 @@ public final class Bloodmoon extends JavaPlugin
         for (BloodmoonActuator actuator : actuators)
         {
             if (actuator.isInProgress()) actuator.StopBloodMoon();
-            try {
-                actuator.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            actuator.close();
         }
 
         if (sqlAccess != null) sqlAccess.close();

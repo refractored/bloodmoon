@@ -1,5 +1,5 @@
 name: BloodMoon
-version: 0.7
+version: 0.8
 main: org.spectralmemories.bloodmoon.Bloodmoon
 softdepend:
   - "Mutliverse-Core"

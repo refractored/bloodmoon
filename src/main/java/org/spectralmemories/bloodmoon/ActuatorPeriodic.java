@@ -5,15 +5,24 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 
+import java.io.Closeable;
 import java.util.Random;
 
-public class ActuatorPeriodic implements Runnable
+/**
+ * ActuatorPeriodic is a periodic runner designed to be ran once at the start of the bloodmoon
+ * You must close it manually upon bloodmoon end
+ */
+class ActuatorPeriodic implements Runnable, Closeable
 {
     World world;
     Random random;
 
     boolean mustStop;
 
+    /**
+     * Default constructor
+     * @param world world to affect
+     */
     public ActuatorPeriodic(World world)
     {
         mustStop = false;
@@ -21,11 +30,17 @@ public class ActuatorPeriodic implements Runnable
         random = new Random();
     }
 
-    public void Stop ()
+    /**
+     * Closes the perdiodic actuator and stops all actions
+     */
+    public void close ()
     {
         mustStop = true;
     }
 
+    /**
+     * Runs the periodic actuator
+     */
     @Override
     public void run()
     {

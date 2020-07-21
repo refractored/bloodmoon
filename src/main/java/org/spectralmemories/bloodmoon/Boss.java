@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -22,9 +21,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -43,96 +40,30 @@ public abstract class Boss implements IBoss, Listener {
 
     protected void ParseSpells() {
         String[] spells = reader.GetZombieBossPowerSet();
-        String[] var2 = spells;
-        int var3 = spells.length;
-        int var4 = 0;
+        int spellsCount = spells.length;
+        int spellIndex = 0;
 
-        while(var4 < var3) {
-            String spell = var2[var4];
+        while(spellIndex < spellsCount) {
+            String spell = spells[spellIndex];
             String[] parts = spell.split(",");
             String spellName = parts[0];
             final int range = Integer.parseInt(parts[1]);
             int cd = (int)Math.ceil((double)(Float.parseFloat(parts[2]) * 20.0F));
             int thirdParameter = 0;
             int fourthParameter = 0;
-            byte var13 = -1;
-            switch(spellName.hashCode()) {
-                case -1929420024:
-                    if (spellName.equals("POISON")) {
-                        var13 = 1;
-                    }
-                    break;
-                case -1734240269:
-                    if (spellName.equals("WITHER")) {
-                        var13 = 0;
-                    }
-                    break;
-                case 2158134:
-                    if (spellName.equals("FIRE")) {
-                        var13 = 5;
-                    }
-                    break;
-                case 2556090:
-                    if (spellName.equals("STUN")) {
-                        var13 = 2;
-                    }
-                    break;
-                case 63289141:
-                    if (spellName.equals("BLIND")) {
-                        var13 = 3;
-                    }
-                    break;
-                case 1759631022:
-                    if (spellName.equals("UNDERLING")) {
-                        var13 = 4;
-                    }
-            }
 
-            switch(var13) {
-                case 0:
-                case 1:
+            switch(spellName) {
+                case "WITHER":
+                case "POISON":
                     fourthParameter = Integer.parseInt(parts[4]);
-                case 2:
-                case 3:
-                case 4:
-                case 5:
+                case "STUN":
+                case "BLIND":
+                case "UNDERLING":
+                case "FIRE":
                     thirdParameter = Integer.parseInt(parts[3]);
                 default:
-                    var13 = -1;
-                    switch(spellName.hashCode()) {
-                        case -1929420024:
-                            if (spellName.equals("POISON")) {
-                                var13 = 4;
-                            }
-                            break;
-                        case -1734240269:
-                            if (spellName.equals("WITHER")) {
-                                var13 = 5;
-                            }
-                            break;
-                        case -821927254:
-                            if (spellName.equals("LIGHTNING")) {
-                                var13 = 0;
-                            }
-                            break;
-                        case 2158134:
-                            if (spellName.equals("FIRE")) {
-                                var13 = 1;
-                            }
-                            break;
-                        case 63289141:
-                            if (spellName.equals("BLIND")) {
-                                var13 = 2;
-                            }
-                            break;
-                        case 1759631022:
-                            if (spellName.equals("UNDERLING")) {
-                                var13 = 3;
-                            }
-                    }
-
-                    switch(var13) {
-                        case 0:
+                    switch(spellName) {
+                        case "LIGHTNING":
                             tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
                                     if (HasTarget()) {
@@ -142,7 +73,7 @@ public abstract class Boss implements IBoss, Listener {
                                 }
                             }, (long)cd, (long)cd));
                             break;
-                        case 1:
+                        case "FIRE":
                             int finalThirdParameter4 = thirdParameter;
                             tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
@@ -153,7 +84,7 @@ public abstract class Boss implements IBoss, Listener {
                                 }
                             }, (long)cd, (long)cd));
                             break;
-                        case 2:
+                        case "BLIND":
                             int finalThirdParameter1 = thirdParameter;
                             tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
@@ -164,7 +95,7 @@ public abstract class Boss implements IBoss, Listener {
                                 }
                             }, (long)cd, (long)cd));
                             break;
-                        case 3:
+                        case "UNDERLING":
                             int finalThirdParameter = thirdParameter;
                             tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
                                 public void run() {
@@ -175,7 +106,7 @@ public abstract class Boss implements IBoss, Listener {
                                 }
                             }, (long)cd, (long)cd));
                             break;
-                        case 4:
+                        case "POISON":
                             int finalFourthParameter = fourthParameter;
                             int finalThirdParameter3 = thirdParameter;
                             tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
@@ -187,7 +118,7 @@ public abstract class Boss implements IBoss, Listener {
                                 }
                             }, (long)cd, (long)cd));
                             break;
-                        case 5:
+                        case "WITHER":
                             int finalFourthParameter1 = fourthParameter;
                             int finalThirdParameter2 = thirdParameter;
                             tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
@@ -203,7 +134,7 @@ public abstract class Boss implements IBoss, Listener {
                             LocaleReader.BroadcastLocale("GeneralError", null, null);
                     }
 
-                    ++var4;
+                    ++spellIndex;
             }
         }
 
@@ -220,16 +151,16 @@ public abstract class Boss implements IBoss, Listener {
 
     private LivingEntity[] GetNearbyEntities(int range) {
         List<LivingEntity> entities = new ArrayList();
-        Iterator var3 = world.getNearbyEntities(host.getLocation(), (double)range, (double)range, (double)range).iterator();
+        Iterator entityIterator = world.getNearbyEntities(host.getLocation(), (double)range, (double)range, (double)range).iterator();
 
-        while(var3.hasNext()) {
-            Entity entity = (Entity)var3.next();
+        while(entityIterator.hasNext()) {
+            Entity entity = (Entity)entityIterator.next();
             if (entity instanceof LivingEntity && entity != host && !(entity instanceof Monster)) {
                 entities.add((LivingEntity)entity);
             }
         }
 
-        return (LivingEntity[])entities.toArray(new LivingEntity[0]);
+        return entities.toArray(new LivingEntity[0]);
     }
 
     protected void Lightning(final int range) {
@@ -240,11 +171,11 @@ public abstract class Boss implements IBoss, Listener {
             public void run() {
                 world.spawnParticle(Particle.EXPLOSION_HUGE, host.getLocation(), 100);
                 world.playSound(host.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0F, 1.0F);
-                LivingEntity[] var1 = GetNearbyEntities(range);
-                int var2 = var1.length;
+                LivingEntity[] entities = GetNearbyEntities(range);
+                int entityCount = entities.length;
 
-                for(int var3 = 0; var3 < var2; ++var3) {
-                    LivingEntity entity = var1[var3];
+                for(int i = 0; i < entityCount; ++i) {
+                    LivingEntity entity = entities[i];
                     world.strikeLightning(entity.getLocation());
                 }
 
