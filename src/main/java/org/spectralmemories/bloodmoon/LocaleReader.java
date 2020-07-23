@@ -3,6 +3,7 @@ package org.spectralmemories.bloodmoon;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.yaml.snakeyaml.Yaml;
 
@@ -168,14 +169,14 @@ public class LocaleReader implements Closeable
     }
 
     /**
-     * Broadcasts a locale to a player
+     * Broadcasts a locale to a CommandSender
      *
      * @param id ID of the locale
      * @param args arguments
      * @param replacements replacements, in order
-     * @param player player to broadcast the message to
+     * @param sender sender to broadcast the message to
      */
-    public static void MessageLocale (String id, String[] args, String[] replacements, Player player)
+    public static void MessageLocale (String id, String[] args, String[] replacements, CommandSender sender)
     {
         String locale = Bloodmoon.GetInstance().getLocaleReader().GetLocaleString(id);
         if(locale.length() > 0)
@@ -187,7 +188,7 @@ public class LocaleReader implements Closeable
                     locale = locale.replace(args[i], replacements[i]);
                 }
             }
-            player.sendMessage(locale);
+            sender.sendMessage(locale);
         }
     }
 

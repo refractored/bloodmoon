@@ -12,7 +12,7 @@ Bugfixes:
 
 Misc:
     - Better loot system X
-    - Commands can now be executed via the console and rcon
+    - Commands can now be executed via the console and rcon X
 
 
 [0.7] The Boss Update
