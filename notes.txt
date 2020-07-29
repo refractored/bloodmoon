@@ -3,12 +3,13 @@
 Features:
     - Customizable hordes can now spawn near players
     - Can now give custom items
-    - ZombieBoss can now blink and sprint
+    - ZombieBoss can now blink X
+    - ZombieBoss can now sprint
 
 Bugfixes:
     - Mob damage is prevented by WorldGuard zones
     - Cleaned decompiled classes for readability (Boss, ZombieBoss, ConfigReader) X
-    - ThunderDuringBloodMoon: false now works
+    - ThunderDuringBloodMoon config now works properly X
 
 Misc:
     - Better loot system X

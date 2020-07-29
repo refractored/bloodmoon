@@ -84,15 +84,15 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
             if (arg0.equalsIgnoreCase("start"))
             {
-                return ConfirmToConsole(sender,ExecuteStart(sender, chosenWorld), arg0);
+                return ConfirmToConsole(sender,ExecuteStart(sender, chosenWorld), arg0, chosenWorld.getName());
             }
             else if (arg0.equalsIgnoreCase("stop"))
             {
-                return ConfirmToConsole(sender,ExecuteStop(sender, chosenWorld), arg0);
+                return ConfirmToConsole(sender,ExecuteStop(sender, chosenWorld), arg0, chosenWorld.getName());
             }
             else if (arg0.equalsIgnoreCase("reload"))
             {
-                return ConfirmToConsole(sender,ExecuteReload(sender), arg0);
+                return ConfirmToConsole(sender,ExecuteReload(sender), arg0, chosenWorld.getName());
             }
             else if (arg0.equalsIgnoreCase("show"))
             {
@@ -100,7 +100,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
             }
             else if (arg0.equalsIgnoreCase("spawnzombieboss"))
             {
-                return ConfirmToConsole(sender,ExecuteSpawnZombieBoss(sender, chosenWorld), arg0);
+                return ConfirmToConsole(sender,ExecuteSpawnZombieBoss(sender, chosenWorld), arg0, chosenWorld.getName());
             }
             else if (arg0.equalsIgnoreCase("killbosses"))
             {
@@ -109,7 +109,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
                     param = Boolean.parseBoolean(args[2]);
                 }
 
-                return ConfirmToConsole(sender,ExecuteKillBosses(sender, chosenWorld, param), arg0);
+                return ConfirmToConsole(sender,ExecuteKillBosses(sender, chosenWorld, param), arg0, chosenWorld.getName());
             }
             else
             {
@@ -280,7 +280,6 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
     private boolean CheckPermission (CommandSender sender, String node)
     {
-        if(sender instanceof ConsoleCommandSender || sender instanceof RemoteConsoleCommandSender) return true;
         return CheckFullPermission (sender, "bloodmoon." + node);
     }
     private boolean CheckFullPermission (CommandSender sender, String fullNode)
@@ -289,9 +288,9 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         return sender.hasPermission(fullNode);
     }
 
-    private boolean ConfirmToConsole(CommandSender console, boolean success, String command){
+    private boolean ConfirmToConsole(CommandSender console, boolean success, String command, String worldName){
         if(success){
-            console.sendMessage("Command " + command + " has been successfully ran");
+            console.sendMessage("Command " + command + " has been successfully ran in world " + worldName);
         }else{
             console.sendMessage("There was a problem running command " + command);
         }

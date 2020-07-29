@@ -168,8 +168,10 @@ public class ConfigReader implements Closeable
             writer.write("#These are AOE powers affecting all players around the boss\n");
             writer.write("#Accepted values are:\n");
             writer.write("#LIGHTNING,[range],[cooldown]\n");
+            writer.write("#BLINK,[range],[cooldown]\n");
             writer.write("#FIRE,[range],[cooldown],[duration]\n");
             writer.write("#UNDERLING,[range],[cooldown],[amount]\n");
+            writer.write("#SPRINT,[duration],[cooldown],[amplifier]\n");
             writer.write("#BLIND,[range],[cooldown],[duration]\n");
             writer.write("#POISON,[range],[cooldown],[duration],[amplifier]\n");
             writer.write("#WITHER,[range],[cooldown],[duration],[amplifier]\n");
@@ -557,10 +559,10 @@ public class ConfigReader implements Closeable
     {
         try
         {
-            Object interval = GetConfig(LIGHTNING_EFFECT_ON_MOB_DEATH);
+            Object interval = GetConfig(THUNDER_DURING_BLOOD_MOON);
             if (interval == null)
             {
-                CreateConfig(LIGHTNING_EFFECT_ON_MOB_DEATH, String.valueOf(THUNDER_DEFAULT));
+                CreateConfig(THUNDER_DURING_BLOOD_MOON, String.valueOf(THUNDER_DEFAULT));
                 interval = THUNDER_DEFAULT;
             }
             return (boolean) interval;

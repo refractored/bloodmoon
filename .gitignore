@@ -175,3 +175,6 @@ fabric.properties
 /target/classes/plugin.yml
 /target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
 /target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+/target/classes/org/spectralmemories/bloodmoon/Boss$13.class
+/target/classes/org/spectralmemories/bloodmoon/Boss$14.class
+/target/classes/org/spectralmemories/bloodmoon/*.class

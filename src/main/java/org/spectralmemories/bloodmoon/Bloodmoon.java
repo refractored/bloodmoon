@@ -1,6 +1,7 @@
 package org.spectralmemories.bloodmoon;
 
 import org.bukkit.World;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.spectralmemories.sqlaccess.FieldType;
@@ -306,6 +307,8 @@ public final class Bloodmoon extends JavaPlugin
         getServer().getPluginManager().registerEvents(actuator, this);
         actuators.add(actuator);
 
+        PurgeBosses(world);
+
         if (! configReader.GetPermanentBloodMoonConfig())
         {
             PeriodicNightCheck nightCheck = new PeriodicNightCheck(world, actuator);
@@ -316,6 +319,23 @@ public final class Bloodmoon extends JavaPlugin
         }
 
         bloodmoonWorlds.add(world);
+    }
+
+
+    /**
+     * Removes all boss remaining from a world
+     * @param world Chosen world
+     */
+    private void PurgeBosses (World world){
+        for(LivingEntity entity : world.getLivingEntities()){
+            if(
+                    entity.getCustomName() != null
+                    && !entity.getCustomName().isEmpty()
+                    && entity.getCustomName().equals(getLocaleReader().GetLocaleString("ZombieBossName"))
+            ){
+                entity.remove();
+            }
+        }
     }
 
     /**

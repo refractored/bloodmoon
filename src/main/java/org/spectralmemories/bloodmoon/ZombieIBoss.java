@@ -14,6 +14,8 @@ package org.spectralmemories.bloodmoon;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;

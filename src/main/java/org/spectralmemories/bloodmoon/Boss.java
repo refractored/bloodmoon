@@ -25,6 +25,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.util.Vector;
 
 public abstract class Boss implements IBoss, Listener {
     protected ConfigReader reader;
@@ -53,13 +54,16 @@ public abstract class Boss implements IBoss, Listener {
             int fourthParameter = 0;
 
             switch(spellName) {
+                //4 parameters
                 case "WITHER":
                 case "POISON":
                     fourthParameter = Integer.parseInt(parts[4]);
+                //3 parameters
                 case "STUN":
                 case "BLIND":
                 case "UNDERLING":
                 case "FIRE":
+                case "SPRINT":
                     thirdParameter = Integer.parseInt(parts[3]);
                 default:
                     switch(spellName) {
@@ -68,6 +72,16 @@ public abstract class Boss implements IBoss, Listener {
                                 public void run() {
                                     if (HasTarget()) {
                                         Lightning(range);
+                                    }
+
+                                }
+                            }, (long)cd, (long)cd));
+                            break;
+                        case "BLINK":
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                                public void run() {
+                                    if (HasTarget()) {
+                                        Blink(range);
                                     }
 
                                 }
@@ -106,6 +120,17 @@ public abstract class Boss implements IBoss, Listener {
                                 }
                             }, (long)cd, (long)cd));
                             break;
+                        case "SPRINT":
+                            int finalThirdParameter5 = thirdParameter;
+                            tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
+                                public void run() {
+                                    if (HasTarget()) {
+                                        Sprint(range, finalThirdParameter5);
+                                    }
+
+                                }
+                            }, (long)cd, (long)cd));
+                            break;
                         case "POISON":
                             int finalFourthParameter = fourthParameter;
                             int finalThirdParameter3 = thirdParameter;
@@ -114,7 +139,6 @@ public abstract class Boss implements IBoss, Listener {
                                     if (HasTarget()) {
                                         Poison(range, (float) finalThirdParameter3, finalFourthParameter);
                                     }
-
                                 }
                             }, (long)cd, (long)cd));
                             break;
@@ -140,15 +164,22 @@ public abstract class Boss implements IBoss, Listener {
 
     }
 
+    /**
+     * @return Does the host has an actively hunted target
+     */
     private boolean HasTarget() {
-        Monster monster = (Monster)host;
-        if (monster != null) {
-            return monster.getTarget() != null;
+        if (host != null) {
+            return host.getTarget() != null;
         } else {
             return false;
         }
     }
 
+    /**
+     * Finds all instances of LivingEntity in a range
+     * @param range The range in meter (blocks), used as a radius
+     * @return The fixed 1D array of LivingEntity
+     */
     private LivingEntity[] GetNearbyEntities(int range) {
         List<LivingEntity> entities = new ArrayList();
         Iterator entityIterator = world.getNearbyEntities(host.getLocation(), (double)range, (double)range, (double)range).iterator();
@@ -219,6 +250,37 @@ public abstract class Boss implements IBoss, Listener {
                 for(int var3 = 0; var3 < var2; ++var3) {
                     LivingEntity entity = var1[var3];
                     entity.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, (int)Math.ceil((double)(duration * 20.0F)), 1));
+                }
+
+                host.setAI(true);
+            }
+        }, CHANNEL_TIME_TICKS);
+    }
+
+    protected void Sprint (final int duration, final int amplifier){
+
+    }
+
+    protected void Blink (final int range){
+        world.spawnParticle(Particle.END_ROD, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, 1.0F, 1.0F);
+        host.setAI(false);
+        Random random = new Random();
+        scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
+            public void run() {
+                world.spawnParticle(Particle.EXPLOSION_NORMAL, host.getLocation(), 100);
+                world.playSound(host.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0F, 1.0F);
+                LivingEntity[] livingEntities = GetNearbyEntities(range);
+                int len = livingEntities.length;
+
+                if(len > 0){
+                    int chosenOneIndex = random.nextInt(len);
+                    LivingEntity chosenOne = livingEntities[chosenOneIndex];
+
+                    Location tpLocation = chosenOne.getLocation().clone();
+                    tpLocation = tpLocation.subtract(chosenOne.getLocation().getDirection().normalize().multiply(2.5));
+                    tpLocation.setY(world.getHighestBlockYAt(tpLocation));
+                    host.teleport(tpLocation);
                 }
 
                 host.setAI(true);
