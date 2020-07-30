@@ -2,9 +2,9 @@
 
 Features:
     - Customizable hordes can now spawn near players
-    - Can now give custom items
+    - Can now give custom items X
     - ZombieBoss can now blink X
-    - ZombieBoss can now sprint
+    - ZombieBoss can now sprint X
 
 Bugfixes:
     - Mob damage is prevented by WorldGuard zones

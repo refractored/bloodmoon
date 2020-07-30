@@ -148,7 +148,7 @@ public final class ZombieIBoss extends Boss {
 
         int expDrop;
         for(expDrop = 0; expDrop < amount; ++expDrop) {
-            world.dropItemNaturally(host.getLocation(), new ItemStack(actuator.GetRandomBonus()));
+            world.dropItemNaturally(host.getLocation(), actuator.GetRandomBonus());
         }
 
         expDrop = rnd.nextInt(2) + 1;

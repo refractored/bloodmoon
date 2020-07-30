@@ -6,6 +6,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,6 +19,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
@@ -366,19 +368,27 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         }
     }
 
-    public Material GetRandomBonus ()
+    /**
+     * Generates a random item to be used as a reward
+     * @return
+     */
+    public ItemStack GetRandomBonus ()
     {
 
         Random random = new Random(); //We want to regenerate it every time to ensure randomness
+        Material itemMaterial;
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-        Map<String, Integer> items = configReader.GetItemListConfig();
+        String[] items = configReader.GetItemListConfig();
         Map<String, Integer[]> indexes = new HashMap<>();
         int totalWeight = 0;
 
-        for(Map.Entry<String, Integer> entry : items.entrySet()){
-            indexes.put(entry.getKey(), new Integer[]{totalWeight, totalWeight + entry.getValue()});
-            totalWeight += entry.getValue();
+        for(String entry : items){
+            String[] parts = entry.split(":");
+            int itemWeight = Integer.parseInt(parts[2]);
+
+            indexes.put(entry, new Integer[]{totalWeight, totalWeight + itemWeight});
+            totalWeight += itemWeight;
         }
 
         int rng = random.nextInt(totalWeight);
@@ -388,7 +398,43 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
             int max = entry.getValue()[1];
 
             if(rng >= min && rng < max){
-                return Material.valueOf(entry.getKey());
+                String[] parts = entry.getKey().split(":");
+                itemMaterial = Material.valueOf(parts[0]);
+
+                ItemStack itemStack = new ItemStack(itemMaterial, Integer.parseInt(parts[1]));
+
+                for(int i = 3; i < 6; i++){
+                    if(parts.length <= i) break;
+
+                    String line = parts[i];
+                    if(line.startsWith("$name")){
+                        line = line.substring("$name".length() + 1);
+
+                        ItemMeta meta = itemStack.getItemMeta();
+                        meta.setDisplayName(line);
+                        itemStack.setItemMeta(meta);
+                    }
+                    else if(line.startsWith("$desc")){
+                        line = line.substring("$desc".length() + 1);
+
+                        ItemMeta meta = itemStack.getItemMeta();
+                        meta.setLore(Arrays.asList(line.split("\\$n")));
+                        itemStack.setItemMeta(meta);
+                    }
+                    else if(line.startsWith("$enchant")){
+                        line = line.substring("$enchant".length() + 1);
+
+                        String[] enchantLines = line.split(";");
+                        for(String enchantLine : enchantLines){
+                            String[] enchant = enchantLine.split(",");
+                            itemStack.addEnchantment(
+                                    Enchantment.getByKey(NamespacedKey.minecraft(enchant[0].toLowerCase()))
+                            , Integer.parseInt(enchant[1]));
+                        }
+                    }
+                }
+
+                return itemStack;
             }
         }
         return null;
@@ -627,7 +673,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
 
         for (int i = 0; i < itemCount; i++)
         {
-            bonusDrops.add(new ItemStack(GetRandomBonus())); //Add the drops
+            bonusDrops.add(GetRandomBonus()); //Add the drops
         }
 
         for (ItemStack item : bonusDrops)
