@@ -258,13 +258,13 @@ public abstract class Boss implements IBoss, Listener {
     }
 
     protected void Sprint (final int duration, final int amplifier){
-        world.spawnParticle(Particle.END_ROD, host.getLocation(), 100);
-        world.playSound(host.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, 1.0F, 1.0F);
+        world.spawnParticle(Particle.CRIT, host.getLocation(), 100);
+        world.playSound(host.getLocation(), Sound.ENTITY_HORSE_BREATHE, 1.0F, 1.0F);
         host.setAI(false);
         scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
-                world.spawnParticle(Particle.EXPLOSION_NORMAL, host.getLocation(), 100);
-                world.playSound(host.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0F, 1.0F);
+                world.spawnParticle(Particle.FIREWORKS_SPARK, host.getLocation(), 100);
+                world.playSound(host.getLocation(), Sound.ENTITY_HORSE_ANGRY, 1.0F, 1.0F);
 
                 host.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * duration, amplifier));
 

@@ -8,7 +8,7 @@ Features:
 
 Bugfixes:
     - Mob damage is prevented by WorldGuard zones
-    - Cleaned decompiled classes for readability (Boss, ZombieBoss, ConfigReader) X
+    - Cleaned decompiled classes for future readability (Boss, ZombieBoss, ConfigReader) X
     - ThunderDuringBloodMoon config now works properly X
 
 Misc:
