@@ -3,6 +3,7 @@ version: 0.8
 main: org.spectralmemories.bloodmoon.Bloodmoon
 softdepend:
   - "Mutliverse-Core"
+  - "WorldGuard"
 api-version: 1.14
 authors: [SpectralMemories]
 description: A BloodMoon shines every couple of nights
@@ -38,6 +39,9 @@ permissions:
     default: op
   bloodmoon.killbosses:
     description: Allows to kill all bosses at will
+    default: op
+  bloodmoon.spawnhorde:
+    description: Allows to spawn a horde
     default: op
   #Required for the testsuite command
   #bloodmoon.testsuite:

@@ -63,8 +63,6 @@ public class ConfigReader implements Closeable
     public static final boolean SHIELD_PREVENTS_EFFECTS_DEFAULT = true;
     public static final String PERMANENT_BLOOD_MOON = "PermanentBloodMoon";
     public static final boolean PERMANENT_BLOODMOON_DEFAULT = false;
-    public static final String COMMANDS_ON_END = "CommandsOnEnd";
-    public static final String COMMANDS_ON_START = "CommandsOnStart";
     public static final String ZOMBIEBOSSEFFECTS = "ZOMBIEBOSSEffects";
     public static final String ENABLE_ZOMBIE_BOSS = "EnableZombieBoss";
     public static final String ZOMBIE_BOSS_HEALTH = "ZombieBossHealth";
@@ -85,6 +83,21 @@ public class ConfigReader implements Closeable
     public static final boolean DEFAULT_PLAYER_HIT_PARTICLE_EFFECT = true;
     public static final String MOB_HIT_PARTICLE_EFFECT = "MobHitParticleEffect";
     public static final boolean DEFAULT_MOB_HIT_PARTICLE_EFFECT = true;
+    public static final String BASELINE_HORDE_SPAWNRATE = "BaselineHordeSpawnrate";
+    public static final int BASELINE_HORDE_SPAWNRATE_DEFAULT = 800;
+    public static final String HORDE_SPAWNRATE_VARIATION = "HordeSpawnrateVariation";
+    public static final int HORDE_SPAWNRATE_VARIATION_DEFAULT = 200;
+    public static final String HORDE_MOB_WHITELIST = "HordeMobWhitelist";
+    public static final String HORDE_SPAWN_DISTANCE = "HordeSpawnDistance";
+    public static final int HORDE_SPAWN_DISTANCE_DEFAULT = 12;
+    public static final String HORDE_MIN_POPULATION = "HordeMinPopulation";
+    public static final int HORDE_MIN_POPULATION_DEFAULT = 3;
+    public static final String HORDE_MAX_POPULATION = "HordeMaxPopulation";
+    public static final int HORDE_MAX_POPULATION_DEFAULT = 10;
+    public static final String COMMANDS_ON_END = "CommandsOnEnd";
+    public static final String COMMANDS_ON_START = "CommandsOnStart";
+    public static final String HORDES_ENABLED = "HordesEnabled";
+    public static final boolean HORDES_ENABLED_DEFAULT = true;
 
     private File configFile;
     private Map <String, Object> cache;
@@ -156,6 +169,10 @@ public class ConfigReader implements Closeable
             writer.write("#When in a permanent BloodMoon, how long (in ticks) before respawning zombie boss after death?\n");
             writer.write("#20 ticks equals a second, 24000 ticks equals a minecraft day\n");
             writer.write(ZOMBIE_BOSS_RESPAWN + ": " + String.valueOf(DEFAULT_ZOMBIE_RESPAWN_TIME) + "\n");
+            writer.write("ZombieBossDamage: 7\n");
+            writer.write("ZombieBossExpMultiplier: 10\n");
+            writer.write("ZombieBossHealth: 50\n");
+            writer.write("ZombieBossItemMultiplier: 10\n");
             writer.write("#List of items that can drop, using the\n");
             writer.write("#\"[ITEM_CODE]:[STACK AMOUNT]:[WEIGHT]:$name [META NAME]:$desc [META DESCRIPTION]:$enchant [ENCHANTMENT LIST]\" format\n");
             writer.write("#$name, $desc and $enchant are of course optional\n");
@@ -215,11 +232,30 @@ public class ConfigReader implements Closeable
             writer.write("#using ;p runs the command as the player, for each player. $p also applies\n");
             writer.write("#For all options, $w will be replaced by the world name\n");
             writer.write("#Note that these commands will be the very first and very last operations\n#ran when starting and ending a BloodMoon\n");
-            writer.write("CommandsOnStart:\n");
+            writer.write(COMMANDS_ON_START + ":\n");
             writer.write("#  - \"some command;s\"\n");
             writer.write("#Commands ran at the end of the BloodMoon\n");
-            writer.write("CommandsOnEnd:\n");
+            writer.write(COMMANDS_ON_END + ":\n");
             writer.write("#  - \"command on player $p on world $w;p\"\n");
+            writer.write("\n#Hordes parameter\n");
+            writer.write("#Are hordes even enabled in this world?\n");
+            writer.write(HORDES_ENABLED + ": " + String.valueOf(HORDES_ENABLED_DEFAULT) + "\n");
+            writer.write("#The baseline spawn rate of hordes in ticks (1/5th of a second)\n");
+            writer.write(BASELINE_HORDE_SPAWNRATE + ": " + String.valueOf(BASELINE_HORDE_SPAWNRATE_DEFAULT) + "\n");
+            writer.write("#The variation of hordes spawn time in ticks\n");
+            writer.write(HORDE_SPAWNRATE_VARIATION + ": " + String.valueOf(HORDE_SPAWNRATE_VARIATION_DEFAULT) + "\n");
+            writer.write("#Decides which mobs are allowed in hordes\n");
+            writer.write(HORDE_MOB_WHITELIST + ":\n");
+            writer.write(" - \"ZOMBIE\"\n");
+            writer.write(" - \"SKELETON\"\n");
+            writer.write(" - \"SPIDER\"\n");
+            writer.write("#The distance from players in block at which hordes will spawn\n");
+            writer.write(HORDE_SPAWN_DISTANCE + ": " + String.valueOf(HORDE_SPAWN_DISTANCE_DEFAULT) + "\n");
+            writer.write("#The minimum number of mobs in a horde\n");
+            writer.write(HORDE_MIN_POPULATION + ": " + String.valueOf(HORDE_MIN_POPULATION_DEFAULT) + "\n");
+            writer.write("#The maximum number of mobs in a horde\n");
+            writer.write(HORDE_MAX_POPULATION + ": " + String.valueOf(HORDE_MAX_POPULATION_DEFAULT) + "\n");
+
 
             writer.close();
         }
@@ -303,6 +339,27 @@ public class ConfigReader implements Closeable
         }
     }
 
+    public String[] GetHordeMobWhitelist ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_MOB_WHITELIST);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
+            {
+                System.out.println("Warning: could not load mob whitelist!");
+                return new String[0];
+            }
+            ArrayList<String> list = (ArrayList<String>) interval;
+
+            return list.toArray(new String[0]);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Warning: could not load mob whitelist!");
+            return new String[0];
+        }
+    }
+
     public String[] GetMobEffectConfig (String mob)
     {
         try
@@ -336,6 +393,24 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return IS_BLACKLISTED_DEFAULT;
+        }
+    }
+
+    public boolean GetHordeEnabled ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDES_ENABLED);
+            if (interval == null)
+            {
+                CreateConfig(HORDES_ENABLED, String.valueOf(HORDES_ENABLED_DEFAULT));
+                interval = HORDES_ENABLED_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return HORDES_ENABLED_DEFAULT;
         }
     }
 
@@ -706,6 +781,97 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return MIN_ITEM_DROP_DEFAULT;
+        }
+    }
+
+    public int GetHordeMinPopulation ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_MIN_POPULATION);
+            if (interval == null)
+            {
+                CreateConfig(HORDE_MIN_POPULATION, String.valueOf(HORDE_MIN_POPULATION_DEFAULT));
+                interval = HORDE_MIN_POPULATION_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return HORDE_MIN_POPULATION_DEFAULT;
+        }
+    }
+
+    public int GetHordeSpawnrateBaseline ()
+    {
+        try
+        {
+            Object interval = GetConfig(BASELINE_HORDE_SPAWNRATE);
+            if (interval == null)
+            {
+                CreateConfig(BASELINE_HORDE_SPAWNRATE, String.valueOf(BASELINE_HORDE_SPAWNRATE_DEFAULT));
+                interval = BASELINE_HORDE_SPAWNRATE_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return BASELINE_HORDE_SPAWNRATE_DEFAULT;
+        }
+    }
+
+    public int GetHordeSpawnrateVariation ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_SPAWNRATE_VARIATION);
+            if (interval == null)
+            {
+                CreateConfig(HORDE_SPAWNRATE_VARIATION, String.valueOf(HORDE_SPAWNRATE_VARIATION_DEFAULT));
+                interval = HORDE_SPAWNRATE_VARIATION_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return HORDE_SPAWNRATE_VARIATION_DEFAULT;
+        }
+    }
+
+    public int GetHordeSpawnDistance ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_SPAWN_DISTANCE);
+            if (interval == null)
+            {
+                CreateConfig(HORDE_SPAWN_DISTANCE, String.valueOf(HORDE_SPAWN_DISTANCE_DEFAULT));
+                interval = HORDE_SPAWN_DISTANCE_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return HORDE_SPAWN_DISTANCE_DEFAULT;
+        }
+    }
+
+
+    public int GetHordeMaxPopulation ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_MAX_POPULATION);
+            if (interval == null)
+            {
+                CreateConfig(HORDE_MAX_POPULATION, String.valueOf(HORDE_MAX_POPULATION_DEFAULT));
+                interval = HORDE_MAX_POPULATION_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return HORDE_MAX_POPULATION_DEFAULT;
         }
     }
 

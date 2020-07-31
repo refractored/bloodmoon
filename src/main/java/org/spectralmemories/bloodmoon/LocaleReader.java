@@ -36,7 +36,9 @@ public class LocaleReader implements Closeable
             "GeneralError",
             "ZombieBossSpawned",
             "ZombieBossName",
-            "BossSlain"
+            "BossSlain",
+            "HordeArrived",
+            "NoPlayerOfName"
     };
     public static final String[] DEFAULT_LOCALES = {
             "BloodMoon",
@@ -62,7 +64,9 @@ public class LocaleReader implements Closeable
             "&c&oThere was an error processing your request",
             "&f&l$b &fhas arrived!",
             "The Tough One",
-            "&l$p &2has slain &f$b!"
+            "&l$p &2has slain &f$b!",
+            "&cA horde has descended upon &f$p!",
+            "&cNo player of name &f$p &ccould be found in world &f$w"
     };
     public static final String STRING_NOT_FOUND = "[String not found]";
     public static final String VERSION_CONFIG = "LocalesVersion";
@@ -285,7 +289,7 @@ public class LocaleReader implements Closeable
             writer.write("LocalesVersion: " + Bloodmoon.GetInstance().getDescription().getVersion() + "\n\n");
             writer.write("#Locales file. use $n to create a new line\n");
             writer.write("#Some entries can accept a parameter, which will be $d\n");
-            writer.write("#You can completely silence a line by assigning \"%void%\"");
+            writer.write("#You can completely silence a line by assigning \"%void%\"\n");
             writer.write("#You can use color codes. Refer to https://dev.bukkit.org/projects/color-chat for more info\n\n");
             int i = 0;
             for (String str : LOCALES_IDS)

@@ -20,7 +20,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
             if (args.length == 0)
             {
-                LocaleReader.MessageLocale("AllowedCommands", new String[]{"$d"}, new String[]{"show, start, stop, reload, spawnzombieboss, killbosses [rewards]"}, player);
+                LocaleReader.MessageLocale("AllowedCommands", new String[]{"$d"}, new String[]{"show, start, stop, reload, spawnzombieboss, spawnhorde [player name], killbosses [rewards]"}, player);
                 return false;
             }
 
@@ -54,6 +54,15 @@ public class BloodmoonCommandExecutor implements CommandExecutor
 
                 return ExecuteKillBosses(player, playerWorld,  param);
             }
+            else if (arg0.equalsIgnoreCase("spawnhorde"))
+            {
+                String param = "";
+                if (args.length >= 2) {
+                    param = args[1];
+                }
+
+                return ExecuteSpawnHorde(player, playerWorld,  param);
+            }
             else
             {
                 LocaleReader.MessageLocale("CommandNotFound", new String[]{"$d"}, new String[]{arg0}, player);
@@ -64,7 +73,7 @@ public class BloodmoonCommandExecutor implements CommandExecutor
         {
             if (args.length < 1)
             {
-                LocaleReader.MessageLocale("AllowedCommands", new String[]{"$d"}, new String[]{"show [world], start [world], stop [world], reload, spawnzombieboss [world], killbosses [world] [rewards]"}, sender);
+                LocaleReader.MessageLocale("AllowedCommands", new String[]{"$d"}, new String[]{"show [world], start [world], stop [world], reload, spawnzombieboss [world], spawnhorde [world] [player name], killbosses [world] [rewards]"}, sender);
                 return false;
             }
             String arg0 = args[0];
@@ -110,6 +119,15 @@ public class BloodmoonCommandExecutor implements CommandExecutor
                 }
 
                 return ConfirmToConsole(sender,ExecuteKillBosses(sender, chosenWorld, param), arg0, chosenWorld.getName());
+            }
+            else if (arg0.equalsIgnoreCase("spawnhorde"))
+            {
+                String param = "";
+                if (args.length >= 3) {
+                    param = args[2];
+                }
+
+                return ConfirmToConsole(sender, ExecuteSpawnHorde(sender, chosenWorld,  param), arg0, chosenWorld.getName());
             }
             else
             {
@@ -247,6 +265,43 @@ public class BloodmoonCommandExecutor implements CommandExecutor
                 return true;
             } else {
                 actuator.KillBosses(giveRewards, true, false);
+                return true;
+            }
+        }
+    }
+
+    private boolean ExecuteSpawnHorde (CommandSender sender, World world, String playerName)
+    {
+        if (!CheckPermission(sender, "spawnhorde")) {
+            LocaleReader.MessageLocale("NoPermission", null, null, sender);
+            return false;
+        } else {
+            BloodmoonActuator actuator = BloodmoonActuator.GetActuator(world);
+            if (actuator == null) {
+                LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, sender);
+                return true;
+            } else {
+                if(playerName.isEmpty()){
+                    actuator.SpawnHorde();
+                }else{
+                    Player player = null;
+
+                    Player[] players = world.getPlayers().toArray(new Player[0]);
+                    for(Player prospect : players)
+                    {
+                        if(prospect.getDisplayName().equalsIgnoreCase(playerName)){
+                            player = prospect;
+                            break;
+                        }
+                    }
+
+                    if(player == null){
+                        LocaleReader.MessageLocale("NoPlayerOfName", new String[] {"$p","$w"}, new String[] {playerName, world.getName()}, sender);
+                        return false;
+                    }
+
+                    actuator.SpawnHorde(player);
+                }
                 return true;
             }
         }

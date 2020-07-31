@@ -14,7 +14,10 @@ Bugfixes:
 Misc:
     - Better loot system X
     - Commands can now be executed via the console and rcon X
+    - Added 1.16 support X
 
+To do:
+    - Make configreader more flexible
 
 [0.7] The Boss Update
 
