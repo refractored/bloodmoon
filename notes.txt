@@ -1,13 +1,13 @@
 [0.8] The Horde update
 
 Features:
-    - Customizable hordes can now spawn near players
+    - Customizable hordes can now spawn near players X
     - Can now give custom items X
     - ZombieBoss can now blink X
     - ZombieBoss can now sprint X
 
 Bugfixes:
-    - Mob damage is prevented by WorldGuard zones
+    - Mob damage is prevented by WorldGuard zones X
     - Cleaned decompiled classes for future readability (Boss, ZombieBoss, ConfigReader) X
     - ThunderDuringBloodMoon config now works properly X
 

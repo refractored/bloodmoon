@@ -1,6 +1,14 @@
 package org.spectralmemories.bloodmoon;
 
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
@@ -549,8 +557,27 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         return null;
     }
 
+    public boolean IsInProtectedWGRegion (Player player){
+        try
+        {
+            RegionContainer rc = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionQuery rq = rc.createQuery();
+            ApplicableRegionSet rs = rq.getApplicableRegions(BukkitAdapter.adapt(player.getLocation()));
+
+            if (rs == null || rs.size() == 0) return false;
+
+            boolean isProtected = !rs.testState(null, Flags.MOB_DAMAGE);
+            return isProtected;
+        }catch (NoClassDefFoundError e){
+            //Server likely does not have WG
+            return false;
+        }
+    }
+
     private void ApplySpecialEffect (Player player, LivingEntity mob)
     {
+        if(IsInProtectedWGRegion(player)) return;
+
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         String mobTypeName = mob.getType().name().toUpperCase();
         for (IBoss boss : bosses)
