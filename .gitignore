@@ -178,3 +178,14 @@ fabric.properties
 /target/classes/org/spectralmemories/bloodmoon/Boss$13.class
 /target/classes/org/spectralmemories/bloodmoon/Boss$14.class
 /target/classes/org/spectralmemories/bloodmoon/*.class
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+exes/
+gradle/
+gradlew
+gradlew.bat
