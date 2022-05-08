@@ -1,10 +1,10 @@
 name: BloodMoon
-version: 0.8
+version: 0.8.1
 main: org.spectralmemories.bloodmoon.Bloodmoon
 softdepend:
   - "Mutliverse-Core"
   - "WorldGuard"
-api-version: 1.14
+api-version: 1.18
 authors: [SpectralMemories]
 description: A BloodMoon shines every couple of nights
 commands:
@@ -14,10 +14,10 @@ commands:
     permission-message: "You do not have the permission to do this"
   #Uncomment this section to unlock the testsuite command. Official releases will obviously pass all tests, but if you want to
   #Run them yourself, knock yourself out!
-  #testsuite:
-  #  description: Runs the integrated test suite. Usually only developers use this, there is however little harm to do it yourself. Test results will be in the BloodMoon folder
-  #  permission: "bloodmoon.testsuite"
-  #  permission-message: "You do not have the permission to do this"
+  testsuite:
+    description: Runs the integrated test suite. Usually only developers use this, there is however little harm to do it yourself. Test results will be in the BloodMoon folder
+    permission: "bloodmoon.testsuite"
+    permission-message: "You do not have the permission to do this"
 permissions:
   bloodmoon.bloodmoon:
     description: Allows to run the base bloodmoon command

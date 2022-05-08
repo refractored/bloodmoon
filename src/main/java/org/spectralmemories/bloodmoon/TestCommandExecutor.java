@@ -278,6 +278,7 @@ public class TestCommandExecutor implements CommandExecutor
         try
         {
             player.performCommand("bloodmoon reload");
+            return true;
         }
         catch (Exception ignored) {}
         return false;

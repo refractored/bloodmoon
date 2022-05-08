@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
@@ -175,7 +176,7 @@ public final class Bloodmoon extends JavaPlugin
             }
             catch (IOException e)
             {
-                System.out.println("Error: Could not create locale file");
+                getLogger().log(Level.SEVERE, "Error: Could not create locale file");
             }
 
             localeReader = new LocaleReader (localeFile);
@@ -280,7 +281,7 @@ public final class Bloodmoon extends JavaPlugin
         getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
 
 
-        //getCommand("testsuite").setExecutor(new TestCommandExecutor());
+        getCommand("testsuite").setExecutor(new TestCommandExecutor());
 
         CheckOlderConfigs();
     }
@@ -366,7 +367,7 @@ public final class Bloodmoon extends JavaPlugin
                 }
                 catch (IOException e)
                 {
-                    System.out.println("[Error]");
+                    getLogger().log(Level.SEVERE,"[Error]");
                     e.printStackTrace();
                 }
             }
@@ -383,19 +384,19 @@ public final class Bloodmoon extends JavaPlugin
 
     private void CheckOlderConfigs ()
     {
-        System.out.println("[BloodMoon] This plugin is still in its infancy. If you encounter a bug, please report it to https://www.spigotmc.org/threads/bloodmoon.412741/");
+        getLogger().log(Level.INFO,"This plugin is still in its infancy. If you encounter a bug, please report it to https://www.spigotmc.org/threads/bloodmoon.412741/");
 
         File oldConfig = new File (getDataFolder() + SLASH + CONFIG_FILE);
-        if (oldConfig.exists()) System.out.println("[Deprecated] BloodMoon/config.yml is no longer used. Use per-world configuration instead");
+        if (oldConfig.exists()) getLogger().log(Level.WARNING,"[Deprecated] BloodMoon/config.yml is no longer used. Use per-world configuration instead");
 
         String localesVersion = getLocaleReader().GetFileVersion();
         if (localesVersion.equals("NaN"))
         {
-            System.out.println("[Error] locales.yml has no valid version tag. Consider regenerating it");
+            getLogger().log(Level.WARNING,"[Error] locales.yml has no valid version tag. Consider regenerating it");
             return;
         }
         if (! GetMajorVersions(localesVersion).equals(GetMajorVersions(getDescription().getVersion())))
-            System.out.println("[Warning] Locales file was not updated since the last major update. Regenerating it is *highly* recommended");
+            getLogger().log(Level.WARNING,"[Warning] Locales file was not updated since the last major update. Regenerating it is *highly* recommended");
         for (World world : bloodmoonWorlds)
         {
             if (BlackListedWorlds.contains(world)) continue;
@@ -403,13 +404,13 @@ public final class Bloodmoon extends JavaPlugin
             String configVersion = getConfigReader(world).GetFileVersion();
             if (configVersion.equals("NaN"))
             {
-                System.out.println("[Error] " + world.getName() + "/config.yml has no valid version tag. Consider regenerating it");
+                getLogger().log(Level.SEVERE,"[Error] " + world.getName() + "/config.yml has no valid version tag. Consider regenerating it");
                 return;
             }
             if (! GetMajorVersions(configVersion).equals(GetMajorVersions(getDescription().getVersion())))
-                System.out.println("[Warning] Config file for world " + world.getName() + " was not updated since the last major update. Regenerating it is *highly* recommended");
+                getLogger().log(Level.WARNING, "[Warning] Config file for world " + world.getName() + " was not updated since the last major update. Regenerating it is *highly* recommended");
             if (getConfigReader(world).GetIntervalConfig() < 1)
-                System.out.println("[Warning] BloodMoonInterval config is set to 0 or less.\nThis may cause problem, please use the PermanentBloodMoon option instead");
+                getLogger().log(Level.WARNING,"[Warning] BloodMoonInterval config is set to 0 or less.\nThis may cause problem, please use the PermanentBloodMoon option instead");
 
         }
     }
