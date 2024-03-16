@@ -3,7 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package org.spectralmemories.bloodmoon;
+package org.refractored.bloodmoon;
 
 import org.bukkit.entity.Monster;
 

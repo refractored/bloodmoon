@@ -1,12 +1,10 @@
-package org.spectralmemories.bloodmoon;
+package org.refractored.bloodmoon;
 
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigReader implements Closeable

@@ -1,4 +1,4 @@
-package org.spectralmemories.bloodmoon;
+package org.refractored.bloodmoon;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;

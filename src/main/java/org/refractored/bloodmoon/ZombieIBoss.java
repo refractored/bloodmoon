@@ -9,18 +9,16 @@
  */
 
 
-package org.spectralmemories.bloodmoon;
+package org.refractored.bloodmoon;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 

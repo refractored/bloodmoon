@@ -8,7 +8,7 @@
  * This class will be rewritten for clarity as needed
  */
 
-package org.spectralmemories.bloodmoon;
+package org.refractored.bloodmoon;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,7 +25,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.util.Vector;
 
 public abstract class Boss implements IBoss, Listener {
     protected ConfigReader reader;
