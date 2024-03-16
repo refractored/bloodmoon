@@ -790,7 +790,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
 
         if (!isInProgress()) return; //Only during BloodMoon
 
-        if (entity.getKiller() == null) return;
+        if (entity.getKiller() == null) return; //No killer, no reward
+
+        if (!entity.hasLineOfSight(entity.getKiller())) return; //No line of sight, no reward
 
         if (event.getEntity() instanceof Player) return; //Handled in another method
 
