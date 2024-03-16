@@ -1,11 +1,11 @@
 name: BloodMoon
-version: 0.8.1
-main: org.spectralmemories.bloodmoon.Bloodmoon
+version: 0.8.2
+main: org.refractored.bloodmoon.Bloodmoon
 softdepend:
-  - "Mutliverse-Core"
+  - "Multiverse-Core"
   - "WorldGuard"
 api-version: 1.18
-authors: [SpectralMemories]
+authors: [SpectralMemories, refractored]
 description: A BloodMoon shines every couple of nights
 commands:
   bloodmoon:
