@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
@@ -170,14 +171,33 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         bosses.clear();
     }
 
+    private List<Player> getNonVanishedPlayers() {
+        List<Player> nonVanishedPlayers = new ArrayList<>();
+        for (Player player : world.getPlayers()) {
+            if (!isVanished(player)) {
+                nonVanishedPlayers.add(player);
+            }
+        }
+        return nonVanishedPlayers;
+    }
+
     public void SpawnHorde ()
     {
         Random random = new Random();
-        Player[] players = world.getPlayers().toArray(new Player[0]);
+        Player[] players = getNonVanishedPlayers().toArray(new Player[0]);
+        Player player = players[random.nextInt(players.length)];
         if(players.length > 0)
         {
-            SpawnHorde(players[random.nextInt(players.length)]);
+            if (player.getGameMode() != GameMode.SURVIVAL) return;
+            SpawnHorde(player);
         }
+    }
+
+    private boolean isVanished(Player player) {
+        for (MetadataValue meta : player.getMetadata("vanished")) {
+            if (meta.asBoolean()) return true;
+        }
+        return false;
     }
 
     public void SpawnHorde (Player target)
@@ -784,7 +804,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
 
         if (blacklistedMobs.contains(entity))
         {
-            //This mob was explicitely blacklisted. ignore it
+            //This mob was explicitly blacklisted. ignore it
             blacklistedMobs.remove(entity);
             return;
         }
