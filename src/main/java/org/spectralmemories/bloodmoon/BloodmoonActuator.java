@@ -795,6 +795,8 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
 
         if (!isInProgress()) return; //Only during BloodMoon
 
+        if (entity.getKiller() == null) return;
+
         if (event.getEntity() instanceof Player) return; //Handled in another method
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
