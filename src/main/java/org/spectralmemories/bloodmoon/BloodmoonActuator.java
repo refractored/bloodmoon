@@ -184,7 +184,6 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         Player player = players[random.nextInt(players.length)];
         if(players.length > 0)
         {
-            if (player.getGameMode() != GameMode.SURVIVAL) return;
             SpawnHorde(player);
         }
     }
