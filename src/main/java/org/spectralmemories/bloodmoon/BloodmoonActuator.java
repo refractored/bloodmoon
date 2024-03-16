@@ -5,8 +5,6 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
-import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 import org.bukkit.*;
@@ -32,10 +30,8 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.util.Vector;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -171,20 +167,20 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         bosses.clear();
     }
 
-    private List<Player> getNonVanishedPlayers() {
-        List<Player> nonVanishedPlayers = new ArrayList<>();
+    private List<Player> getEligiblePlayers() {
+        List<Player> eligiblePlayers = new ArrayList<>();
         for (Player player : world.getPlayers()) {
-            if (!isVanished(player)) {
-                nonVanishedPlayers.add(player);
+            if (!isVanished(player) && player.getGameMode() == GameMode.SURVIVAL) {
+                eligiblePlayers.add(player);
             }
         }
-        return nonVanishedPlayers;
+        return eligiblePlayers;
     }
 
     public void SpawnHorde ()
     {
         Random random = new Random();
-        Player[] players = getNonVanishedPlayers().toArray(new Player[0]);
+        Player[] players = getEligiblePlayers().toArray(new Player[0]);
         Player player = players[random.nextInt(players.length)];
         if(players.length > 0)
         {
