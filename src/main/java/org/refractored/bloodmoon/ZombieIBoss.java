@@ -40,7 +40,7 @@ public final class ZombieIBoss extends Boss {
         host.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, Integer.MAX_VALUE, reader.GetZombieBossDamage()));
         host.setCustomName(locales.GetLocaleString("ZombieBossName"));
         host.setCustomNameVisible(true);
-        zombieHost.setBaby(false);
+        zombieHost.setAdult();
         Announce();
         tasks.add(scheduler.scheduleSyncRepeatingTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {
