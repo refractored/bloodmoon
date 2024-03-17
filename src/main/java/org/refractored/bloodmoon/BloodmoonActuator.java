@@ -116,8 +116,8 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
 
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
 
-        originalMaxSpawn = world.getMonsterSpawnLimit();
-        world.setMonsterSpawnLimit(reader.GetSpawnRateConfig());
+        originalMaxSpawn = world.getSpawnLimit(SpawnCategory.MONSTER);
+        world.setSpawnLimit(SpawnCategory.MONSTER, reader.GetSpawnRateConfig());
     }
 
     public void StopBloodMoon ()
@@ -135,7 +135,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
         actuatorPeriodic = null;
         blacklistedMobs.clear();
         KillBosses();
-        world.setMonsterSpawnLimit(originalMaxSpawn);
+        world.setSpawnLimit(SpawnCategory.MONSTER, originalMaxSpawn);
         RunPostCommand();
     }
 
