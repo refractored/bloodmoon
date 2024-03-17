@@ -989,7 +989,7 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public int GetMobDamageMultConfig ()
+    public double GetMobDamageMultConfig ()
     {
         try
         {
@@ -999,7 +999,7 @@ public class ConfigReader implements Closeable
                 CreateConfig(MOB_DAMAGE_MULT, String.valueOf(MOB_DAMAGE_MULT_DEFAULT));
                 interval = MOB_DAMAGE_MULT_DEFAULT;
             }
-            return (int) interval;
+            return (double) interval;
         }
         catch (FileNotFoundException e)
         {
@@ -1007,7 +1007,7 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public int GetMobHealthMultConfig ()
+    public double GetMobHealthMultConfig ()
     {
         try
         {
@@ -1017,7 +1017,7 @@ public class ConfigReader implements Closeable
                 CreateConfig(MOB_HEALTH_MULT, String.valueOf(MOB_HEALTH_MULT_DEFAULT));
                 interval = MOB_HEALTH_MULT_DEFAULT;
             }
-            return (int) interval;
+            return (double) interval;
         }
         catch (FileNotFoundException e)
         {
