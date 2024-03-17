@@ -180,12 +180,8 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
     public void SpawnHorde ()
     {
         Random random = new Random();
-        Player[] players = getEligiblePlayers().toArray(new Player[0]);
-        Player player = players[random.nextInt(players.length)];
-        if(players.length > 0)
-        {
-            SpawnHorde(player);
-        }
+        ArrayList<Player> players = new ArrayList<>(getEligiblePlayers());
+        SpawnHorde(players.get(random.nextInt(players.size())));
     }
 
     private boolean isVanished(Player player) {
@@ -197,6 +193,8 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable
 
     public void SpawnHorde (Player target)
     {
+        if (target == null) return;
+
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         if (!reader.GetHordeEnabled()) return;
 
