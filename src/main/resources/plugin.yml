@@ -1,9 +1,10 @@
 name: BloodMoon
 version: 0.8.2
-main: org.refractored.bloodmoon.Bloodmoon
+main: net.refractored.bloodmoon.Bloodmoon
 softdepend:
   - "Multiverse-Core"
   - "WorldGuard"
+  - "PlaceholderAPI"
 api-version: 1.20
 authors: [SpectralMemories, refractored]
 description: A BloodMoon shines every couple of nights
