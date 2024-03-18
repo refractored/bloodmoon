@@ -25,11 +25,11 @@ public class PeriodicNightCheck implements Runnable, Listener
     private long checkupAfter;
     private int daysBeforeBloodMoon;
 
+
     private World world;
     private BloodmoonActuator actuator;
 
-    public PeriodicNightCheck(World world, BloodmoonActuator actuator)
-    {
+    public PeriodicNightCheck(World world, BloodmoonActuator actuator) {
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         this.actuator = actuator;
         this.world = world;
@@ -39,8 +39,7 @@ public class PeriodicNightCheck implements Runnable, Listener
         AddCheck(this);
     }
 
-    private static void AddCheck (PeriodicNightCheck instance)
-    {
+    private static void AddCheck (PeriodicNightCheck instance) {
         if (nightChecks == null) nightChecks = new HashMap<>();
 
         nightChecks.put(instance.GetWorld(), instance);
@@ -120,12 +119,12 @@ public class PeriodicNightCheck implements Runnable, Listener
         long checkAt = (actuator.isInProgress()) ? 0 : checkupAfter;
         if (exists)
         {
-            sql = "UPDATE " + tableName + " SET days = " + (days + 1) + ", checkAt = " + checkAt;
+            sql = String.format("UPDATE %s SET days = %d, checkAt = %d WHERE world = '%s';", tableName, (days + 1), checkAt, worldUid);
             sql += " WHERE world = '" + worldUid + "';";
         }
         else
         {
-            sql = "INSERT INTO " + tableName + " VALUES('" + worldUid + "', " + (days + 1) + ", " + checkAt + ");";
+            sql = String.format("INSERT INTO %s VALUES('%s', %d, %d, %d);", tableName, worldUid, (days + 1), checkAt);
         }
 
         try
@@ -157,12 +156,15 @@ public class PeriodicNightCheck implements Runnable, Listener
 
          */
 
-        Check11();
-        Check13();
+        CheckTomorrow();
+        CheckBloodmoonNight();
         CheckDay();
     }
 
-    private void Check11 ()
+    /**
+     * This method checks if the next day is the day before the blood moon
+     */
+    private void CheckTomorrow()
     {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         if (world.getTime() > 11000)
@@ -189,7 +191,7 @@ public class PeriodicNightCheck implements Runnable, Listener
             checkupAfter = getTodayZero() + 12000;
         }
     }
-    private void Check13 ()
+    private void CheckBloodmoonNight()
     {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);

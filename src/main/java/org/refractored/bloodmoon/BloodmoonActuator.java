@@ -58,7 +58,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
 
     private World world;
     private boolean inProgress;
-
+    private int bloodMoonLevel = 1;
     private BossBar nightBar;
     private ActuatorPeriodic actuatorPeriodic;
 
@@ -121,6 +121,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
             return;
         }
         inProgress = false;
+        bloodMoonLevel = 1;
 
         StopStorm();
         HideNightBar();
@@ -174,6 +175,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
     public void SpawnHorde () {
         Random random = new Random();
         ArrayList<Player> players = new ArrayList<>(getEligiblePlayers());
+        if (players.isEmpty()) return;
         SpawnHorde(players.get(random.nextInt(players.size())));
     }
 
@@ -483,7 +485,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         Material itemMaterial;
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-        String[] items = configReader.GetItemListConfig();
+        String[] items = configReader.GetItemListConfig(); //Get the list of items
         Map<String, Integer[]> indexes = new HashMap<>();
         int totalWeight = 0;
 
@@ -537,9 +539,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
                         for (String enchantLine : enchantLines)
                         {
                             String[] enchant = enchantLine.split(",");
-                            itemStack.addEnchantment(
-                                    Enchantment.getByKey(NamespacedKey.minecraft(enchant[0].toLowerCase()))
-                                    , Integer.parseInt(enchant[1]));
+                            Enchantment enchantment = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(enchant[0].toLowerCase()));
+                            if (enchantment == null) continue; //Enchantment not found. Meh
+                            itemStack.addEnchantment(enchantment, Integer.parseInt(enchant[1]));
                         }
                     }
                 }
@@ -585,7 +587,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
 
         for (String str : configs)
         {
-            if (str.equals("LIGHTNING"))
+            if (str.equals("lightning"))
             {
                 world.strikeLightning(player.getLocation());
                 continue;
@@ -593,20 +595,14 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
 
 
             String[] parts = str.split(",");
-            PotionEffectType[] types = PotionEffectType.values();
+            PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(parts[0]));
+            if (type == null) continue; //Effect not found. Meh
             String effectName = parts[0];
             int ticks = (int) (20f * Float.parseFloat(parts[1]));
             int amp = Integer.parseInt(parts[2]);
 
-            for (PotionEffectType type : types)
-            {
-                if (type.getName().equals(effectName))
-                {
-                    player.addPotionEffect(new PotionEffect(type, ticks, amp));
-                    break;
-                }
-            }
-            //Effect not found. Meh
+            player.addPotionEffect(new PotionEffect(type, ticks, amp));
+
         }
     }
 
@@ -884,5 +880,13 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
 
         KillBosses(false, false);
         world.save();
+    }
+
+    public int getBloodMoonLevel() {
+        return bloodMoonLevel;
+    }
+
+    public void setBloodMoonLevel(int bloodMoonLevel) {
+        this.bloodMoonLevel = bloodMoonLevel;
     }
 }

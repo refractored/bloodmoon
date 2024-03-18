@@ -23,7 +23,7 @@ java {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
     compileOnly 'com.sk89q.worldguard:worldguard-bukkit:7.0.0'
     implementation 'org.yaml:snakeyaml:1.23'
     implementation 'org.jetbrains:annotations:18.0.0'

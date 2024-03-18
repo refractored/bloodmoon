@@ -4,7 +4,7 @@ main: org.refractored.bloodmoon.Bloodmoon
 softdepend:
   - "Multiverse-Core"
   - "WorldGuard"
-api-version: 1.18
+api-version: 1.20
 authors: [SpectralMemories, refractored]
 description: A BloodMoon shines every couple of nights
 commands:
