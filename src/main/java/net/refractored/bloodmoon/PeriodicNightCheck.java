@@ -1,4 +1,4 @@
-package org.refractored.bloodmoon;
+package net.refractored.bloodmoon;
 
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -124,7 +124,7 @@ public class PeriodicNightCheck implements Runnable, Listener
         }
         else
         {
-            sql = String.format("INSERT INTO %s VALUES('%s', %d, %d, %d);", tableName, worldUid, (days + 1), checkAt);
+            sql = String.format("INSERT INTO %s VALUES('%s', %d, %d);", tableName, worldUid, (days + 1), checkAt);
         }
 
         try

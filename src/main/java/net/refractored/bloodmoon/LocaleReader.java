@@ -1,4 +1,4 @@
-package org.refractored.bloodmoon;
+package net.refractored.bloodmoon;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

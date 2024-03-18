@@ -3,7 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package org.refractored.bloodmoon;
+package net.refractored.bloodmoon;
 
 import org.bukkit.entity.Monster;
 

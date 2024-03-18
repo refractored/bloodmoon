@@ -9,7 +9,7 @@
  */
 
 
-package org.refractored.bloodmoon;
+package net.refractored.bloodmoon;
 
 import java.util.ArrayList;
 import java.util.Iterator;

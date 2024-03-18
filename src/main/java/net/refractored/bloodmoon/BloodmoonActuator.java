@@ -1,4 +1,4 @@
-package org.refractored.bloodmoon;
+package net.refractored.bloodmoon;
 
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;

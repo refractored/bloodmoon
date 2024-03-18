@@ -8,7 +8,7 @@
  * This class will be rewritten for clarity as needed
  */
 
-package org.refractored.bloodmoon;
+package net.refractored.bloodmoon;
 
 import java.util.ArrayList;
 import java.util.Iterator;
