@@ -9,5 +9,6 @@ RegisterCommands {
         handler.register(new BloodmoonStop());
         handler.register(new BloodmoonShow());
         handler.register(new BloodmoonSpawnHorde());
+        handler.register(new BloodmoonReload());
     }
 }
