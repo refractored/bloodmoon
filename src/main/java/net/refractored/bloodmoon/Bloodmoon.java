@@ -42,7 +42,7 @@ public final class Bloodmoon extends JavaPlugin {
     public final static long NIGHT_CHECK_DELAY = 40;
 
     private static SQLAccess sqlAccess;
-    private static LocaleReader localeReader;
+    public static LocaleReader localeReader;
 
     private static Bloodmoon instance;
 
