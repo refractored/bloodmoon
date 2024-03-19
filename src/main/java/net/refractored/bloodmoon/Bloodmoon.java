@@ -1,8 +1,7 @@
 package net.refractored.bloodmoon;
 
-import net.refractored.bloodmoon.commands.BloodmoonStart;
-import net.refractored.bloodmoon.commands.BloodmoonStop;
 import net.refractored.bloodmoon.commands.RegisterCommands;
+import net.refractored.bloodmoon.listeners.*;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.World;
@@ -29,8 +28,7 @@ import java.util.logging.Level;
 /**
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
  */
-public final class Bloodmoon extends JavaPlugin
-{
+public final class Bloodmoon extends JavaPlugin {
     public static final String CACHE_DB = "cache.db";
     /**
      * The config file
@@ -311,7 +309,15 @@ public final class Bloodmoon extends JavaPlugin
         }
 
         BloodmoonActuator actuator = new BloodmoonActuator(world);
-        getServer().getPluginManager().registerEvents(actuator, this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new MobSpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerConnectListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerSleepHandler(), this);
+        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
+
         actuators.add(actuator);
 
         PurgeBosses(world);
