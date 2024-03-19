@@ -158,7 +158,7 @@ public class BloodmoonActuator implements Runnable, Closeable {
         bosses.clear();
     }
 
-    private List<Player> getEligiblePlayers() {
+    public List<Player> getEligiblePlayers() {
         List<Player> eligiblePlayers = new ArrayList<>();
         for (Player player : world.getPlayers()) {
             if (!isVanished(player) && player.getGameMode() == GameMode.SURVIVAL) {
