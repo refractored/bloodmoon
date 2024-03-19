@@ -1,5 +1,6 @@
-package net.refractored.bloodmoon;
+package net.refractored.bloodmoon.readers;
 
+import net.refractored.bloodmoon.Bloodmoon;
 import org.bukkit.World;
 import org.yaml.snakeyaml.Yaml;
 

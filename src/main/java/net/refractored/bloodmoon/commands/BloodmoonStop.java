@@ -1,7 +1,7 @@
 package net.refractored.bloodmoon.commands;
 
 import net.refractored.bloodmoon.Bloodmoon;
-import net.refractored.bloodmoon.LocaleReader;
+import net.refractored.bloodmoon.readers.LocaleReader;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import org.bukkit.World;
 import org.bukkit.entity.Player;

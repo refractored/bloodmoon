@@ -1,5 +1,7 @@
 package net.refractored.bloodmoon;
 
+import net.refractored.bloodmoon.readers.ConfigReader;
+import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -243,25 +245,5 @@ public class PeriodicNightCheck implements Runnable, Listener
         long remaining = currentTime % DAY;
 
         return (currentTime - remaining);
-    }
-
-
-    //We need to make sure the checkAt var is reset when time is manually changed
-    @EventHandler
-    public void onCommandIssued (PlayerCommandPreprocessEvent event)
-    {
-        Player sender = event.getPlayer();
-        String command = event.getMessage();
-
-        if (command.startsWith("/time set")
-            || command.startsWith("/night")
-            || command.startsWith("/day")
-        )
-        {
-            if (sender.getWorld() == world && !event.isCancelled())
-            {
-                SetCheckAfter(0);
-            }
-        }
     }
 }

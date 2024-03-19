@@ -8,12 +8,17 @@
  * This class will be rewritten for clarity as needed
  */
 
-package net.refractored.bloodmoon;
+package net.refractored.bloodmoon.boss;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+
+import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.BloodmoonActuator;
+import net.refractored.bloodmoon.readers.ConfigReader;
+import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;

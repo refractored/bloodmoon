@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon;
 
+import net.refractored.bloodmoon.readers.ConfigReader;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;

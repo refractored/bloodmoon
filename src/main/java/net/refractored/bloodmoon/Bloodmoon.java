@@ -1,6 +1,8 @@
 package net.refractored.bloodmoon;
 
 import net.refractored.bloodmoon.commands.BloodmoonStart;
+import net.refractored.bloodmoon.readers.ConfigReader;
+import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
