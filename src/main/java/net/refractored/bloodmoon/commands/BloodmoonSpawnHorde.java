@@ -25,8 +25,8 @@ public class BloodmoonSpawnHorde {
     public void bloodmoonSpawnHorde(BukkitCommandActor actor, @Optional Player target) {
         if (target == null) {
             BloodmoonActuator.GetActuator(actor.getAsPlayer().getWorld()).SpawnHorde();
-            actor.reply("Spawned a horde in your world on a random player.");
-            actor.reply("If no players are online, unvanished or in survival mode then no horde will spawn.");
+            actor.reply("&cSpawned a horde in your world on a random player.");
+            actor.reply("&7&oIf no players are online, unvanished or in survival mode then no horde will spawn.");
             return;
         }
         Player player = actor.getAsPlayer();
