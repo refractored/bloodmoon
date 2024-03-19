@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon;
 
+import net.refractored.bloodmoon.commands.BloodmoonStart;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -8,6 +9,7 @@ import org.spectralmemories.sqlaccess.FieldType;
 import org.spectralmemories.sqlaccess.SQLAccess;
 import org.spectralmemories.sqlaccess.SQLField;
 import org.spectralmemories.sqlaccess.SQLTable;
+import revxrsal.commands.bukkit.BukkitCommandHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -248,12 +250,17 @@ public final class Bloodmoon extends JavaPlugin
         return reader;
     }
 
+
     /**
      * Enables the plugin
      */
+
     @Override
     public void onEnable()
     {
+        BukkitCommandHandler handler = BukkitCommandHandler.create(this);
+        handler.register(new BloodmoonStart());
+
         instance = this;
 
         CreateFolder();
@@ -278,10 +285,10 @@ public final class Bloodmoon extends JavaPlugin
 
         getServer().getPluginManager().registerEvents (worldManager, this);
 
-        getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
+//        getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
 
 
-        getCommand("testsuite").setExecutor(new TestCommandExecutor());
+//        getCommand("testsuite").setExecutor(new TestCommandExecutor());
 
         CheckOlderConfigs();
     }
@@ -331,8 +338,8 @@ public final class Bloodmoon extends JavaPlugin
         for(LivingEntity entity : world.getLivingEntities()){
             if(
                     entity.getCustomName() != null
-                    && !entity.getCustomName().isEmpty()
-                    && entity.getCustomName().equals(getLocaleReader().GetLocaleString("ZombieBossName"))
+                            && !entity.getCustomName().isEmpty()
+                            && entity.getCustomName().equals(getLocaleReader().GetLocaleString("ZombieBossName"))
             ){
                 entity.remove();
             }
