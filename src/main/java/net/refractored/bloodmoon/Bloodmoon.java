@@ -287,11 +287,6 @@ public final class Bloodmoon extends JavaPlugin
 
         getServer().getPluginManager().registerEvents (worldManager, this);
 
-//        getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
-
-
-//        getCommand("testsuite").setExecutor(new TestCommandExecutor());
-
         CheckOlderConfigs();
     }
 
