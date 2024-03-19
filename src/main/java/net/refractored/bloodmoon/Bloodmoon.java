@@ -262,6 +262,7 @@ public final class Bloodmoon extends JavaPlugin {
     {
         BukkitCommandHandler handler = BukkitCommandHandler.create(this);
         RegisterCommands.register(handler);
+        handler.registerBrigadier();
 
         instance = this;
 
