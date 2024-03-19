@@ -14,7 +14,7 @@ public class BloodmoonStop {
 
     @CommandPermission("bloodmoon.admin.stop")
     @Description("Starts the bloodmoon")
-    @Command("bloodmoon start")
+    @Command("bloodmoon stop")
     public void bloodmoonStart(BukkitCommandActor actor) {
 
         Player player = actor.getAsPlayer();

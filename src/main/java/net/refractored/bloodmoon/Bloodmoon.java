@@ -1,6 +1,8 @@
 package net.refractored.bloodmoon;
 
 import net.refractored.bloodmoon.commands.BloodmoonStart;
+import net.refractored.bloodmoon.commands.BloodmoonStop;
+import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.World;
@@ -261,7 +263,7 @@ public final class Bloodmoon extends JavaPlugin
     public void onEnable()
     {
         BukkitCommandHandler handler = BukkitCommandHandler.create(this);
-        handler.register(new BloodmoonStart());
+        RegisterCommands.register(handler);
 
         instance = this;
 
