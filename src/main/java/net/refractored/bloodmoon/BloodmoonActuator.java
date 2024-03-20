@@ -34,7 +34,10 @@ import java.util.*;
  * This is the class that handles most interaction during a BloodMoon
  */
 public class BloodmoonActuator implements Runnable, Closeable {
-    //Eligible mobs
+    /**
+     * The constant rewardedTypes.
+     */
+//Eligible mobs
     public static final EntityType[] rewardedTypes = {
             EntityType.ZOMBIE,
             EntityType.SKELETON,
@@ -52,13 +55,22 @@ public class BloodmoonActuator implements Runnable, Closeable {
 
     private static Map<World, BloodmoonActuator> actuators;
 
+    /**
+     * The constant world.
+     */
     public static World world;
     private static boolean inProgress;
     private int bloodMoonLevel = 1;
     private static BossBar nightBar;
     private ActuatorPeriodic actuatorPeriodic;
 
+    /**
+     * The Blacklisted mobs.
+     */
     public static List<LivingEntity> blacklistedMobs;
+    /**
+     * The Bosses.
+     */
     public static List<IBoss> bosses;
 
     private void AddActuator (BloodmoonActuator instance) {
@@ -67,6 +79,12 @@ public class BloodmoonActuator implements Runnable, Closeable {
         actuators.put(instance.world, instance);
     }
 
+    /**
+     * Get actuator bloodmoon actuator.
+     *
+     * @param world the world
+     * @return the bloodmoon actuator
+     */
     public static BloodmoonActuator GetActuator (World world) {
         try
         {
@@ -78,6 +96,11 @@ public class BloodmoonActuator implements Runnable, Closeable {
     }
 
 
+    /**
+     * Instantiates a new Bloodmoon actuator.
+     *
+     * @param world the world
+     */
     public BloodmoonActuator (World world) {
         this.world = world;
         inProgress = false;
@@ -92,6 +115,9 @@ public class BloodmoonActuator implements Runnable, Closeable {
         bosses = new ArrayList<>();
     }
 
+    /**
+     * Start blood moon.
+     */
     public void StartBloodMoon () {
         inProgress = true;
         RunPreCommand();
@@ -111,6 +137,9 @@ public class BloodmoonActuator implements Runnable, Closeable {
         world.setSpawnLimit(SpawnCategory.MONSTER, reader.GetSpawnRateConfig());
     }
 
+    /**
+     * Stop blood moon.
+     */
     public void StopBloodMoon () {
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
         {
@@ -130,21 +159,42 @@ public class BloodmoonActuator implements Runnable, Closeable {
         RunPostCommand();
     }
 
+    /**
+     * Kill bosses.
+     */
     public void KillBosses ()
     {
         KillBosses(false);
     }
 
+    /**
+     * Kill bosses.
+     *
+     * @param giveRewards the give rewards
+     */
     public void KillBosses (boolean giveRewards)
     {
         KillBosses(giveRewards, true);
     }
 
+    /**
+     * Kill bosses.
+     *
+     * @param giveRewards the give rewards
+     * @param effects     the effects
+     */
     public void KillBosses (boolean giveRewards, boolean effects)
     {
         KillBosses(giveRewards, effects, true);
     }
 
+    /**
+     * Kill bosses.
+     *
+     * @param giveRewards the give rewards
+     * @param effects     the effects
+     * @param respawn     the respawn
+     */
     public void KillBosses (boolean giveRewards, boolean effects, boolean respawn)
     {
         Iterator var2 = bosses.iterator();
@@ -158,6 +208,11 @@ public class BloodmoonActuator implements Runnable, Closeable {
         bosses.clear();
     }
 
+    /**
+     * Gets eligible players.
+     *
+     * @return the eligible players
+     */
     public List<Player> getEligiblePlayers() {
         List<Player> eligiblePlayers = new ArrayList<>();
         for (Player player : world.getPlayers()) {
@@ -175,6 +230,9 @@ public class BloodmoonActuator implements Runnable, Closeable {
         return false;
     }
 
+    /**
+     * Spawn horde.
+     */
     public void SpawnHorde () {
         Random random = new Random();
         ArrayList<Player> players = new ArrayList<>(getEligiblePlayers());
@@ -183,7 +241,11 @@ public class BloodmoonActuator implements Runnable, Closeable {
     }
 
 
-
+    /**
+     * Spawn horde.
+     *
+     * @param target the target
+     */
     public void SpawnHorde (Player target) {
         if (target == null) return;
 
@@ -223,6 +285,9 @@ public class BloodmoonActuator implements Runnable, Closeable {
         LocaleReader.MessageAllLocale("HordeArrived", new String[]{"$p"}, new String[]{target.getDisplayName()}, world);
     }
 
+    /**
+     * Start spawning of hordes.
+     */
     public void StartSpawningOfHordes () {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         Random random = new Random();
@@ -340,6 +405,9 @@ public class BloodmoonActuator implements Runnable, Closeable {
         }
     }
 
+    /**
+     * Spawn bosses.
+     */
     public void SpawnBosses () {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         Bloodmoon.GetInstance().getServer().getScheduler().scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable()
@@ -351,6 +419,9 @@ public class BloodmoonActuator implements Runnable, Closeable {
         }, (long) ((new Random()).nextInt(2000) + 400));
     }
 
+    /**
+     * Spawn zombie boss.
+     */
     public void SpawnZombieBoss ()
     {
         if (world.getPlayers().size() > 0)
@@ -369,6 +440,11 @@ public class BloodmoonActuator implements Runnable, Closeable {
         }
     }
 
+    /**
+     * Add to blacklist.
+     *
+     * @param entity the entity
+     */
     public void AddToBlacklist (LivingEntity entity)
     {
         blacklistedMobs.add(entity);
@@ -419,6 +495,11 @@ public class BloodmoonActuator implements Runnable, Closeable {
         nightBar = null;
     }
 
+    /**
+     * Hide night bar player.
+     *
+     * @param player the player
+     */
     public static void HideNightBarPlayer (Player player) {
         try
         {
@@ -443,6 +524,11 @@ public class BloodmoonActuator implements Runnable, Closeable {
         if (nightBar != null && percent >= 0.0 && percent <= 1.0f) nightBar.setProgress(1.0 - percent);
     }
 
+    /**
+     * Handle reconnecting player.
+     *
+     * @param player the player
+     */
     public static void HandleReconnectingPlayer (Player player) {
         if (isInProgress() && nightBar != null) nightBar.addPlayer(player);
         BroadcastBloodMoonWarningPlayer(player);
@@ -475,7 +561,7 @@ public class BloodmoonActuator implements Runnable, Closeable {
     /**
      * Generates a random item to be used as a reward
      *
-     * @return
+     * @return item stack
      */
     public static ItemStack GetRandomBonus () {
 
@@ -550,6 +636,12 @@ public class BloodmoonActuator implements Runnable, Closeable {
         return null;
     }
 
+    /**
+     * Is in protected wg region boolean.
+     *
+     * @param player the player
+     * @return the boolean
+     */
     public static boolean IsInProtectedWGRegion(Player player){
         try
         {
@@ -567,6 +659,12 @@ public class BloodmoonActuator implements Runnable, Closeable {
         }
     }
 
+    /**
+     * Apply special effect.
+     *
+     * @param player the player
+     * @param mob    the mob
+     */
     public static void ApplySpecialEffect (Player player, LivingEntity mob) {
         if(IsInProtectedWGRegion(player)) return;
 
@@ -604,6 +702,11 @@ public class BloodmoonActuator implements Runnable, Closeable {
         }
     }
 
+    /**
+     * Is in progress boolean.
+     *
+     * @return the boolean
+     */
     public static boolean isInProgress() {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         return inProgress || reader.GetPermanentBloodMoonConfig();
@@ -632,10 +735,20 @@ public class BloodmoonActuator implements Runnable, Closeable {
         world.save();
     }
 
+    /**
+     * Gets blood moon level.
+     *
+     * @return the blood moon level
+     */
     public int getBloodMoonLevel() {
         return bloodMoonLevel;
     }
 
+    /**
+     * Sets blood moon level.
+     *
+     * @param bloodMoonLevel the blood moon level
+     */
     public void setBloodMoonLevel(int bloodMoonLevel) {
         this.bloodMoonLevel = bloodMoonLevel;
     }
