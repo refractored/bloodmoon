@@ -1,5 +1,9 @@
 package net.refractored.bloodmoon;
 
+import net.refractored.bloodmoon.commands.RegisterCommands;
+import net.refractored.bloodmoon.listeners.*;
+import net.refractored.bloodmoon.readers.ConfigReader;
+import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -8,6 +12,7 @@ import org.spectralmemories.sqlaccess.FieldType;
 import org.spectralmemories.sqlaccess.SQLAccess;
 import org.spectralmemories.sqlaccess.SQLField;
 import org.spectralmemories.sqlaccess.SQLTable;
+import revxrsal.commands.bukkit.BukkitCommandHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +28,7 @@ import java.util.logging.Level;
 /**
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
  */
-public final class Bloodmoon extends JavaPlugin
-{
+public final class Bloodmoon extends JavaPlugin {
     public static final String CACHE_DB = "cache.db";
     /**
      * The config file
@@ -38,7 +42,7 @@ public final class Bloodmoon extends JavaPlugin
     public final static long NIGHT_CHECK_DELAY = 40;
 
     private static SQLAccess sqlAccess;
-    private static LocaleReader localeReader;
+    public static LocaleReader localeReader;
 
     private static Bloodmoon instance;
 
@@ -248,12 +252,18 @@ public final class Bloodmoon extends JavaPlugin
         return reader;
     }
 
+
     /**
      * Enables the plugin
      */
+
     @Override
     public void onEnable()
     {
+        BukkitCommandHandler handler = BukkitCommandHandler.create(this);
+        RegisterCommands.register(handler);
+        handler.registerBrigadier();
+
         instance = this;
 
         CreateFolder();
@@ -278,11 +288,6 @@ public final class Bloodmoon extends JavaPlugin
 
         getServer().getPluginManager().registerEvents (worldManager, this);
 
-        getCommand("bloodmoon").setExecutor(new BloodmoonCommandExecutor());
-
-
-        getCommand("testsuite").setExecutor(new TestCommandExecutor());
-
         CheckOlderConfigs();
     }
 
@@ -305,7 +310,15 @@ public final class Bloodmoon extends JavaPlugin
         }
 
         BloodmoonActuator actuator = new BloodmoonActuator(world);
-        getServer().getPluginManager().registerEvents(actuator, this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new MobSpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerConnectListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerSleepHandler(), this);
+        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
+
         actuators.add(actuator);
 
         PurgeBosses(world);
@@ -331,8 +344,8 @@ public final class Bloodmoon extends JavaPlugin
         for(LivingEntity entity : world.getLivingEntities()){
             if(
                     entity.getCustomName() != null
-                    && !entity.getCustomName().isEmpty()
-                    && entity.getCustomName().equals(getLocaleReader().GetLocaleString("ZombieBossName"))
+                            && !entity.getCustomName().isEmpty()
+                            && entity.getCustomName().equals(getLocaleReader().GetLocaleString("ZombieBossName"))
             ){
                 entity.remove();
             }

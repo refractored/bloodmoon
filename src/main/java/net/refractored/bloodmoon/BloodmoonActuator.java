@@ -7,29 +7,25 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import net.refractored.bloodmoon.boss.IBoss;
+import net.refractored.bloodmoon.boss.ZombieIBoss;
+import net.refractored.bloodmoon.readers.ConfigReader;
+import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.SpawnerSpawnEvent;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.SpawnCategory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.projectiles.ProjectileSource;
 
 import java.io.Closeable;
 import java.util.*;
@@ -37,9 +33,12 @@ import java.util.*;
 /**
  * This is the class that handles most interaction during a BloodMoon
  */
-public class BloodmoonActuator implements Listener, Runnable, Closeable {
-    //Eligible mobs
-    public final EntityType[] rewardedTypes = {
+public class BloodmoonActuator implements Runnable, Closeable {
+    /**
+     * The constant rewardedTypes.
+     */
+//Eligible mobs
+    public static final EntityType[] rewardedTypes = {
             EntityType.ZOMBIE,
             EntityType.SKELETON,
             EntityType.SPIDER,
@@ -56,14 +55,23 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
 
     private static Map<World, BloodmoonActuator> actuators;
 
-    private World world;
-    private boolean inProgress;
+    /**
+     * The constant world.
+     */
+    public static World world;
+    private static boolean inProgress;
     private int bloodMoonLevel = 1;
-    private BossBar nightBar;
+    private static BossBar nightBar;
     private ActuatorPeriodic actuatorPeriodic;
 
-    private List<LivingEntity> blacklistedMobs;
-    private List<IBoss> bosses;
+    /**
+     * The Blacklisted mobs.
+     */
+    public static List<LivingEntity> blacklistedMobs;
+    /**
+     * The Bosses.
+     */
+    public static List<IBoss> bosses;
 
     private void AddActuator (BloodmoonActuator instance) {
         if (actuators == null) actuators = new HashMap<>();
@@ -71,6 +79,12 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         actuators.put(instance.world, instance);
     }
 
+    /**
+     * Get actuator bloodmoon actuator.
+     *
+     * @param world the world
+     * @return the bloodmoon actuator
+     */
     public static BloodmoonActuator GetActuator (World world) {
         try
         {
@@ -82,6 +96,11 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
     }
 
 
+    /**
+     * Instantiates a new Bloodmoon actuator.
+     *
+     * @param world the world
+     */
     public BloodmoonActuator (World world) {
         this.world = world;
         inProgress = false;
@@ -96,6 +115,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         bosses = new ArrayList<>();
     }
 
+    /**
+     * Start blood moon.
+     */
     public void StartBloodMoon () {
         inProgress = true;
         RunPreCommand();
@@ -115,6 +137,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         world.setSpawnLimit(SpawnCategory.MONSTER, reader.GetSpawnRateConfig());
     }
 
+    /**
+     * Stop blood moon.
+     */
     public void StopBloodMoon () {
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
         {
@@ -134,21 +159,42 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         RunPostCommand();
     }
 
+    /**
+     * Kill bosses.
+     */
     public void KillBosses ()
     {
         KillBosses(false);
     }
 
+    /**
+     * Kill bosses.
+     *
+     * @param giveRewards the give rewards
+     */
     public void KillBosses (boolean giveRewards)
     {
         KillBosses(giveRewards, true);
     }
 
+    /**
+     * Kill bosses.
+     *
+     * @param giveRewards the give rewards
+     * @param effects     the effects
+     */
     public void KillBosses (boolean giveRewards, boolean effects)
     {
         KillBosses(giveRewards, effects, true);
     }
 
+    /**
+     * Kill bosses.
+     *
+     * @param giveRewards the give rewards
+     * @param effects     the effects
+     * @param respawn     the respawn
+     */
     public void KillBosses (boolean giveRewards, boolean effects, boolean respawn)
     {
         Iterator var2 = bosses.iterator();
@@ -162,7 +208,12 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         bosses.clear();
     }
 
-    private List<Player> getEligiblePlayers() {
+    /**
+     * Gets eligible players.
+     *
+     * @return the eligible players
+     */
+    public List<Player> getEligiblePlayers() {
         List<Player> eligiblePlayers = new ArrayList<>();
         for (Player player : world.getPlayers()) {
             if (!isVanished(player) && player.getGameMode() == GameMode.SURVIVAL) {
@@ -171,14 +222,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         }
         return eligiblePlayers;
     }
-
-    public void SpawnHorde () {
-        Random random = new Random();
-        ArrayList<Player> players = new ArrayList<>(getEligiblePlayers());
-        if (players.isEmpty()) return;
-        SpawnHorde(players.get(random.nextInt(players.size())));
-    }
-
+    
     private boolean isVanished(Player player) {
         for (MetadataValue meta : player.getMetadata("vanished")) {
             if (meta.asBoolean()) return true;
@@ -186,6 +230,22 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         return false;
     }
 
+    /**
+     * Spawn horde.
+     */
+    public void SpawnHorde () {
+        Random random = new Random();
+        ArrayList<Player> players = new ArrayList<>(getEligiblePlayers());
+        if (players.isEmpty()) return;
+        SpawnHorde(players.get(random.nextInt(players.size())));
+    }
+
+
+    /**
+     * Spawn horde.
+     *
+     * @param target the target
+     */
     public void SpawnHorde (Player target) {
         if (target == null) return;
 
@@ -225,6 +285,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         LocaleReader.MessageAllLocale("HordeArrived", new String[]{"$p"}, new String[]{target.getDisplayName()}, world);
     }
 
+    /**
+     * Start spawning of hordes.
+     */
     public void StartSpawningOfHordes () {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         Random random = new Random();
@@ -342,6 +405,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         }
     }
 
+    /**
+     * Spawn bosses.
+     */
     public void SpawnBosses () {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         Bloodmoon.GetInstance().getServer().getScheduler().scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable()
@@ -353,6 +419,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         }, (long) ((new Random()).nextInt(2000) + 400));
     }
 
+    /**
+     * Spawn zombie boss.
+     */
     public void SpawnZombieBoss ()
     {
         if (world.getPlayers().size() > 0)
@@ -371,6 +440,11 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         }
     }
 
+    /**
+     * Add to blacklist.
+     *
+     * @param entity the entity
+     */
     public void AddToBlacklist (LivingEntity entity)
     {
         blacklistedMobs.add(entity);
@@ -421,7 +495,12 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         nightBar = null;
     }
 
-    private void HideNightBarPlayer (Player player) {
+    /**
+     * Hide night bar player.
+     *
+     * @param player the player
+     */
+    public static void HideNightBarPlayer (Player player) {
         try
         {
             if (nightBar != null) nightBar.removePlayer(player);
@@ -445,7 +524,12 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         if (nightBar != null && percent >= 0.0 && percent <= 1.0f) nightBar.setProgress(1.0 - percent);
     }
 
-    private void HandleReconnectingPlayer (Player player) {
+    /**
+     * Handle reconnecting player.
+     *
+     * @param player the player
+     */
+    public static void HandleReconnectingPlayer (Player player) {
         if (isInProgress() && nightBar != null) nightBar.addPlayer(player);
         BroadcastBloodMoonWarningPlayer(player);
     }
@@ -458,7 +542,7 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
     }
 
 
-    private void BroadcastBloodMoonWarningPlayer (Player player) {
+    private static void BroadcastBloodMoonWarningPlayer(Player player) {
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
         LocaleReader.MessageLocale("BloodMoonWarningTitle", null, null, player);
@@ -477,9 +561,9 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
     /**
      * Generates a random item to be used as a reward
      *
-     * @return
+     * @return item stack
      */
-    public ItemStack GetRandomBonus () {
+    public static ItemStack GetRandomBonus () {
 
         Random random = new Random(); //We want to regenerate it every time to ensure randomness
         Material itemMaterial;
@@ -552,7 +636,13 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         return null;
     }
 
-    public boolean IsInProtectedWGRegion (Player player){
+    /**
+     * Is in protected wg region boolean.
+     *
+     * @param player the player
+     * @return the boolean
+     */
+    public static boolean IsInProtectedWGRegion(Player player){
         try
         {
             RegionContainer rc = WorldGuard.getInstance().getPlatform().getRegionContainer();
@@ -569,7 +659,13 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         }
     }
 
-    private void ApplySpecialEffect (Player player, LivingEntity mob) {
+    /**
+     * Apply special effect.
+     *
+     * @param player the player
+     * @param mob    the mob
+     */
+    public static void ApplySpecialEffect (Player player, LivingEntity mob) {
         if(IsInProtectedWGRegion(player)) return;
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
@@ -606,257 +702,14 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         }
     }
 
-    public boolean isInProgress () {
+    /**
+     * Is in progress boolean.
+     *
+     * @return the boolean
+     */
+    public static boolean isInProgress() {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         return inProgress || reader.GetPermanentBloodMoonConfig();
-    }
-
-
-    //Events
-    @EventHandler
-    public void onPlayerConnect (PlayerJoinEvent event) {
-        if (isInProgress() && event.getPlayer().getWorld() == world)
-        {
-            HandleReconnectingPlayer(event.getPlayer());
-        }
-    }
-
-    @EventHandler
-    public void onPlayerTeleport (PlayerTeleportEvent event) {
-        World to = event.getTo().getWorld();
-        World from = event.getFrom().getWorld();
-        if (to != world && from != world) return; //None of our concern
-
-        if (from != to)
-        {
-            if (to == world && isInProgress())
-            {
-                //Someone entered our bm world
-                HandleReconnectingPlayer(event.getPlayer());
-            }
-            if (from == world && isInProgress())
-            {
-                //Someone left our bm world
-                HideNightBarPlayer(event.getPlayer());
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerRespawn (PlayerRespawnEvent event) {
-        World from = event.getPlayer().getWorld();
-        World to = event.getRespawnLocation().getWorld();
-        if (to != world && from != world) return; //None of our concern
-
-        if (from != to)
-        {
-            if (to == world && isInProgress())
-            {
-                //Someone respawned in our bm world
-                HandleReconnectingPlayer(event.getPlayer());
-            }
-            if (from == world)
-            {
-                //Someone respawned out of our bm world
-                HideNightBarPlayer(event.getPlayer());
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerDeath (PlayerDeathEvent event) {
-        if (!isInProgress()) return; //Only during BloodMoon
-
-        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-
-        Player deadplayer = event.getEntity();
-        if (deadplayer.getWorld() != world) return; //Wrong world
-
-        if (configReader.GetLightningEffectConfig()) world.strikeLightningEffect(deadplayer.getLocation());
-
-        String deathMessage = event.getDeathMessage();
-
-        if (!deathMessage.contains(localeReader.GetLocaleString("DeathSuffix")))
-        {
-            deathMessage += " " + localeReader.GetLocaleString("DeathSuffix");
-
-            event.setDeathMessage(deathMessage);
-        }
-
-        if (configReader.GetExperienceLossConfig())
-        {
-            event.setNewTotalExp(0);
-            event.setDroppedExp(0);
-        }
-
-
-        if (configReader.GetInventoryLossConfig()) event.getDrops().clear();
-    }
-
-    @EventHandler
-    public void onPlayerSleeps (PlayerBedEnterEvent event) {
-        if (event.getPlayer().getWorld() == world)
-        {
-            if (isInProgress())
-            {
-                ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-                if (configReader.GetPreventSleepingConfig())
-                {
-                    LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
-
-                    LocaleReader.MessageLocale("BedNotAllowed", null, null, event.getPlayer());
-                    event.setCancelled(true);
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onMobSpawn (SpawnerSpawnEvent event) {
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-
-        if (configReader.GetMobsFromSpawnerNoRewardConfig() && event.getEntity().getWorld() == world && isInProgress())
-        {
-            for (EntityType type : rewardedTypes)
-            {
-                if (event.getEntityType() == type)
-                {
-                    if (event.getEntity() instanceof LivingEntity)
-                    {
-                        blacklistedMobs.add((LivingEntity) event.getEntity());
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onMobDeath (EntityDeathEvent event) {
-        LivingEntity entity = event.getEntity();
-
-        for (IBoss boss : bosses)
-        {
-            if (entity == boss.GetHost())
-            {
-                Player killer = boss.GetHost().getKiller();
-                if (killer != null)
-                {
-
-                    LocaleReader.MessageAllLocale("BossSlain", new String[]{"$b", "$p"}, new String[]{boss.GetName(), killer.getName()}, world);
-                }
-
-                boss.Kill(killer != null && isInProgress());
-                bosses.remove(boss);
-                return;
-            }
-        }
-
-        if (!isInProgress()) return; //Only during BloodMoon
-
-        if (entity.getKiller() == null) return; //No killer, no reward
-
-        if (!entity.hasLineOfSight(entity.getKiller())) return; //No line of sight, no reward
-
-        if (event.getEntity() instanceof Player) return; //Handled in another method
-
-        ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-
-
-        if (entity.getWorld() != world) return; //Wrong world
-
-        if (blacklistedMobs.contains(entity))
-        {
-            //This mob was explicitly blacklisted. ignore it
-            blacklistedMobs.remove(entity);
-            return;
-        }
-
-        boolean eligible = false;
-        for (EntityType type : rewardedTypes)
-        {
-            if (entity.getType() == type) eligible = true;
-        }
-
-        if (!eligible) return; //Not eligible for reward
-
-        event.setDroppedExp(event.getDroppedExp() * configReader.GetExpMultConfig());
-
-        if (configReader.GetMobDeathThunderConfig())
-            world.strikeLightningEffect(event.getEntity().getLocation());
-
-        List<ItemStack> bonusDrops = new ArrayList<>();
-
-        int min = configReader.GetMinItemsDropConfig();
-        int max = configReader.GetMaxItemsDropConfig();
-
-        int itemCount = (max - min <= 0) ? min : new Random().nextInt(max - min) + min;
-
-        for (int i = 0; i < itemCount; i++)
-        {
-            bonusDrops.add(GetRandomBonus()); //Add the drops
-        }
-
-        for (ItemStack item : bonusDrops)
-        {
-            world.dropItemNaturally(entity.getLocation(), item); //Drop items
-        }
-    }
-
-    @EventHandler
-    public void onEntityDamage (EntityDamageByEntityEvent event) {
-        if (!isInProgress()) return; //Only during BloodMoon
-
-        Entity receiver = event.getEntity();
-        Entity damager = event.getDamager();
-
-        if (receiver.getWorld() != world || damager.getWorld() != world) return; //Wrong world
-        if (damager instanceof Projectile) //if its any damage dealing projectile
-        {
-            ProjectileSource source = ((Projectile) damager).getShooter(); //Get the shooter as Source
-            if (source instanceof LivingEntity) //Source is a mob, not a block
-            {
-                damager = (LivingEntity) source;
-            }
-        }
-
-
-        if (receiver instanceof LivingEntity && damager instanceof LivingEntity)
-        {
-            ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
-            if (receiver instanceof Player)
-            {
-                for (EntityType type : rewardedTypes)
-                {
-                    if (damager.getType() == type)
-                    {
-                        //Player is damaged by monster
-                        if (event.getFinalDamage() == 0 && configReader.GetShieldPreventEffects())
-                            return; //Hit was shielded. We shall not apply configs
-                        event.setDamage(event.getDamage() * configReader.GetMobDamageMultConfig());
-                        ApplySpecialEffect((Player) receiver, (LivingEntity) damager);
-                        if (configReader.GetPlayerDamageSoundConfig())
-                            ((Player) receiver).playSound(receiver.getLocation(), Sound.AMBIENT_CAVE, 80.0f, 1.5f);
-                        if (configReader.GetPlayerHitParticleConfig())
-                            world.spawnParticle(Particle.FLAME, receiver.getLocation(), 60);
-                    }
-                }
-            } else if (damager instanceof Player)
-            {
-                for (EntityType type : rewardedTypes)
-                {
-                    if (receiver.getType() == type)
-                    {
-                        //Player dealt damage to monster
-                        event.setDamage((int) Math.ceil(event.getDamage() / configReader.GetMobHealthMultConfig()));
-                        if (configReader.GetMobHitParticleConfig())
-                            world.spawnParticle(Particle.CRIT_MAGIC, receiver.getLocation(), 60);
-
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -882,10 +735,20 @@ public class BloodmoonActuator implements Listener, Runnable, Closeable {
         world.save();
     }
 
+    /**
+     * Gets blood moon level.
+     *
+     * @return the blood moon level
+     */
     public int getBloodMoonLevel() {
         return bloodMoonLevel;
     }
 
+    /**
+     * Sets blood moon level.
+     *
+     * @param bloodMoonLevel the blood moon level
+     */
     public void setBloodMoonLevel(int bloodMoonLevel) {
         this.bloodMoonLevel = bloodMoonLevel;
     }
