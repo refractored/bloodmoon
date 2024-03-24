@@ -19,12 +19,17 @@ public class BloodmoonInfo {
     public void bloodmoonStart(BukkitCommandActor actor) {
         Player player = actor.getAsPlayer();
         World playerWorld = player.getWorld();
-
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(playerWorld);
+
+        if (playerWorld.getEnvironment() != World.Environment.NORMAL) {
+            actor.reply("&cThis command can only be used in the overworld.");
+            return;
+        }
 
         if (configReader.GetPermanentBloodMoonConfig())
         {
-            LocaleReader.MessageLocale("WorldIsPermanentBloodMoon", null, null, player);
+            actor.reply(localeReader.GetLocaleString("WorldIsPermanentBloodMoon"));
             return;
         }
 
@@ -33,21 +38,22 @@ public class BloodmoonInfo {
 
         if (worldActuator == null)
         {
-            LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, player);
+            actor.reply(localeReader.GetLocaleString("NoBloodMoonInWorld"));
             return;
         }
 
-        if (worldActuator.isInProgress())
+
+        if (BloodmoonManager.isInProgress())
         {
-            LocaleReader.MessageLocale("BloodMoonRightNow", null, null, player);
+            actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
             return;
         }
 
         int remainingDays = PeriodicNightCheck.GetDaysRemaining(playerWorld);
         if (remainingDays < 0)
         {
-            System.out.println("[Error] remainingDays was inferior to 0. Please regenerate both the cache and the config for world " + playerWorld.getName());
-            LocaleReader.MessageLocale("GeneralError", null, null, player);
+            System.out.println("[Error] remainingDays is lower than 0. Please regenerate both the bloodmoon cache and the config for world " + playerWorld.getName());
+            actor.reply(localeReader.GetLocaleString("GeneralError"));
         }
         else
         {
