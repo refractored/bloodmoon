@@ -122,7 +122,6 @@ public class PeriodicNightCheck implements Runnable, Listener
         if (exists)
         {
             sql = String.format("UPDATE %s SET days = %d, checkAt = %d WHERE world = '%s';", tableName, (days + 1), checkAt, worldUid);
-            sql += " WHERE world = '" + worldUid + "';";
         }
         else
         {
