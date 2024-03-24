@@ -13,7 +13,7 @@ import revxrsal.commands.bukkit.annotation.CommandPermission;
 public class BloodmoonStop {
 
     @CommandPermission("bloodmoon.admin.stop")
-    @Description("Starts the bloodmoon")
+    @Description("Stops the bloodmoon")
     @Command("bloodmoon stop")
     public void bloodmoonStart(BukkitCommandActor actor) {
 
