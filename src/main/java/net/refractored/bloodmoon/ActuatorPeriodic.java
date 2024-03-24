@@ -13,7 +13,7 @@ import java.util.Random;
  * ActuatorPeriodic is a periodic runner designed to be ran once at the start of the bloodmoon
  * You must close it manually upon bloodmoon end
  */
-class ActuatorPeriodic implements Runnable, Closeable
+public class ActuatorPeriodic implements Runnable, Closeable
 {
     World world;
     Random random;
