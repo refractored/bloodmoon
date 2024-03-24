@@ -132,7 +132,7 @@ public class PeriodicNightCheck implements Runnable, Listener
         {
             if (! access.ExecuteSQLOperation(sql))
             {
-                System.out.println("[Warning] There was an issue updating plugin");
+                System.out.println("[Warning] There was an issue updating the cache");
             }
         }
         catch (SQLException e)
