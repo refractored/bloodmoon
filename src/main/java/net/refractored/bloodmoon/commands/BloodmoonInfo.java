@@ -12,10 +12,10 @@ import revxrsal.commands.annotation.Description;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 
-public class BloodmoonShow {
+public class BloodmoonInfo {
     @CommandPermission("bloodmoon.check")
     @Description("Check when the next bloodmoon is")
-    @Command({"bloodmoon ~", "bloodmoon show"})
+    @Command("bloodmoon info")
     public void bloodmoonStart(BukkitCommandActor actor) {
         Player player = actor.getAsPlayer();
         World playerWorld = player.getWorld();

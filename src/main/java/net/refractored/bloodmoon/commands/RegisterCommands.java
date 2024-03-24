@@ -7,7 +7,7 @@ RegisterCommands {
     public static void register(BukkitCommandHandler handler) {
         handler.register(new BloodmoonStart());
         handler.register(new BloodmoonStop());
-        handler.register(new BloodmoonShow());
+        handler.register(new BloodmoonInfo());
         handler.register(new BloodmoonSpawnHorde());
         handler.register(new BloodmoonReload());
     }
