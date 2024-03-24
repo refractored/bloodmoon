@@ -13,7 +13,7 @@ import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 
 public class BloodmoonInfo {
-    @CommandPermission("bloodmoon.check")
+    @CommandPermission("bloodmoon.info")
     @Description("Check when the next bloodmoon is")
     @Command("bloodmoon info")
     public void bloodmoonStart(BukkitCommandActor actor) {

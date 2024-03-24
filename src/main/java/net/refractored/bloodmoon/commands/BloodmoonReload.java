@@ -14,7 +14,7 @@ import revxrsal.commands.bukkit.annotation.CommandPermission;
 
 public class BloodmoonReload {
     @CommandPermission("bloodmoon.admin.reload")
-    @Description("Reload the config for bloodmoons.")
+    @Description("Reload the config for bloodmoons")
     @Command("bloodmoon reload")
     public void bloodmoonReload(BukkitCommandActor actor) {
 
