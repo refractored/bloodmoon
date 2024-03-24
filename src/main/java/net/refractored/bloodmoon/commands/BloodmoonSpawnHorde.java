@@ -1,7 +1,9 @@
 package net.refractored.bloodmoon.commands;
 
+import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.LocaleReader;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Description;
@@ -14,9 +16,14 @@ public class BloodmoonSpawnHorde {
     @Description("Check when the next bloodmoon is")
     @Command("bloodmoon spawnhorde")
     public void bloodmoonSpawnHorde(BukkitCommandActor actor, @Optional Player target) {
+        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         if (target == null) {
             if (actor.isConsole()){
                 actor.reply("&cYou must specify a player to spawn a horde on.");
+                return;
+            }
+            if (actor.getAsPlayer().getWorld().getEnvironment() != World.Environment.NORMAL) {
+                actor.reply("&cYou arent in a overworld.");
                 return;
             }
             BloodmoonManager.GetActuator(actor.getAsPlayer().getWorld()).SpawnHorde();
@@ -26,8 +33,12 @@ public class BloodmoonSpawnHorde {
         }
         Player player = actor.getAsPlayer();
         BloodmoonManager actuator = BloodmoonManager.GetActuator(target.getWorld());
+        if (player.getWorld().getEnvironment() != World.Environment.NORMAL) {
+            actor.reply("&cTarget is not in a overworld world.");
+            return;
+        }
         if (actuator == null) {
-            LocaleReader.MessageLocale("NoBloodMoonInWorld", null, null, player);
+            actor.reply(localeReader.GetLocaleString("NoBloodMoonInWorld"));
             return;
         }
         actuator.SpawnHorde(target);
