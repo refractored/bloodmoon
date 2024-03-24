@@ -1,5 +1,6 @@
-package net.refractored.bloodmoon;
+package net.refractored.bloodmoon.managers;
 
+import net.refractored.bloodmoon.Bloodmoon;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;

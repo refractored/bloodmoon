@@ -1,4 +1,4 @@
-package net.refractored.bloodmoon;
+package net.refractored.bloodmoon.managers;
 
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
@@ -7,6 +7,9 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import net.refractored.bloodmoon.ActuatorPeriodic;
+import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.PeriodicNightCheck;
 import net.refractored.bloodmoon.boss.IBoss;
 import net.refractored.bloodmoon.boss.ZombieIBoss;
 import net.refractored.bloodmoon.readers.ConfigReader;
@@ -33,7 +36,7 @@ import java.util.*;
 /**
  * This is the class that handles most interaction during a BloodMoon
  */
-public class BloodmoonActuator implements Runnable, Closeable {
+public class BloodmoonManager implements Runnable, Closeable {
     /**
      * The constant rewardedTypes.
      */
@@ -53,7 +56,7 @@ public class BloodmoonActuator implements Runnable, Closeable {
 
     private int originalMaxSpawn = 0;
 
-    private static Map<World, BloodmoonActuator> actuators;
+    private static Map<World, BloodmoonManager> actuators;
 
     /**
      * The constant world.
@@ -73,7 +76,7 @@ public class BloodmoonActuator implements Runnable, Closeable {
      */
     public static List<IBoss> bosses;
 
-    private void AddActuator (BloodmoonActuator instance) {
+    private void AddActuator (BloodmoonManager instance) {
         if (actuators == null) actuators = new HashMap<>();
 
         actuators.put(instance.world, instance);
@@ -85,7 +88,7 @@ public class BloodmoonActuator implements Runnable, Closeable {
      * @param world the world
      * @return the bloodmoon actuator
      */
-    public static BloodmoonActuator GetActuator (World world) {
+    public static BloodmoonManager GetActuator (World world) {
         try
         {
             return actuators.get(world);
@@ -101,7 +104,7 @@ public class BloodmoonActuator implements Runnable, Closeable {
      *
      * @param world the world
      */
-    public BloodmoonActuator (World world) {
+    public BloodmoonManager(World world) {
         this.world = world;
         inProgress = false;
         AddActuator(this);

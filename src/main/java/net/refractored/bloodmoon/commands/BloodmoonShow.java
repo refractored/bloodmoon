@@ -1,7 +1,7 @@
 package net.refractored.bloodmoon.commands;
 
 import net.refractored.bloodmoon.Bloodmoon;
-import net.refractored.bloodmoon.BloodmoonActuator;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
@@ -29,7 +29,7 @@ public class BloodmoonShow {
         }
 
 
-        BloodmoonActuator worldActuator = BloodmoonActuator.GetActuator(playerWorld);
+        BloodmoonManager worldActuator = BloodmoonManager.GetActuator(playerWorld);
 
         if (worldActuator == null)
         {

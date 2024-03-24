@@ -4,7 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import static net.refractored.bloodmoon.BloodmoonActuator.*;
+import static net.refractored.bloodmoon.managers.BloodmoonManager.*;
 
 
 public class PlayerConnectListener implements Listener {

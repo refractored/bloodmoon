@@ -16,7 +16,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 import net.refractored.bloodmoon.Bloodmoon;
-import net.refractored.bloodmoon.BloodmoonActuator;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -117,7 +117,7 @@ public final class ZombieIBoss extends Boss {
             scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
                 @Override
                 public void run() {
-                    BloodmoonActuator.GetActuator(world).SpawnZombieBoss();
+                    BloodmoonManager.GetActuator(world).SpawnZombieBoss();
                 }
             }, reader.GetBossRespawnTime("Zombie"));
         }
@@ -145,7 +145,7 @@ public final class ZombieIBoss extends Boss {
         }
 
         amount *= reader.GetZombieBossItemMultiplier();
-        BloodmoonActuator actuator = BloodmoonActuator.GetActuator(world);
+        BloodmoonManager actuator = BloodmoonManager.GetActuator(world);
 
         int expDrop;
         for(expDrop = 0; expDrop < amount; ++expDrop) {

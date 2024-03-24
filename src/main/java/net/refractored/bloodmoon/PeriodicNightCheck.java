@@ -1,13 +1,13 @@
 package net.refractored.bloodmoon;
 
+import net.refractored.bloodmoon.managers.BloodmoonManager;
+import net.refractored.bloodmoon.managers.DatabaseManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.spectralmemories.sqlaccess.FieldType;
 import org.spectralmemories.sqlaccess.SQLAccess;
 import org.spectralmemories.sqlaccess.SQLField;
@@ -29,9 +29,9 @@ public class PeriodicNightCheck implements Runnable, Listener
 
 
     private World world;
-    private BloodmoonActuator actuator;
+    private BloodmoonManager actuator;
 
-    public PeriodicNightCheck(World world, BloodmoonActuator actuator) {
+    public PeriodicNightCheck(World world, BloodmoonManager actuator) {
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         this.actuator = actuator;
         this.world = world;
@@ -101,7 +101,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
         String worldUid = world.getUID().toString();
         String tableName = "lastBloodMoon";
-        SQLAccess access = Bloodmoon.GetInstance().getSqlAccess();
+        SQLAccess access = DatabaseManager.getSqlAccess();
         boolean exists = false;
         try
         {

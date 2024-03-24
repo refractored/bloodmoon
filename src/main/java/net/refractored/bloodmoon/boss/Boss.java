@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 import net.refractored.bloodmoon.Bloodmoon;
-import net.refractored.bloodmoon.BloodmoonActuator;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.Location;
@@ -308,7 +308,7 @@ public abstract class Boss implements IBoss, Listener {
         world.spawnParticle(Particle.WATER_BUBBLE, host.getLocation(), 100);
         world.playSound(host.getLocation(), Sound.BLOCK_WATER_AMBIENT, 1.0F, 1.0F);
         final Random rnd = new Random();
-        final BloodmoonActuator actuator = BloodmoonActuator.GetActuator(world);
+        final BloodmoonManager actuator = BloodmoonManager.GetActuator(world);
         host.setAI(false);
         scheduler.scheduleSyncDelayedTask(Bloodmoon.GetInstance(), new Runnable() {
             public void run() {

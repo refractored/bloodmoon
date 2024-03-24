@@ -2,6 +2,8 @@ package net.refractored.bloodmoon;
 
 import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.listeners.*;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
+import net.refractored.bloodmoon.managers.WorldManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.World;
@@ -11,12 +13,10 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.spectralmemories.sqlaccess.FieldType;
 import org.spectralmemories.sqlaccess.SQLAccess;
 import org.spectralmemories.sqlaccess.SQLField;
-import org.spectralmemories.sqlaccess.SQLTable;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+
+import static net.refractored.bloodmoon.managers.DatabaseManager.getSqlAccess;
 
 /**
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
@@ -41,13 +43,13 @@ public final class Bloodmoon extends JavaPlugin {
     public static final String LOCALES_YML = "locales.yml";
     public final static long NIGHT_CHECK_DELAY = 40;
 
-    private static SQLAccess sqlAccess;
+    public static SQLAccess sqlAccess;
     public static LocaleReader localeReader;
 
     private static Bloodmoon instance;
 
     private static List<PeriodicNightCheck> nightChecks;
-    private static List<BloodmoonActuator> actuators;
+    private static List<BloodmoonManager> actuators;
     private static List<World> bloodmoonWorlds;
     private static Map<World, ConfigReader> configReaders;
     private static List<ConfigReader> allConfigReaders;
@@ -93,43 +95,7 @@ public final class Bloodmoon extends JavaPlugin {
         return getServer().getScheduler();
     }
 
-    private void InitializeSQLAccess ()
-    {
-        boolean mustCreateDb = ! (new File(getDataFolder().getAbsolutePath() + SLASH + CACHE_DB).exists());
-        try
-        {
-            DriverManager.getConnection(SQLAccess.JDBC_SQLITE + getDataFolder().getAbsolutePath() + SLASH + CACHE_DB); //create db if it does not exist
-            File db = new File(getDataFolder().getAbsoluteFile() + SLASH + CACHE_DB);
 
-            sqlAccess = new SQLAccess(db);
-
-            if (mustCreateDb)
-            {
-                List<SQLField> fields = new ArrayList<>();
-                fields.add(new SQLField("world", FieldType.TEXT, true, false));
-                fields.add(new SQLField("days", FieldType.INTEGER, false, false));
-                fields.add(new SQLField("checkAt", FieldType.INTEGER, false, false));
-
-                SQLTable bloodMoonTable = new SQLTable("lastBloodMoon",  fields);
-
-                sqlAccess.CreateTable(bloodMoonTable);
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Returns the SQLAccess object initialized at startup
-     * @return the SQLAccess instance
-     */
-    public SQLAccess getSqlAccess ()
-    {
-        if (sqlAccess == null) InitializeSQLAccess();
-        return sqlAccess;
-    }
 
     /**
      * Returns the initialized ConfigReader for a world. May return null if none was found
@@ -309,7 +275,7 @@ public final class Bloodmoon extends JavaPlugin {
             return;
         }
 
-        BloodmoonActuator actuator = new BloodmoonActuator(world);
+        BloodmoonManager actuator = new BloodmoonManager(world);
         getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
         getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
         getServer().getPluginManager().registerEvents(new MobSpawnListener(), this);
@@ -363,7 +329,7 @@ public final class Bloodmoon extends JavaPlugin {
             nightCheck.UpdateCacheDatabase();
         }
 
-        for (BloodmoonActuator actuator : actuators)
+        for (BloodmoonManager actuator : actuators)
         {
             if (actuator.isInProgress()) actuator.StopBloodMoon();
             actuator.close();

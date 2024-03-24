@@ -1,7 +1,7 @@
 package net.refractored.bloodmoon.listeners;
 
 import net.refractored.bloodmoon.Bloodmoon;
-import net.refractored.bloodmoon.BloodmoonActuator;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.boss.IBoss;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static net.refractored.bloodmoon.BloodmoonActuator.*;
+import static net.refractored.bloodmoon.managers.BloodmoonManager.*;
 
 public class MobDeathListener implements Listener {
     @EventHandler
@@ -35,13 +35,13 @@ public class MobDeathListener implements Listener {
                     LocaleReader.MessageAllLocale("BossSlain", new String[]{"$b", "$p"}, new String[]{boss.GetName(), killer.getName()}, world);
                 }
 
-                boss.Kill(killer != null && BloodmoonActuator.isInProgress());
+                boss.Kill(killer != null && BloodmoonManager.isInProgress());
                 bosses.remove(boss);
                 return;
             }
         }
 
-        if (!BloodmoonActuator.isInProgress()) return; //Only during BloodMoon
+        if (!BloodmoonManager.isInProgress()) return; //Only during BloodMoon
 
         if (entity.getKiller() == null) return; //No killer, no reward
 
