@@ -31,7 +31,7 @@ public class BloodmoonStart {
             world = targetworld;
         }
         if (world.getEnvironment() != World.Environment.NORMAL) {
-            actor.reply("&cTarget must be a overworld.");
+            actor.reply(String.format("World \"%s\" is not a overworld.",world.getName()));
             return;
         }
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig()) {
@@ -41,13 +41,13 @@ public class BloodmoonStart {
 
         PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
         if (nightCheck == null) {
-            actor.reply(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+            actor.reply(String.format("&cBloodmoons are disabled in world \"%s\".",world.getName()));
             return;
         }
 
         if (BloodmoonManager.GetActuator(world).isInProgress())
         {
-            actor.reply("&cA bloodmoon is already in progress.");
+            actor.reply(String.format("&cA Bloodmoon is already in progress in world \"%s\"",world.getName()));
             return;
         }
         actor.reply("&cA bloodmoon has been started.");
