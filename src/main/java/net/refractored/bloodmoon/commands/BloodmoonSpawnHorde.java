@@ -28,17 +28,17 @@ public class BloodmoonSpawnHorde {
             }
             BloodmoonManager.GetActuator(actor.getAsPlayer().getWorld()).SpawnHorde();
             actor.reply("&cSpawned a horde in your world on a random player.");
-            actor.reply("&7&oIf no players are online, unvanished or in survival mode then no horde will spawn.");
+            actor.reply("&7&oIf no players are in your world, unvanished or in survival mode then no horde will spawn.");
             return;
         }
         Player player = actor.getAsPlayer();
         BloodmoonManager actuator = BloodmoonManager.GetActuator(target.getWorld());
         if (player.getWorld().getEnvironment() != World.Environment.NORMAL) {
-            actor.reply("&cTarget is not in a overworld world.");
+            actor.reply(String.format("&cPlayer \"%s\" is in world \"%s\", which is not a overworld. ", target.getName(), target.getWorld().getName()));
             return;
         }
         if (actuator == null) {
-            actor.reply(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+            actor.reply(String.format("&cPlayer \"%s\" is in world \"%s\", which has bloodmoons disabled.", target.getName(), target.getWorld().getName()));
             return;
         }
         actuator.SpawnHorde(target);
