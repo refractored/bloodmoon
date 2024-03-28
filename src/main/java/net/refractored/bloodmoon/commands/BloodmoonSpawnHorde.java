@@ -14,7 +14,7 @@ import revxrsal.commands.bukkit.annotation.CommandPermission;
 public class BloodmoonSpawnHorde {
     @CommandPermission("bloodmoon.command.spawnhorde")
     @Description("Check when the next bloodmoon is")
-    @Command("bloodmoon spawnhorde")
+    @Command("bloodmoon spawn horde")
     public void bloodmoonSpawnHorde(BukkitCommandActor actor, @Optional Player target) {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         if (target == null) {
