@@ -62,6 +62,10 @@ public class ConfigReader implements Closeable
     public static final boolean SHIELD_PREVENTS_EFFECTS_DEFAULT = true;
     public static final String PERMANENT_BLOOD_MOON = "PermanentBloodMoon";
     public static final boolean PERMANENT_BLOODMOON_DEFAULT = false;
+    public static final String PERMANENT_BLOOD_MOON_LEVEL = "PermanentBloodMoonLevel";
+    public static final int PERMANENT_BLOODMOON_LEVEL_DEFAULT = 1;
+
+
     public static final String ZOMBIEBOSSEFFECTS = "ZOMBIEBOSSEffects";
     public static final String ENABLE_ZOMBIE_BOSS = "EnableZombieBoss";
     public static final String ZOMBIE_BOSS_HEALTH = "ZombieBossHealth";
@@ -428,6 +432,24 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return PERMANENT_BLOODMOON_DEFAULT;
+        }
+    }
+
+    public int GetPermanentBloodMoonLevelConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PERMANENT_BLOOD_MOON_LEVEL);
+            if (interval == null)
+            {
+                CreateConfig(PERMANENT_BLOOD_MOON_LEVEL, String.valueOf(PERMANENT_BLOODMOON_LEVEL_DEFAULT));
+                interval = PERMANENT_BLOODMOON_LEVEL_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return PERMANENT_BLOODMOON_LEVEL_DEFAULT;
         }
     }
 
