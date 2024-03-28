@@ -31,22 +31,18 @@ public class BloodmoonStop {
         }
         if (world.getEnvironment() != World.Environment.NORMAL) {
             actor.reply(String.format("World \"%s\" is not a overworld.",world.getName()));
-
             return;
         }
-        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
-        {
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig()){
             actor.reply(localeReader.GetLocaleString("CannotStopBloodMoon"));
             return;
         }
         PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
-        if (nightCheck == null)
-        {
+        if (nightCheck == null){
             actor.reply(String.format("&cBloodmoons are disabled in world \"%s\".",world.getName()));
             return;
         }
-        if (!BloodmoonManager.GetActuator(world).isInProgress())
-        {
+        if (!BloodmoonManager.GetActuator(world).isInProgress()){
             actor.reply(String.format("&cA Bloodmoon is not in progress in world \"%s\".",world.getName()));
             return;
         }
