@@ -60,6 +60,10 @@ public class ConfigReader implements Closeable
     public static final boolean MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT = false;
     public static final String SHIELD_PREVENTS_EFFECTS = "ShieldPreventsEffects";
     public static final boolean SHIELD_PREVENTS_EFFECTS_DEFAULT = true;
+    public static final String BLOODMOON_LEVELS_ENABLED = "BloodmoonLevelsEnabled";
+    public static final boolean BLOODMOON_LEVELS_ENABLED_DEFAULT = true;
+
+
     public static final String PERMANENT_BLOOD_MOON = "PermanentBloodMoon";
     public static final boolean PERMANENT_BLOODMOON_DEFAULT = false;
     public static final String PERMANENT_BLOOD_MOON_LEVEL = "PermanentBloodMoonLevel";
@@ -124,6 +128,8 @@ public class ConfigReader implements Closeable
             writer.write("#Config file for world:" + world.getName() + " (UUID: " + world.getUID().toString() + ")\n\n");
             writer.write("#Wether or not a BloodMoon happens in this world\n#Requires a server restart upon changes\n");
             writer.write(IS_BLACKLISTED + ": " + String.valueOf(IS_BLACKLISTED_DEFAULT) + "\n");
+            writer.write("#Enable or disable the leveling system of bloodmoons\n#When disabled level one configs are used for evereything.\n");
+            writer.write(BLOODMOON_LEVELS_ENABLED + ": " + String.valueOf(BLOODMOON_LEVELS_ENABLED_DEFAULT) + "\n");
             writer.write("#Sets a permanent BloodMoon in this world\n#Obviously the interval option is ignored when this is on\n");
             writer.write(PERMANENT_BLOOD_MOON + ": " + String.valueOf(PERMANENT_BLOODMOON_DEFAULT) + "\n");
             writer.write("#Change the level of a the PERMANENT bloodmoon\n#This is ignored if levels are disabled\n");
@@ -418,7 +424,23 @@ public class ConfigReader implements Closeable
             return HORDES_ENABLED_DEFAULT;
         }
     }
-
+    public boolean GetBloodMoonLevelsEnabledConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(BLOODMOON_LEVELS_ENABLED);
+            if (interval == null)
+            {
+                CreateConfig(BLOODMOON_LEVELS_ENABLED, String.valueOf(BLOODMOON_LEVELS_ENABLED_DEFAULT));
+                interval = BLOODMOON_LEVELS_ENABLED_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return BLOODMOON_LEVELS_ENABLED_DEFAULT;
+        }
+    }
     public boolean GetPermanentBloodMoonConfig ()
     {
         try
