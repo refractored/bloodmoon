@@ -10,5 +10,7 @@ RegisterCommands {
         handler.register(new BloodmoonInfo());
         handler.register(new BloodmoonSpawnHorde());
         handler.register(new BloodmoonReload());
+        handler.register(new BloodmoonLevelSet());
+
     }
 }
