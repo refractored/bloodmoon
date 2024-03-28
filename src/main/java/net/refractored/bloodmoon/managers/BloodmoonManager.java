@@ -269,10 +269,16 @@ public class BloodmoonManager implements Runnable, Closeable {
         int maxMob = reader.GetHordeMaxPopulation();
         int mobAmount = random.nextInt(maxMob - minMob) + minMob;
         int maxDistance = reader.GetHordeSpawnDistance();
+        String[] mobList = switch (bloodMoonLevel) {
+            case 1 -> reader.GetHordeMobWhitelist();
+            case 2 -> reader.GetHordeMobWhitelistLevel2();
+            case 3 -> reader.GetHordeMobWhitelistLevel3();
+            default -> reader.GetHordeMobWhitelist();
+        };
+
 
         for (int i = 0; i < mobAmount; i++)
         {
-            String[] mobList = reader.GetHordeMobWhitelist();
             int mobListLen = mobList.length;
             EntityType mobType = EntityType.valueOf(mobList[random.nextInt(mobListLen)]);
 
