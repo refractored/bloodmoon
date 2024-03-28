@@ -47,7 +47,7 @@ public class BloodmoonLevelSet {
             actor.reply(String.format("&cA Bloodmoon is already in progress in world \"%s\"", world.getName()));
             return;
         }
-        actor.reply(String.format("&aSet bloodmoom level to %d in world \"%s\"", targetlevel, targetworld.getName()));
-        BloodmoonManager.GetActuator(targetworld).setBloodMoonLevel(targetlevel);
+        BloodmoonManager.GetActuator(world).setBloodMoonLevel(targetlevel);
+        actor.reply(String.format("&aSet bloodmoom level to %d in world \"%s\"", targetlevel, world.getName()));
     }
 }
