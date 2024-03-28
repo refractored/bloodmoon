@@ -294,7 +294,9 @@ public class ConfigReader implements Closeable
         GetPreventSleepingConfig();
         GetMobsFromSpawnerNoRewardConfig ();
         GetShieldPreventEffects ();
+        GetBloodMoonLevelsEnabledConfig();
         GetPermanentBloodMoonConfig ();
+        GetPermanentBloodMoonLevelConfig();
         GetPreBloodMoonCommands();
         GetPostBloodMoonCommands();
         GetZombieBossDamage();
