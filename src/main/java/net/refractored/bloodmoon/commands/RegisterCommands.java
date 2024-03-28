@@ -12,5 +12,6 @@ RegisterCommands {
         handler.register(new BloodmoonReload());
         handler.register(new BloodmoonLevelSet());
         handler.register(new BloodmoonLevelRemove());
+        handler.register(new BloodmoonLevelAdd());
     }
 }
