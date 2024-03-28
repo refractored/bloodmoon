@@ -49,7 +49,7 @@ public class BloodmoonLevelRemove {
             actor.reply(String.format("&cBloodmoon level cannot be less than 1 in world \"%s\"", world.getName()));
             return;
         }
-        BloodmoonManager.GetActuator(world).setBloodMoonLevel(targetlevel);
+        BloodmoonManager.GetActuator(world).setBloodMoonLevel(finalLevel);
         actor.reply(String.format("&aRemoved %d level(s) from the bloodmoom level. Bloodmoon level is now %d in world \"%s\"", targetlevel, finalLevel, world.getName()));
     }
 }
