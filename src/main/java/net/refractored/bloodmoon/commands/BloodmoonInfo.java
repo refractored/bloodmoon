@@ -33,7 +33,6 @@ public class BloodmoonInfo {
             return;
         }
 
-
         BloodmoonManager worldActuator = BloodmoonManager.GetActuator(playerWorld);
 
         if (worldActuator == null)
@@ -42,7 +41,6 @@ public class BloodmoonInfo {
             return;
         }
 
-
         if (BloodmoonManager.isInProgress())
         {
             actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
@@ -50,16 +48,16 @@ public class BloodmoonInfo {
         }
 
         int remainingDays = PeriodicNightCheck.GetDaysRemaining(playerWorld);
-        if (remainingDays < 0)
-        {
+
+        if (remainingDays < 0) {
             System.out.println("[Error] remainingDays is lower than 0. Please regenerate both the bloodmoon cache and the config for world " + playerWorld.getName());
             actor.reply(localeReader.GetLocaleString("GeneralError"));
-        }
-        else
-        {
-            LocaleReader.MessageLocale("DaysBeforeBloodMoon", new String[]{"$d"}, new String[]{String.valueOf(remainingDays)}, player);
+            return;
         }
 
-        return;
+        actor.reply(String.format("&aThere are %d days remaining until the bloodmoon in \"%s\".", remainingDays, playerWorld.getName()));
+        actor.reply(String.format("&aThe bloodmoon is level %d", worldActuator.getBloodMoonLevel()));
+
+
     }
 }
