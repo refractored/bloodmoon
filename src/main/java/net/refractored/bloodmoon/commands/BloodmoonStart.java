@@ -50,9 +50,9 @@ public class BloodmoonStart {
             actor.reply(String.format("&cA Bloodmoon is already in progress in world \"%s\"",world.getName()));
             return;
         }
-        actor.reply("&cA bloodmoon has been started.");
         nightCheck.SetCheckAfter(0);
         nightCheck.SetDaysRemaining(0);
         world.setTime(12001);
+        actor.reply(String.format("&aStarted the bloodmoon in world \"%s\".",world.getName()));
     }
 }
