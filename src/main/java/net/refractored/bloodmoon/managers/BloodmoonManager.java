@@ -112,6 +112,7 @@ public class BloodmoonManager implements Runnable, Closeable {
 
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
         {
+            setBloodMoonLevel(Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonLevelConfig());
             StartBloodMoon();
         }
 
