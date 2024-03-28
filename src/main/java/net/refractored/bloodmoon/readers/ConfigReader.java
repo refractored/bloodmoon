@@ -126,6 +126,8 @@ public class ConfigReader implements Closeable
             writer.write(IS_BLACKLISTED + ": " + String.valueOf(IS_BLACKLISTED_DEFAULT) + "\n");
             writer.write("#Sets a permanent BloodMoon in this world\n#Obviously the interval option is ignored when this is on\n");
             writer.write(PERMANENT_BLOOD_MOON + ": " + String.valueOf(PERMANENT_BLOODMOON_DEFAULT) + "\n");
+            writer.write("#Change the level of a the PERMANENT bloodmoon\n#This is ignored if levels are disabled\n");
+            writer.write(PERMANENT_BLOOD_MOON_LEVEL + ": " + String.valueOf(PERMANENT_BLOODMOON_LEVEL_DEFAULT) + "\n");
             writer.write("#Interval in days between BloodMoons\n");
             writer.write(BLOOD_MOON_INTERVAL + ": " + String.valueOf(DEFAULT_INTERVAL) + "\n");
             writer.write("#Do items despawn upon death?\n");
