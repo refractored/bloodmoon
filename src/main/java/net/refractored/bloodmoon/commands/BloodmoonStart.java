@@ -53,6 +53,6 @@ public class BloodmoonStart {
         nightCheck.SetCheckAfter(0);
         nightCheck.SetDaysRemaining(0);
         world.setTime(12001);
-        actor.reply(String.format("&aStarted the bloodmoon in world \"%s\".",world.getName()));
+        actor.reply(String.format("&aStarted a bloodmoon in world \"%s\".",world.getName()));
     }
 }
