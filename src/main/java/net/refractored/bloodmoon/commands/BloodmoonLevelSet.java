@@ -33,7 +33,7 @@ public class BloodmoonLevelSet {
             return;
         }
 
-        if (Bloodmoon.GetInstance().getConfigReader(world).GetBloodMoonLevelsEnabledConfig()) {
+        if (!Bloodmoon.GetInstance().getConfigReader(world).GetBloodMoonLevelsEnabledConfig()) {
             actor.reply(String.format("&cBloodmoon levels are disabled in world \"%s\".", world.getName()));
             return;
         }
