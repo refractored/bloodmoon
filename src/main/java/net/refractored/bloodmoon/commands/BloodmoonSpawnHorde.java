@@ -16,7 +16,6 @@ public class BloodmoonSpawnHorde {
     @Description("Check when the next bloodmoon is")
     @Command("bloodmoon spawn horde")
     public void bloodmoonSpawnHorde(BukkitCommandActor actor, @Optional Player target) {
-        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         boolean targetBlank = false;
         if (target == null) {
             if (actor.isConsole()){
