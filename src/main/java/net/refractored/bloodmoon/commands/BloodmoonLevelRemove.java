@@ -29,6 +29,12 @@ public class BloodmoonLevelRemove {
             actor.reply(String.format("World \"%s\" is not a overworld.", world.getName()));
             return;
         }
+
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetBloodMoonLevelsEnabledConfig()) {
+            actor.reply(String.format("&cBloodmoon levels are disabled in world \"%s\".", world.getName()));
+            return;
+        }
+
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig()) {
             actor.reply(localeReader.GetLocaleString("WorldIsPermanentBloodMoon"));
             return;
