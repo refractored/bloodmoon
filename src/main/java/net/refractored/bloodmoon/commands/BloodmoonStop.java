@@ -53,5 +53,6 @@ public class BloodmoonStop {
         nightCheck.SetCheckAfter(0);
         nightCheck.SetDaysRemaining(nightCheck.GetBloodMoonInterval() - 1);
         world.setTime(0);
+        actor.reply(String.format("&aStopped the bloodmoon in world \"%s\".",world.getName()));
     }
 }
