@@ -94,7 +94,10 @@ public class ConfigReader implements Closeable
     public static final int BASELINE_HORDE_SPAWNRATE_DEFAULT = 800;
     public static final String HORDE_SPAWNRATE_VARIATION = "HordeSpawnrateVariation";
     public static final int HORDE_SPAWNRATE_VARIATION_DEFAULT = 200;
-    public static final String HORDE_MOB_WHITELIST = "HordeMobWhitelist";
+    public static final String HORDE_MOB_WHITELIST = "HordeMobWhitelistLevel1";
+    public static final String HORDE_MOB_WHITELIST_LEVEL_2 = "HordeMobWhitelistLevel2";
+    public static final String HORDE_MOB_WHITELIST_LEVEL_3 = "HordeMobWhitelistLevel3";
+
     public static final String HORDE_SPAWN_DISTANCE = "HordeSpawnDistance";
     public static final int HORDE_SPAWN_DISTANCE_DEFAULT = 12;
     public static final String HORDE_MIN_POPULATION = "HordeMinPopulation";
@@ -260,6 +263,15 @@ public class ConfigReader implements Closeable
             writer.write(" - \"ZOMBIE\"\n");
             writer.write(" - \"SKELETON\"\n");
             writer.write(" - \"SPIDER\"\n");
+            writer.write(HORDE_MOB_WHITELIST_LEVEL_2 + ":\n");
+            writer.write(" - \"ZOMBIE\"\n");
+            writer.write(" - \"SKELETON\"\n");
+            writer.write(" - \"SPIDER\"\n");
+            writer.write(HORDE_MOB_WHITELIST_LEVEL_3 + ":\n");
+            writer.write(" - \"ZOMBIE\"\n");
+            writer.write(" - \"SKELETON\"\n");
+            writer.write(" - \"SPIDER\"\n");
+            writer.write(" - \"PHANTOM\"\n");
             writer.write("#The distance from players in block at which hordes will spawn\n");
             writer.write(HORDE_SPAWN_DISTANCE + ": " + String.valueOf(HORDE_SPAWN_DISTANCE_DEFAULT) + "\n");
             writer.write("#The minimum number of mobs in a horde\n");
@@ -373,6 +385,46 @@ public class ConfigReader implements Closeable
         }
     }
 
+    public String[] GetHordeMobWhitelistLevel2 ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_MOB_WHITELIST_LEVEL_2);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
+            {
+                System.out.println("Warning: could not load mob whitelist!");
+                return new String[0];
+            }
+            ArrayList<String> list = (ArrayList<String>) interval;
+
+            return list.toArray(new String[0]);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Warning: could not load mob whitelist!");
+            return new String[0];
+        }
+    }
+    public String[] GetHordeMobWhitelistLevel3 ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_MOB_WHITELIST_LEVEL_3);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
+            {
+                System.out.println("Warning: could not load mob whitelist!");
+                return new String[0];
+            }
+            ArrayList<String> list = (ArrayList<String>) interval;
+
+            return list.toArray(new String[0]);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Warning: could not load mob whitelist!");
+            return new String[0];
+        }
+    }
     public String[] GetMobEffectConfig (String mob)
     {
         try
