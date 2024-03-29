@@ -188,12 +188,10 @@ public class ConfigReader implements Closeable
             writer.write("ZombieBossHealth: 50\n");
             writer.write("ZombieBossItemMultiplier: 10\n");
             writer.write("#List of items that can drop, using the\n");
-            writer.write("#\"[ITEM_CODE]:[STACK AMOUNT]:[WEIGHT]:$name [META NAME]:$desc [META DESCRIPTION]:$enchant [ENCHANTMENT LIST]\" format\n");
-            writer.write("#$name, $desc and $enchant are of course optional\n");
-            writer.write("#The enchantment list argument is formatted as follow: \"$enchant [ENCHANT NAME],[LEVEL];\"\n");
+            writer.write("#\"[BloodmoonLvL],[Weight],[Item]\" format\n");
+            writer.write("#The [Item] uses auxilor's eco item lookup. Read more here:\n");
+            writer.write("#https://plugins.auxilor.io/all-plugins/the-item-lookup-system\n");
             writer.write("#The percent chance of an item dropping is equal to [item weight] / [total weight] * 100\n");
-            writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
-            writer.write("#Enchantment names are exactly as they appear in-game, except with \"_\" replacing spaces. Case is irrelevant\n");
             writer.write(DROP_ITEM_LIST + ":\n");
             writer.write("  - \"IRON_INGOT:5:10\"\n");
             writer.write("  - \"GOLD_INGOT:2:5\"\n");
