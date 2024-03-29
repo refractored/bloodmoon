@@ -62,7 +62,7 @@ public class BloodmoonManager implements Runnable, Closeable {
      */
     public static World world;
     private static boolean inProgress;
-    private int bloodMoonLevel = 1;
+    private static int bloodMoonLevel = 1;
     private static BossBar nightBar;
     private PeriodicManager actuatorPeriodic;
 
@@ -678,6 +678,7 @@ public class BloodmoonManager implements Runnable, Closeable {
      */
     public static void ApplySpecialEffect (Player player, LivingEntity mob) {
         if(IsInProtectedWGRegion(player)) return;
+        Bukkit.getLogger().info("woah this ran!");
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         String mobTypeName = mob.getType().name().toUpperCase();
@@ -692,13 +693,12 @@ public class BloodmoonManager implements Runnable, Closeable {
 
         String[] configs = configReader.GetMobEffectConfig(mobTypeName);
 
+        Bukkit.getLogger().info("this also ran");
         for (String str : configs)
         {
-
-
-
+            Bukkit.getLogger().info("if this didnt run u can go kys");
             String[] parts = str.split(",");
-            if (BloodmoonManager.GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
+            if (bloodMoonLevel != Integer.parseInt(parts[0])) continue;
             if (parts[1].equals("lightning"))
             {
                 world.strikeLightning(player.getLocation());

@@ -41,8 +41,8 @@ public class EntityDamageListener implements Listener {
                     if (damager.getType() == type)
                     {
                         //Player is damaged by monster
-                        if (event.getFinalDamage() == 0 && configReader.GetShieldPreventEffects())
-                            return; //Hit was shielded. We shall not apply configs
+                        if (event.getFinalDamage() == 0 && configReader.GetShieldPreventEffects()) return;
+                        //Hit was shielded. We shall not apply configs
                         event.setDamage(event.getDamage() * configReader.GetMobDamageMultConfig());
                         ApplySpecialEffect((Player) receiver, (LivingEntity) damager);
                         if (configReader.GetPlayerDamageSoundConfig())
