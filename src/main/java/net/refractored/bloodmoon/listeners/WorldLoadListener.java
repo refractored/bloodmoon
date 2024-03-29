@@ -1,11 +1,11 @@
-package net.refractored.bloodmoon.managers;
+package net.refractored.bloodmoon.listeners;
 
 import net.refractored.bloodmoon.Bloodmoon;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;
 
-public class WorldManager implements Listener
+public class WorldLoadListener implements Listener
 {
     @EventHandler
     public void onWorldLoad (WorldLoadEvent event)

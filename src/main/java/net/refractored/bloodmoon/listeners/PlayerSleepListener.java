@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 
 import static net.refractored.bloodmoon.managers.BloodmoonManager.*;
 
-public class PlayerSleepHandler implements Listener {
+public class PlayerSleepListener implements Listener {
     @EventHandler
     public void onPlayerSleeps (PlayerBedEnterEvent event) {
         if (event.getPlayer().getWorld() == world)
