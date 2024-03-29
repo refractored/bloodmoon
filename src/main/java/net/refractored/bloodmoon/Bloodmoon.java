@@ -285,7 +285,7 @@ public final class Bloodmoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerSleepListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
         getServer().getPluginManager().registerEvents(new EntityDamageListener(), this);
-        getServer().getPluginManager().registerEvents(new WorldLoadListener(), this);
+
 
         actuators.add(actuator);
 
