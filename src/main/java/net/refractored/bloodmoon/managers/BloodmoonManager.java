@@ -7,7 +7,6 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import net.refractored.bloodmoon.ActuatorPeriodic;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import net.refractored.bloodmoon.boss.IBoss;
@@ -65,7 +64,7 @@ public class BloodmoonManager implements Runnable, Closeable {
     private static boolean inProgress;
     private int bloodMoonLevel = 1;
     private static BossBar nightBar;
-    private ActuatorPeriodic actuatorPeriodic;
+    private PeriodicManager actuatorPeriodic;
 
     /**
      * The Blacklisted mobs.
@@ -133,7 +132,7 @@ public class BloodmoonManager implements Runnable, Closeable {
         ShowNightBar();
         BroadcastBloodMoonWarning();
 
-        actuatorPeriodic = new ActuatorPeriodic(world);
+        actuatorPeriodic = new PeriodicManager(world);
         actuatorPeriodic.run();
 
         SpawnBosses();
