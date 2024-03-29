@@ -678,7 +678,6 @@ public class BloodmoonManager implements Runnable, Closeable {
      */
     public static void ApplySpecialEffect (Player player, LivingEntity mob) {
         if(IsInProtectedWGRegion(player)) return;
-        Bukkit.getLogger().info("woah this ran!");
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         String mobTypeName = mob.getType().name().toUpperCase();
@@ -693,10 +692,9 @@ public class BloodmoonManager implements Runnable, Closeable {
 
         String[] configs = configReader.GetMobEffectConfig(mobTypeName);
 
-        Bukkit.getLogger().info("this also ran");
+
         for (String str : configs)
         {
-            Bukkit.getLogger().info("if this didnt run u can go kys");
             String[] parts = str.split(",");
             if (bloodMoonLevel != Integer.parseInt(parts[0])) continue;
             if (parts[1].equals("lightning"))
