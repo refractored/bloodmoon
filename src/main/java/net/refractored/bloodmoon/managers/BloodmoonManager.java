@@ -694,19 +694,20 @@ public class BloodmoonManager implements Runnable, Closeable {
 
         for (String str : configs)
         {
-            if (str.equals("lightning"))
+
+
+
+            String[] parts = str.split(",");
+            if (BloodmoonManager.GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
+            if (parts[1].equals("lightning"))
             {
                 world.strikeLightning(player.getLocation());
                 continue;
             }
-
-
-            String[] parts = str.split(",");
-            PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(parts[0]));
+            PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(parts[1]));
             if (type == null) continue; //Effect not found. Meh
-            String effectName = parts[0];
-            int ticks = (int) (20f * Float.parseFloat(parts[1]));
-            int amp = Integer.parseInt(parts[2]);
+            int ticks = (int) (20f * Float.parseFloat(parts[2]));
+            int amp = Integer.parseInt(parts[3]);
 
             player.addPotionEffect(new PotionEffect(type, ticks, amp));
 
