@@ -1,6 +1,8 @@
 name: BloodMoon
 version: 0.8.2
 main: net.refractored.bloodmoon.Bloodmoon
+depend:
+  - "eco"
 softdepend:
   - "Multiverse-Core"
   - "WorldGuard"

@@ -7,6 +7,7 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import com.willfp.eco.core.items.Items;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import net.refractored.bloodmoon.boss.IBoss;
@@ -580,68 +581,29 @@ public class BloodmoonManager implements Runnable, Closeable {
         Material itemMaterial;
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
+
         String[] items = configReader.GetItemListConfig(); //Get the list of items
         Map<String, Integer[]> indexes = new HashMap<>();
         int totalWeight = 0;
 
-        for (String entry : items)
-        {
-            String[] parts = entry.split(":");
-            int itemWeight = Integer.parseInt(parts[2]);
-
+        for (String entry : items) {
+            String[] parts = entry.split(",");
+            int itemWeight = Integer.parseInt(parts[1]);
+            if (bloodMoonLevel != Integer.parseInt(parts[0])) continue;
             indexes.put(entry, new Integer[]{totalWeight, totalWeight + itemWeight});
             totalWeight += itemWeight;
         }
 
         int rng = random.nextInt(totalWeight);
 
-        for (Map.Entry<String, Integer[]> entry : indexes.entrySet())
-        {
+        for (Map.Entry<String, Integer[]> entry : indexes.entrySet()) {
             int min = entry.getValue()[0];
             int max = entry.getValue()[1];
 
             if (rng >= min && rng < max)
             {
-                String[] parts = entry.getKey().split(":");
-                itemMaterial = Material.valueOf(parts[0]);
-
-                ItemStack itemStack = new ItemStack(itemMaterial, Integer.parseInt(parts[1]));
-
-                for (int i = 3; i < 6; i++)
-                {
-                    if (parts.length <= i) break;
-
-                    String line = parts[i];
-                    if (line.startsWith("$name"))
-                    {
-                        line = line.substring("$name".length() + 1);
-
-                        ItemMeta meta = itemStack.getItemMeta();
-                        meta.setDisplayName(line);
-                        itemStack.setItemMeta(meta);
-                    } else if (line.startsWith("$desc"))
-                    {
-                        line = line.substring("$desc".length() + 1);
-
-                        ItemMeta meta = itemStack.getItemMeta();
-                        meta.setLore(Arrays.asList(line.split("\\$n")));
-                        itemStack.setItemMeta(meta);
-                    } else if (line.startsWith("$enchant"))
-                    {
-                        line = line.substring("$enchant".length() + 1);
-
-                        String[] enchantLines = line.split(";");
-                        for (String enchantLine : enchantLines)
-                        {
-                            String[] enchant = enchantLine.split(",");
-                            Enchantment enchantment = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(enchant[0].toLowerCase()));
-                            if (enchantment == null) continue; //Enchantment not found. Meh
-                            itemStack.addEnchantment(enchantment, Integer.parseInt(enchant[1]));
-                        }
-                    }
-                }
-
-                return itemStack;
+                String[] parts = entry.getKey().split(",");
+                return Items.lookup(parts[2]).getItem();
             }
         }
         return null;
