@@ -3,7 +3,7 @@ package net.refractored.bloodmoon;
 import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.listeners.*;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
-import net.refractored.bloodmoon.managers.WorldManager;
+import net.refractored.bloodmoon.listeners.WorldLoadListener;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.World;
@@ -54,7 +54,7 @@ public final class Bloodmoon extends JavaPlugin {
     private static Map<World, ConfigReader> configReaders;
     private static List<ConfigReader> allConfigReaders;
 
-    private static WorldManager worldManager;
+    private static WorldLoadListener worldManager;
 
     /**
      * Returns the Bloodmoon instance
@@ -237,7 +237,7 @@ public final class Bloodmoon extends JavaPlugin {
         getSqlAccess();
         getLocaleReader();
 
-        worldManager = new WorldManager();
+        worldManager = new WorldLoadListener();
 
         nightChecks = new ArrayList<>();
         actuators = new ArrayList<>();
@@ -282,7 +282,7 @@ public final class Bloodmoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerConnectListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerSleepHandler(), this);
+        getServer().getPluginManager().registerEvents(new PlayerSleepListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
 
         actuators.add(actuator);
