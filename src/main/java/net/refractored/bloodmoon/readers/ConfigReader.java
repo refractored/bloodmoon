@@ -217,7 +217,7 @@ public class ConfigReader implements Closeable
             writer.write("#Mob effects on hit. Format (with no spaces in between):\n");
             writer.write("#[BloodmoonLevel],[Effect],[Duration in seconds],[Effect amplifier. Use 1 if you're unsure]\n");
             writer.write("#For a complete list of effects, refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/potion/PotionEffectType.html\n");
-            writer.write("#Additional effects include: 'LIGHTNING'\n");
+            writer.write("#Additional effects include: 'lightning'\n");
             writer.write(ZOMBIEEFFECTS + ":\n");
             writer.write("  - \"1,wither,7,1\"\n");
             writer.write(HUSKEFFECT + ":\n");
