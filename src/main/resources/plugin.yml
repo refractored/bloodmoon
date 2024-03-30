@@ -1,4 +1,4 @@
-name: BloodMoon
+name: Bloodmoon
 version: 0.8.2
 main: net.refractored.bloodmoon.Bloodmoon
 depend:
@@ -8,4 +8,4 @@ softdepend:
   - "WorldGuard"
 api-version: 1.20
 authors: [SpectralMemories, refractored]
-description: A BloodMoon shines every couple of nights
+description: A Bloodmoon shines every couple of nights
