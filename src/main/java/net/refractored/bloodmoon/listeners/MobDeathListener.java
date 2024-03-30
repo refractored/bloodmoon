@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Random;
 
@@ -88,6 +89,7 @@ public class MobDeathListener implements Listener {
 
         for (ItemStack item : bonusDrops)
         {
+            if (item == null) continue;
             world.dropItemNaturally(entity.getLocation(), item); //Drop items
         }
     }
