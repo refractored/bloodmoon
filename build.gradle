@@ -23,6 +23,7 @@ repositories {
     maven { url = 'https://oss.sonatype.org/content/repositories/central' }
     maven { url = 'https://maven.enginehub.org/repo/' }
     maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven { url = 'https://repo.auxilor.io/repository/maven-public/' }
 }
 
 java {
@@ -37,7 +38,7 @@ dependencies {
 
     // Required for all platforms
     implementation("com.github.Revxrsal.Lamp:common:${lamp_version}")
-    compileOnly("com.willfp:eco:6.55.0")
+    compileOnly("com.willfp:eco:6.69.1")
     // The Bukkit API for Lamp
     implementation("com.github.Revxrsal.Lamp:bukkit:${lamp_version}")
 
