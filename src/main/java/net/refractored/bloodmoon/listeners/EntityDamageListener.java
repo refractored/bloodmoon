@@ -63,8 +63,6 @@ public class EntityDamageListener implements Listener {
                         event.setDamage((int) Math.ceil(event.getDamage() / configReader.GetMobHealthMultConfig()));
                         if (configReader.GetMobHitParticleConfig())
                             Particles.lookup("CRIT_MAGIC").spawn(receiver.getLocation(), 60);
-
-
                     }
                 }
             }
