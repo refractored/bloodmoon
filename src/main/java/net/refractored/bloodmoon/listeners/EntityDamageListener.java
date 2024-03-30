@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon.listeners;
 
+import com.willfp.eco.core.particle.Particles;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import org.bukkit.Particle;
@@ -48,7 +49,8 @@ public class EntityDamageListener implements Listener {
                         if (configReader.GetPlayerDamageSoundConfig())
                             ((Player) receiver).playSound(receiver.getLocation(), Sound.AMBIENT_CAVE, 80.0f, 1.5f);
                         if (configReader.GetPlayerHitParticleConfig())
-                            world.spawnParticle(Particle.FLAME, receiver.getLocation(), 60);
+                             Particles.lookup("FLAME").spawn(receiver.getLocation(), 60);
+
                     }
                 }
             } else if (damager instanceof Player)
@@ -60,7 +62,8 @@ public class EntityDamageListener implements Listener {
                         //Player dealt damage to monster
                         event.setDamage((int) Math.ceil(event.getDamage() / configReader.GetMobHealthMultConfig()));
                         if (configReader.GetMobHitParticleConfig())
-                            world.spawnParticle(Particle.CRIT_MAGIC, receiver.getLocation(), 60);
+                            Particles.lookup("CRIT_MAGIC").spawn(receiver.getLocation(), 60);
+
 
                     }
                 }
