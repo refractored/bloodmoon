@@ -1,6 +1,7 @@
 package net.refractored.bloodmoon.listeners;
 
 import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.commands.BloodmoonLevelAdd;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.boss.IBoss;
 import net.refractored.bloodmoon.readers.ConfigReader;
@@ -70,7 +71,7 @@ public class MobDeathListener implements Listener {
 
         if (!eligible) return; //Not eligible for reward
 
-        event.setDroppedExp(event.getDroppedExp() * configReader.GetExpMultConfig());
+        event.setDroppedExp((int) (event.getDroppedExp() * configReader.GetExpMultConfig()[GetActuator(world).getBloodMoonLevel()]));
 
         if (configReader.GetMobDeathThunderConfig())
             world.strikeLightningEffect(event.getEntity().getLocation());

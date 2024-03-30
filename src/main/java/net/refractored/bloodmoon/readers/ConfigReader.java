@@ -148,11 +148,20 @@ public class ConfigReader implements Closeable
             writer.write("#Minimum item amount to drop per mob death\n");
             writer.write(ITEM_DROPS_MINIMUM + ": " + String.valueOf(MIN_ITEM_DROP_DEFAULT) + "\n");
             writer.write("#Mob experience drop multiplicator. Whole number only\n");
-            writer.write(EXP_MULTIPLICATOR + ": " + String.valueOf(EXP_MULTIPLICATOR_DEFAULT) + "\n");
+            writer.write(EXP_MULTIPLICATOR  + ":\n");
+            writer.write("  - \"1\"\n");
+            writer.write("  - \"1\"\n");
+            writer.write("  - \"1\"\n");
             writer.write("#Mob damage multiplier. Whole number only\n");
-            writer.write(MOB_DAMAGE_MULT + ": " + String.valueOf(MOB_DAMAGE_MULT_DEFAULT) + "\n");
+            writer.write(MOB_DAMAGE_MULT  + ":\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
             writer.write("#Mob health multiplier. Whole number only\n");
-            writer.write(MOB_HEALTH_MULT + ": " + String.valueOf(MOB_HEALTH_MULT_DEFAULT) + "\n");
+            writer.write(MOB_HEALTH_MULT + ":\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
             writer.write("#Should there be a lightning effect on player death?\n");
             writer.write(LIGHTNING_EFFECT_ON_PLAYER_DEATH + ": " + String.valueOf(LIGTHNINGEFFECT_DEFAULT) + "\n");
             writer.write("#Adds a lightning effect when a mob dies\n");
@@ -362,6 +371,7 @@ public class ConfigReader implements Closeable
             return new String[0];
         }
     }
+
 
     public String[] GetHordeMobWhitelist ()
     {
@@ -602,21 +612,22 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public int GetExpMultConfig ()
-    {
-        try
-        {
+    public Double[] GetExpMultConfig () {
+        try {
             Object interval = GetConfig(EXP_MULTIPLICATOR);
-            if (interval == null)
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
-                CreateConfig(EXP_MULTIPLICATOR, String.valueOf(EXP_MULTIPLICATOR_DEFAULT));
-                interval = EXP_MULTIPLICATOR_DEFAULT;
+                System.out.println("Warning: could not load item list!");
+                return new Double[0];
             }
-            return (int) interval;
+            ArrayList<Double> list = (ArrayList<Double>) interval;
+
+            return list.toArray(new Double[0]);
         }
-        catch (FileNotFoundException e)
+        catch (Exception e)
         {
-            return EXP_MULTIPLICATOR_DEFAULT;
+            System.out.println("Warning: could not load item list!");
+            return new Double[0];
         }
     }
 
@@ -1089,42 +1100,43 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public double GetMobDamageMultConfig ()
-    {
-        try
-        {
-            Object interval = GetConfig(MOB_DAMAGE_MULT);
-            if (interval == null)
+    public Double[] GetMobDamageMultConfig (){
+        try {
+            Object interval = GetConfig(EXP_MULTIPLICATOR);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
-                CreateConfig(MOB_DAMAGE_MULT, String.valueOf(MOB_DAMAGE_MULT_DEFAULT));
-                interval = MOB_DAMAGE_MULT_DEFAULT;
+                System.out.println("Warning: could not load item list!");
+                return new Double[0];
             }
-            return (double) interval;
+            ArrayList<Double> list = (ArrayList<Double>) interval;
+
+            return list.toArray(new Double[0]);
         }
-        catch (FileNotFoundException e)
+        catch (Exception e)
         {
-            return MOB_DAMAGE_MULT_DEFAULT;
+            System.out.println("Warning: could not load item list!");
+            return new Double[0];
         }
     }
 
-    public double GetMobHealthMultConfig ()
-    {
-        try
-        {
-            Object interval = GetConfig(MOB_HEALTH_MULT);
-            if (interval == null)
+    public Double[] GetMobHealthMultConfig (){
+        try {
+            Object interval = GetConfig(EXP_MULTIPLICATOR);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
-                CreateConfig(MOB_HEALTH_MULT, String.valueOf(MOB_HEALTH_MULT_DEFAULT));
-                interval = MOB_HEALTH_MULT_DEFAULT;
+                System.out.println("Warning: could not load item list!");
+                return new Double[0];
             }
-            return (double) interval;
+            ArrayList<Double> list = (ArrayList<Double>) interval;
+
+            return list.toArray(new Double[0]);
         }
-        catch (FileNotFoundException e)
+        catch (Exception e)
         {
-            return MOB_HEALTH_MULT_DEFAULT;
+            System.out.println("Warning: could not load item list!");
+            return new Double[0];
         }
     }
-
     //============================================================================================================
 
 
