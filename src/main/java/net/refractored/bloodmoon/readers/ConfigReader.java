@@ -6,7 +6,9 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ConfigReader implements Closeable
 {
@@ -351,7 +353,7 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public String[] GetItemListConfig ()
+    public String[] GetItemListConfig()
     {
         try
         {
@@ -617,16 +619,30 @@ public class ConfigReader implements Closeable
             Object interval = GetConfig(EXP_MULTIPLICATOR);
             if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
-                System.out.println("Warning: could not load item list!");
+                System.out.println("Warning: could not load Health list!");
                 return new Double[0];
             }
-            ArrayList<Double> list = (ArrayList<Double>) interval;
-
-            return list.toArray(new Double[0]);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Warning: could not load item list!");
+            if (interval instanceof ArrayList) {
+                ArrayList<?> rawList = (ArrayList<?>) interval;
+                Double[] doubleArray = new Double[rawList.size()];
+                for (int i = 0; i < rawList.size(); i++) {
+                    Object obj = rawList.get(i);
+                    if (obj instanceof String) {
+                        double value = Double.parseDouble((String) obj);
+                        doubleArray[i] = value;
+                    } else {
+                        System.out.println("Invalid element type in list: " + obj.getClass());
+                        doubleArray[i] = null; // or another default value
+                    }
+                }
+                return doubleArray;
+            } else {
+                System.out.println("Invalid list type: " + interval.getClass());
+                return new Double[0];
+            }
+        } catch (Exception e) {
+            System.out.println("Warning: could not load Damage list!");
+            e.printStackTrace();
             return new Double[0];
         }
     }
@@ -1100,40 +1116,67 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public Double[] GetMobDamageMultConfig (){
+    public Double[] GetMobDamageMultConfig() {
         try {
-            Object interval = GetConfig(EXP_MULTIPLICATOR);
-            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
-            {
-                System.out.println("Warning: could not load item list!");
+            Object interval = GetConfig(MOB_DAMAGE_MULT);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG)) {
+                System.out.println("Warning: could not load Damage list!");
                 return new Double[0];
             }
-            ArrayList<Double> list = (ArrayList<Double>) interval;
-
-            return list.toArray(new Double[0]);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Warning: could not load item list!");
+            if (interval instanceof ArrayList) {
+                ArrayList<?> rawList = (ArrayList<?>) interval;
+                Double[] doubleArray = new Double[rawList.size()];
+                for (int i = 0; i < rawList.size(); i++) {
+                    Object obj = rawList.get(i);
+                    if (obj instanceof String) {
+                        double value = Double.parseDouble((String) obj);
+                        doubleArray[i] = value;
+                    } else {
+                        System.out.println("Invalid element type in list: " + obj.getClass());
+                        doubleArray[i] = null; // or another default value
+                    }
+                }
+                return doubleArray;
+            } else {
+                System.out.println("Invalid list type: " + interval.getClass());
+                return new Double[0];
+            }
+        } catch (Exception e) {
+            System.out.println("Warning: could not load Damage list!");
+            e.printStackTrace();
             return new Double[0];
         }
     }
 
     public Double[] GetMobHealthMultConfig (){
         try {
-            Object interval = GetConfig(EXP_MULTIPLICATOR);
+            Object interval = GetConfig(MOB_HEALTH_MULT);
             if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
             {
-                System.out.println("Warning: could not load item list!");
+                System.out.println("Warning: could not load Health list!");
                 return new Double[0];
             }
-            ArrayList<Double> list = (ArrayList<Double>) interval;
-
-            return list.toArray(new Double[0]);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Warning: could not load item list!");
+            if (interval instanceof ArrayList) {
+                ArrayList<?> rawList = (ArrayList<?>) interval;
+                Double[] doubleArray = new Double[rawList.size()];
+                for (int i = 0; i < rawList.size(); i++) {
+                    Object obj = rawList.get(i);
+                    if (obj instanceof String) {
+                        double value = Double.parseDouble((String) obj);
+                        doubleArray[i] = value;
+                    } else {
+                        System.out.println("Invalid element type in list: " + obj.getClass());
+                        doubleArray[i] = null; // or another default value
+                    }
+                }
+                return doubleArray;
+            } else {
+                System.out.println("Invalid list type: " + interval.getClass());
+                return new Double[0];
+            }
+        } catch (Exception e) {
+            System.out.println("Warning: could not load Damage list!");
+            e.printStackTrace();
             return new Double[0];
         }
     }
@@ -1159,7 +1202,7 @@ public class ConfigReader implements Closeable
 
 
 
-    private Object GetConfig (String config) throws FileNotFoundException
+    private Object GetConfig(String config) throws FileNotFoundException
     {
         if (cache == null)
         {
