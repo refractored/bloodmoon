@@ -50,7 +50,6 @@ public class EntityDamageListener implements Listener {
                         //Player is damaged by monster
                         if (event.getFinalDamage() == 0 && configReader.GetShieldPreventEffects()) return;
                         //Hit was shielded. We shall not apply configs
-                        Logger.getLogger("Minecraft").info("List: " + Arrays.toString(Damage));
                         event.setDamage(event.getDamage() * Damage[Bloodmoonlevel]);
                         ApplySpecialEffect((Player) receiver, (LivingEntity) damager);
                         if (configReader.GetPlayerDamageSoundConfig())
@@ -68,7 +67,6 @@ public class EntityDamageListener implements Listener {
                     {
                         Double[] Health = configReader.GetMobDamageMultConfig();
                         //Player dealt damage to monster
-                        Logger.getLogger("Minecraft").info("List: " + Health);
                         event.setDamage((int) Math.ceil(event.getDamage() / Health[Bloodmoonlevel]));
                         if (configReader.GetMobHitParticleConfig())
                             Particles.lookup("CRIT_MAGIC").spawn(receiver.getLocation(), 60);

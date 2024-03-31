@@ -616,30 +616,22 @@ public class ConfigReader implements Closeable
 
     public Double[] GetExpMultConfig () {
         try {
+            // This is pretty hacky imo, if I rewrite configwriter then this will go away
             Object interval = GetConfig(EXP_MULTIPLICATOR);
-            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
-            {
-                System.out.println("Warning: could not load Health list!");
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG)) {
+                System.out.println("Warning: could not load Damage list!");
                 return new Double[0];
             }
-            if (interval instanceof ArrayList) {
-                ArrayList<?> rawList = (ArrayList<?>) interval;
-                Double[] doubleArray = new Double[rawList.size()];
-                for (int i = 0; i < rawList.size(); i++) {
-                    Object obj = rawList.get(i);
-                    if (obj instanceof String) {
-                        double value = Double.parseDouble((String) obj);
-                        doubleArray[i] = value;
-                    } else {
-                        System.out.println("Invalid element type in list: " + obj.getClass());
-                        doubleArray[i] = null; // or another default value
-                    }
+            ArrayList<String> stringList = (ArrayList<String>) interval;
+            ArrayList<Double> doubleList = new ArrayList<>();
+            for (String str : stringList) {
+                try {
+                    doubleList.add(Double.valueOf(str));
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing string to double: " + str);
                 }
-                return doubleArray;
-            } else {
-                System.out.println("Invalid list type: " + interval.getClass());
-                return new Double[0];
             }
+            return doubleList.toArray(new Double[0]);
         } catch (Exception e) {
             System.out.println("Warning: could not load Damage list!");
             e.printStackTrace();
@@ -1123,57 +1115,39 @@ public class ConfigReader implements Closeable
                 System.out.println("Warning: could not load Damage list!");
                 return new Double[0];
             }
-            if (interval instanceof ArrayList) {
-                ArrayList<?> rawList = (ArrayList<?>) interval;
-                Double[] doubleArray = new Double[rawList.size()];
-                for (int i = 0; i < rawList.size(); i++) {
-                    Object obj = rawList.get(i);
-                    if (obj instanceof String) {
-                        double value = Double.parseDouble((String) obj);
-                        doubleArray[i] = value;
-                    } else {
-                        System.out.println("Invalid element type in list: " + obj.getClass());
-                        doubleArray[i] = null; // or another default value
-                    }
+            ArrayList<String> stringList = (ArrayList<String>) interval;
+            ArrayList<Double> doubleList = new ArrayList<>();
+            for (String str : stringList) {
+                try {
+                    doubleList.add(Double.valueOf(str));
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing string to double: " + str);
                 }
-                return doubleArray;
-            } else {
-                System.out.println("Invalid list type: " + interval.getClass());
-                return new Double[0];
             }
+            return doubleList.toArray(new Double[0]);
         } catch (Exception e) {
             System.out.println("Warning: could not load Damage list!");
             e.printStackTrace();
             return new Double[0];
         }
     }
-
     public Double[] GetMobHealthMultConfig (){
         try {
             Object interval = GetConfig(MOB_HEALTH_MULT);
-            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
-            {
-                System.out.println("Warning: could not load Health list!");
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG)) {
+                System.out.println("Warning: could not load Damage list!");
                 return new Double[0];
             }
-            if (interval instanceof ArrayList) {
-                ArrayList<?> rawList = (ArrayList<?>) interval;
-                Double[] doubleArray = new Double[rawList.size()];
-                for (int i = 0; i < rawList.size(); i++) {
-                    Object obj = rawList.get(i);
-                    if (obj instanceof String) {
-                        double value = Double.parseDouble((String) obj);
-                        doubleArray[i] = value;
-                    } else {
-                        System.out.println("Invalid element type in list: " + obj.getClass());
-                        doubleArray[i] = null; // or another default value
-                    }
+            ArrayList<String> stringList = (ArrayList<String>) interval;
+            ArrayList<Double> doubleList = new ArrayList<>();
+            for (String str : stringList) {
+                try {
+                    doubleList.add(Double.valueOf(str));
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing string to double: " + str);
                 }
-                return doubleArray;
-            } else {
-                System.out.println("Invalid list type: " + interval.getClass());
-                return new Double[0];
             }
+            return doubleList.toArray(new Double[0]);
         } catch (Exception e) {
             System.out.println("Warning: could not load Damage list!");
             e.printStackTrace();
