@@ -33,8 +33,8 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     private static Map<World, PeriodicNightCheck> nightChecks;
 
-    private long checkupAfter;
-    private int daysBeforeBloodMoon;
+//    private long checkupAfter;
+//    private int daysBeforeBloodMoon;
 
 
     private World world;
@@ -44,7 +44,7 @@ public class PeriodicNightCheck implements Runnable, Listener
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         this.actuator = actuator;
         this.world = world;
-        daysBeforeBloodMoon = (configReader.GetIntervalConfig() - 1); //Workaround
+        BloodmoonManager.GetActuator(world).setBloodMoonDays((configReader.GetIntervalConfig() - 1));//Workaround
         checkupAfter = world.getFullTime();
 
         AddCheck(this);

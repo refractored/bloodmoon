@@ -135,7 +135,7 @@ public class BloodmoonManager implements Runnable, Closeable {
         CheckAtPersistentData = new PersistentDataKey(
                 bloodmoonLevelKey,
                 PersistentDataKeyType.INT,
-                1
+                0
         );
         blacklistedMobs = new ArrayList<>();
         Logger.getLogger("Bloodmoon").info(levelsPersistentData.toString());
@@ -737,6 +737,14 @@ public class BloodmoonManager implements Runnable, Closeable {
         world.save();
     }
 
+    public int getBloodMoonCheckAt() {
+
+        return ServerProfile.load().read(CheckAtPersistentData);
+    }
+    public int getBloodMoonDays() {
+
+        return ServerProfile.load().read(DaysPersistentData);
+    }
     /**
      * Gets blood moon level.
      *
@@ -758,6 +766,19 @@ public class BloodmoonManager implements Runnable, Closeable {
             levelsPersistentData,
             bloodMoonLevel
     );
-//        dataContainer.set(key, PersistentDataType.INTEGER, bloodMoonLevel);
+    }
+    public void setBloodMoonDays(int bloodMoonDays) {
+
+        ServerProfile.load().write(
+                levelsPersistentData,
+                bloodMoonDays
+        );
+    }
+    public void setBloodMoonCheckAt(int bloodMoonCheckAt) {
+
+        ServerProfile.load().write(
+                levelsPersistentData,
+                bloodMoonCheckAt
+        );
     }
 }
