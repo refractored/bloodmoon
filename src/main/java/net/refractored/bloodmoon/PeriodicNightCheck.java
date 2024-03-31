@@ -33,8 +33,8 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     private static Map<World, PeriodicNightCheck> nightChecks;
 
-//    private long checkupAfter;
-//    private int daysBeforeBloodMoon;
+    private long checkupAfter;
+    private int daysBeforeBloodMoon;
 
 
     private World world;
@@ -107,7 +107,7 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     public void UpdateCacheDatabase ()
     {
-
+//        actuator.setBloodMoonLevel(actuator.getBloodMoonLevel());
         String worldUid = world.getUID().toString();
         String tableName = "lastBloodMoon";
         SQLAccess access = DatabaseManager.getSqlAccess();

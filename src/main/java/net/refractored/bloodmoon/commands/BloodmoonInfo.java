@@ -39,11 +39,11 @@ public class BloodmoonInfo {
             return;
         }
 
-        if (BloodmoonManager.isInProgress())
-        {
-            actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
-            return;
-        }
+//        if (BloodmoonManager.isInProgress())
+//        {
+//            actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
+//            return;
+//        }
 
         int remainingDays = PeriodicNightCheck.GetDaysRemaining(world);
 

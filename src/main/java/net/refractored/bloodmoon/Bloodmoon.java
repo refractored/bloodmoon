@@ -259,8 +259,16 @@ public final class Bloodmoon extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents (worldManager, this);
-         
 
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new MobSpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerConnectListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerSleepListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
+        getServer().getPluginManager().registerEvents(new EntityDamageListener(), this);
 
         CheckOlderConfigs();
 //        ecoWrite();
@@ -285,15 +293,7 @@ public final class Bloodmoon extends JavaPlugin {
         }
 
         BloodmoonManager actuator = new BloodmoonManager(world);
-        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
-        getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
-        getServer().getPluginManager().registerEvents(new MobSpawnListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerConnectListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerSleepListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
-        getServer().getPluginManager().registerEvents(new EntityDamageListener(), this);
+
 
 
         actuators.add(actuator);

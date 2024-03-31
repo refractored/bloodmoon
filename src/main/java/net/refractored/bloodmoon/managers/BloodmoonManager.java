@@ -140,15 +140,15 @@ public class BloodmoonManager implements Runnable, Closeable {
         blacklistedMobs = new ArrayList<>();
         Logger.getLogger("Bloodmoon").info(levelsPersistentData.toString());
 
-        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
-        {
-            if (Bloodmoon.GetInstance().getConfigReader(world).GetBloodMoonLevelsEnabledConfig()){
-                setBloodMoonLevel(Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonLevelConfig());
-            } else {
-                setBloodMoonLevel(1);
-            }
-            StartBloodMoon();
-        }
+//        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
+//        {
+//            if (Bloodmoon.GetInstance().getConfigReader(world).GetBloodMoonLevelsEnabledConfig()){
+//                setBloodMoonLevel(Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonLevelConfig());
+//            } else {
+//                setBloodMoonLevel(1);
+//            }
+//            StartBloodMoon();
+//        }
 
         bosses = new ArrayList<>();
     }
@@ -184,7 +184,7 @@ public class BloodmoonManager implements Runnable, Closeable {
             return;
         }
         inProgress = false;
-        bloodMoonLevel = 1;
+        setBloodMoonLevel(1);
 
         StopStorm();
         HideNightBar();
@@ -299,7 +299,7 @@ public class BloodmoonManager implements Runnable, Closeable {
         int maxMob = reader.GetHordeMaxPopulation();
         int mobAmount = random.nextInt(maxMob - minMob) + minMob;
         int maxDistance = reader.GetHordeSpawnDistance();
-        String[] mobList = switch (bloodMoonLevel) {
+        String[] mobList = switch (getBloodMoonLevel()) {
             default -> reader.GetHordeMobWhitelist();
             case 2 -> reader.GetHordeMobWhitelistLevel2();
             case 3 -> reader.GetHordeMobWhitelistLevel3();
@@ -619,7 +619,7 @@ public class BloodmoonManager implements Runnable, Closeable {
         for (String entry : items) {
             String[] parts = entry.split(",");
             int itemWeight = Integer.parseInt(parts[1]);
-            if (bloodMoonLevel != Integer.parseInt(parts[0])) continue;
+            if (GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
             indexes.put(entry, new Integer[]{totalWeight, totalWeight + itemWeight});
             totalWeight += itemWeight;
         }
@@ -688,7 +688,8 @@ public class BloodmoonManager implements Runnable, Closeable {
         for (String str : configs)
         {
             String[] parts = str.split(",");
-            if (bloodMoonLevel != Integer.parseInt(parts[0])) continue;
+            Logger.getLogger("Bloodmoon").info(Integer.toString(GetActuator(world).getBloodMoonLevel()));
+            if (GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
             if (parts[1].equals("lightning"))
             {
                 world.strikeLightning(player.getLocation());

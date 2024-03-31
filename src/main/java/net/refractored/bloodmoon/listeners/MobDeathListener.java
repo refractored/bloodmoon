@@ -71,7 +71,7 @@ public class MobDeathListener implements Listener {
 
         if (!eligible) return; //Not eligible for reward
 
-        event.setDroppedExp((int) (event.getDroppedExp() * configReader.GetExpMultConfig()[GetActuator(world).getBloodMoonLevel() - 1]));
+        event.setDroppedExp((int) (event.getDroppedExp() * configReader.GetExpMultConfig()[(GetActuator(world).getBloodMoonLevel() - 1)]));
 
         if (configReader.GetMobDeathThunderConfig())
             world.strikeLightningEffect(event.getEntity().getLocation());
