@@ -1,11 +1,16 @@
 package net.refractored.bloodmoon;
 
+import com.willfp.eco.core.data.ServerProfile;
+import com.willfp.eco.core.data.keys.PersistentDataKey;
+import com.willfp.eco.core.data.keys.PersistentDataKeyType;
+import com.willfp.eco.util.NamespacedKeyUtils;
 import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.listeners.*;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.listeners.WorldLoadListener;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static net.refractored.bloodmoon.managers.DatabaseManager.getSqlAccess;
 
@@ -253,8 +259,11 @@ public final class Bloodmoon extends JavaPlugin {
         }
 
         getServer().getPluginManager().registerEvents (worldManager, this);
+         
+
 
         CheckOlderConfigs();
+//        ecoWrite();
     }
 
     /**
@@ -319,7 +328,22 @@ public final class Bloodmoon extends JavaPlugin {
             }
         }
     }
-
+//private void ecoWrite(){
+//    NamespacedKey key = NamespacedKeyUtils.create("bloodmoon", "level");
+//    Logger.getLogger("Bloodmoon").info("Updating cache database");
+//    PersistentDataKey<Integer> bloodmoonLevelKey = new PersistentDataKey(
+//            key,
+//            PersistentDataKeyType.INT,
+//            1
+//    );
+//    ServerProfile.load().write(
+//            bloodmoonLevelKey,
+//            3
+//    );
+//    Logger.getLogger("Bloodmoon").info(bloodmoonLevelKey.toString() );
+//
+//
+//}
     /**
      * Disables the plugin
      */
@@ -361,6 +385,7 @@ public final class Bloodmoon extends JavaPlugin {
         {
             e.printStackTrace();
         }
+
     }
 
     private void CheckOlderConfigs ()

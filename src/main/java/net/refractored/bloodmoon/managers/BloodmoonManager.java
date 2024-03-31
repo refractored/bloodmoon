@@ -7,7 +7,11 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
+import com.willfp.eco.core.data.ServerProfile;
+import com.willfp.eco.core.data.keys.PersistentDataKey;
+import com.willfp.eco.core.data.keys.PersistentDataKeyType;
 import com.willfp.eco.core.items.Items;
+import com.willfp.eco.util.NamespacedKeyUtils;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import net.refractored.bloodmoon.boss.IBoss;
@@ -19,19 +23,18 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SpawnCategory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.Closeable;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * This is the class that handles most interaction during a BloodMoon
@@ -66,6 +69,14 @@ public class BloodmoonManager implements Runnable, Closeable {
     private static int bloodMoonLevel = 1;
     private static BossBar nightBar;
     private PeriodicManager actuatorPeriodic;
+
+    private final NamespacedKey bloodmoonLevelKey;
+    private final NamespacedKey bloodmoonDaysKey;
+    private final NamespacedKey bloodmoonCheckAtKey;
+
+    private final PersistentDataKey<Integer> levelsPersistentData;
+    private final PersistentDataKey<Integer> DaysPersistentData;
+    private final PersistentDataKey<Integer> CheckAtPersistentData;
 
     /**
      * The Blacklisted mobs.
@@ -108,7 +119,26 @@ public class BloodmoonManager implements Runnable, Closeable {
         this.world = world;
         inProgress = false;
         AddActuator(this);
+        this.bloodmoonLevelKey = NamespacedKeyUtils.create("bloodmoon", "level_" + world.getName());
+        levelsPersistentData = new PersistentDataKey(
+                bloodmoonLevelKey,
+                PersistentDataKeyType.INT,
+                1
+        );
+        this.bloodmoonDaysKey = NamespacedKeyUtils.create("bloodmoon", "days_" + world.getName());
+        DaysPersistentData = new PersistentDataKey(
+                bloodmoonLevelKey,
+                PersistentDataKeyType.INT,
+                1
+        );
+        this.bloodmoonCheckAtKey = NamespacedKeyUtils.create("bloodmoon", "checkat_" + world.getName());
+        CheckAtPersistentData = new PersistentDataKey(
+                bloodmoonLevelKey,
+                PersistentDataKeyType.INT,
+                1
+        );
         blacklistedMobs = new ArrayList<>();
+        Logger.getLogger("Bloodmoon").info(levelsPersistentData.toString());
 
         if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
         {
@@ -713,7 +743,8 @@ public class BloodmoonManager implements Runnable, Closeable {
      * @return the blood moon level
      */
     public int getBloodMoonLevel() {
-        return bloodMoonLevel;
+
+        return ServerProfile.load().read(levelsPersistentData);
     }
 
     /**
@@ -722,6 +753,11 @@ public class BloodmoonManager implements Runnable, Closeable {
      * @param bloodMoonLevel the blood moon level
      */
     public void setBloodMoonLevel(int bloodMoonLevel) {
-        this.bloodMoonLevel = bloodMoonLevel;
+
+    ServerProfile.load().write(
+            levelsPersistentData,
+            bloodMoonLevel
+    );
+//        dataContainer.set(key, PersistentDataType.INTEGER, bloodMoonLevel);
     }
 }
