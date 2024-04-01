@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon.commands;
 
+import com.willfp.eco.core.Eco;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.PeriodicNightCheck;
@@ -11,6 +12,8 @@ import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Description;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
+
+import java.util.logging.Logger;
 
 public class BloodmoonInfo {
     @CommandPermission("bloodmoon.info")
@@ -39,16 +42,16 @@ public class BloodmoonInfo {
             return;
         }
 
-//        if (BloodmoonManager.isInProgress())
-//        {
-//            actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
-//            return;
-//        }
+        if (BloodmoonManager.isInProgress())
+        {
+            actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
+            return;
+        }
 
         int remainingDays = (BloodmoonManager.GetActuator(world).getBloodMoonDays() + 1);
 
         if (remainingDays < 0) {
-            System.out.println("[Error] remainingDays is lower than 0. Please regenerate both the bloodmoon cache and the config for world " + world.getName());
+            Bloodmoon.GetInstance().getLogger().warning("remainingDays is lower than 0. Please regenerate both the cache and the config for world" + world.getName());
             actor.reply(localeReader.GetLocaleString("GeneralError"));
             return;
         }
