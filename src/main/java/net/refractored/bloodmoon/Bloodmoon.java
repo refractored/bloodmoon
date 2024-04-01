@@ -164,31 +164,6 @@ public final class Bloodmoon extends JavaPlugin {
         folder.mkdir();
     }
 
-    private void LoadCache (World world)
-    {
-//        try
-//        {
-//            SQLAccess access = getSqlAccess();
-//            boolean exists = access.EntryExist("lastBloodMoon", new SQLField("world", FieldType.TEXT, true, false), world.getUID().toString());
-//
-//            if (exists)
-//            {
-//                ResultSet set = access.ExecuteSQLQuery("SELECT days, checkAt FROM lastBloodMoon WHERE world = '" + world.getUID().toString() + "';");
-//                set.next();
-//
-//                PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
-//
-////                nightCheck.setBloodMoonDays(set.getInt("days"));
-//                nightCheck.SetCheckAfter(set.getInt("checkAt"));
-//                set.close();
-//            }
-//        }
-//        catch (SQLException e)
-//        {
-//            e.printStackTrace();
-//        }
-    }
-
     //Create a config reader, setting it up if it does not exist
     private ConfigReader CreateSingleConfigReader (World world)
     {
@@ -297,7 +272,6 @@ public final class Bloodmoon extends JavaPlugin {
             GetScheduler().runTaskLater(this, nightCheck, 0);
             getServer().getPluginManager().registerEvents(nightCheck, this);
             nightChecks.add(nightCheck);
-            LoadCache(world);
         }
 
         bloodmoonWorlds.add(world);
