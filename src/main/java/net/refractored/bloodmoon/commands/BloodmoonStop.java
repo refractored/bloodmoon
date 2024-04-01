@@ -5,7 +5,6 @@ import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Description;
 import revxrsal.commands.annotation.Optional;
@@ -17,7 +16,7 @@ public class BloodmoonStop {
     @CommandPermission("bloodmoon.admin.stop")
     @Description("Stops the bloodmoon")
     @Command("bloodmoon stop")
-    public void bloodmoonStart(BukkitCommandActor actor, @Optional World targetworld) {
+    public void bloodmoonStop(BukkitCommandActor actor, @Optional World targetworld) {
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         World world;
         if (targetworld == null) {
@@ -31,27 +30,25 @@ public class BloodmoonStop {
         }
         if (world.getEnvironment() != World.Environment.NORMAL) {
             actor.reply(String.format("World \"%s\" is not a overworld.",world.getName()));
-
             return;
         }
-        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
-        {
+        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig()){
             actor.reply(localeReader.GetLocaleString("CannotStopBloodMoon"));
             return;
         }
         PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
-        if (nightCheck == null)
-        {
+        if (nightCheck == null){
             actor.reply(String.format("&cBloodmoons are disabled in world \"%s\".",world.getName()));
             return;
         }
-        if (!BloodmoonManager.GetActuator(world).isInProgress())
-        {
+        if (!BloodmoonManager.GetActuator(world).isInProgress()){
             actor.reply(String.format("&cA Bloodmoon is not in progress in world \"%s\".",world.getName()));
             return;
         }
-        nightCheck.SetCheckAfter(0);
-        nightCheck.SetDaysRemaining(nightCheck.GetBloodMoonInterval() - 1);
+//        nightCheck.SetCheckAfter(0);
+        BloodmoonManager.GetActuator(world).setBloodMoonDays(0);
+        BloodmoonManager.GetActuator(world).setBloodMoonDays(nightCheck.GetBloodMoonInterval() - 1);
         world.setTime(0);
+        actor.reply(String.format("&aStopped a bloodmoon in world \"%s\".",world.getName()));
     }
 }

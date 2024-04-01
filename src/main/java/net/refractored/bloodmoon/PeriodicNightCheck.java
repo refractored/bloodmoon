@@ -1,7 +1,6 @@
 package net.refractored.bloodmoon;
 
 import net.refractored.bloodmoon.managers.BloodmoonManager;
-import net.refractored.bloodmoon.managers.DatabaseManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.Sound;
@@ -24,10 +23,6 @@ public class PeriodicNightCheck implements Runnable, Listener
 
     private static Map<World, PeriodicNightCheck> nightChecks;
 
-    private long checkupAfter;
-    private int daysBeforeBloodMoon;
-
-
     private World world;
     private BloodmoonManager actuator;
 
@@ -35,8 +30,7 @@ public class PeriodicNightCheck implements Runnable, Listener
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         this.actuator = actuator;
         this.world = world;
-        daysBeforeBloodMoon = (configReader.GetIntervalConfig() - 1); //Workaround
-        checkupAfter = world.getFullTime();
+        actuator.setBloodMoonCheckAt((int) world.getFullTime());
 
         AddCheck(this);
     }
@@ -45,15 +39,6 @@ public class PeriodicNightCheck implements Runnable, Listener
         if (nightChecks == null) nightChecks = new HashMap<>();
 
         nightChecks.put(instance.GetWorld(), instance);
-    }
-
-    public static int GetDaysRemaining (World world)
-    {
-        PeriodicNightCheck instance = nightChecks.get(world);
-
-        if (instance != null) return (instance.GetRemainingDays() + 1);
-
-        return -1;
     }
 
     public World GetWorld ()
@@ -74,74 +59,6 @@ public class PeriodicNightCheck implements Runnable, Listener
     public int GetBloodMoonInterval ()
     {
         return Bloodmoon.GetInstance().getConfigReader(world).GetIntervalConfig();
-    }
-
-    public int GetRemainingDays ()
-    {
-        return daysBeforeBloodMoon;
-    }
-
-    public void SetDaysRemaining (int remaining)
-    {
-        daysBeforeBloodMoon = remaining;
-    }
-
-    public void SetCheckAfter (long time)
-    {
-        checkupAfter = time;
-    }
-
-    public long GetCheckAfter ()
-    {
-        return checkupAfter;
-    }
-
-    public void UpdateCacheDatabase ()
-    {
-
-        String worldUid = world.getUID().toString();
-        String tableName = "lastBloodMoon";
-        SQLAccess access = DatabaseManager.getSqlAccess();
-        boolean exists = false;
-        try
-        {
-            exists = access.EntryExist (tableName, new SQLField(
-                            "world",
-                            FieldType.TEXT,
-                            true,
-                            false), worldUid);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        String sql;
-        int days = (actuator.isInProgress()) ? -1 : daysBeforeBloodMoon;
-        long checkAt = (actuator.isInProgress()) ? 0 : checkupAfter;
-        if (exists)
-        {
-            sql = String.format("UPDATE %s SET days = %d, checkAt = %d WHERE world = '%s';", tableName, (days + 1), checkAt, worldUid);
-        }
-        else
-        {
-            sql = String.format("INSERT INTO %s VALUES('%s', %d, %d);", tableName, worldUid, (days + 1), checkAt);
-        }
-
-        try
-        {
-            if (! access.ExecuteSQLOperation(sql))
-            {
-                System.out.println("[Warning] There was an issue updating the cache");
-            }
-        }
-        catch (SQLException e)
-        {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
-
-
     }
 
     @Override
@@ -170,26 +87,26 @@ public class PeriodicNightCheck implements Runnable, Listener
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         if (world.getTime() > 11000)
         {
-            if (world.getFullTime() <= checkupAfter) return;
-            if (daysBeforeBloodMoon > 0)
+            if (world.getFullTime() <= actuator.getBloodMoonCheckAt()) return;
+            if (actuator.getBloodMoonDays() > 0)
             {
 
-                if (daysBeforeBloodMoon == 1)
+                if (actuator.getBloodMoonDays() == 1)
                 {
                     LocaleReader.MessageAllLocale("BloodMoonTomorrow", null, null, world);
                 }
                 else
                 {
-                    LocaleReader.MessageAllLocale("DaysBeforeBloodMoon", new String[]{"$d"}, new String[]{String.valueOf(daysBeforeBloodMoon)}, world);
+                    LocaleReader.MessageAllLocale("DaysBeforeBloodMoon", new String[]{"$d"}, new String[]{String.valueOf(actuator.getBloodMoonDays())}, world);
                 }
-                SetDaysRemaining(daysBeforeBloodMoon - 1);
-                checkupAfter = getNextEvening();
+                actuator.setBloodMoonDays((actuator.getBloodMoonDays() - 1));
+                actuator.setBloodMoonCheckAt(getNextEvening());
                 return;
             }
 
             //Day 0: prepare for Blood Moon
             LocaleReader.MessageAllLocale("BloodMoonTonight", null, null, world);
-            checkupAfter = getTodayZero() + 12000;
+            actuator.setBloodMoonCheckAt((int) (getTodayZero() + 12000));
         }
     }
     private void CheckBloodmoonNight()
@@ -197,13 +114,13 @@ public class PeriodicNightCheck implements Runnable, Listener
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         //Check if its Blood Moon night, then time is over 13000, and if its the day after the day 0 warning
-        if (world.getFullTime() >= checkupAfter && world.getTime() >= 12000 && daysBeforeBloodMoon == 0)
+        if (world.getFullTime() >= actuator.getBloodMoonCheckAt() && world.getTime() >= 12000 && actuator.getBloodMoonDays() == 0)
         {
 
             actuator.StartBloodMoon();
 
-            checkupAfter = getNextEvening();
-            daysBeforeBloodMoon = (configReader.GetIntervalConfig() - 1);
+            actuator.setBloodMoonCheckAt(getNextEvening());
+            actuator.setBloodMoonDays((configReader.GetIntervalConfig() - 1));
         }
     }
     private void CheckDay ()
@@ -223,19 +140,19 @@ public class PeriodicNightCheck implements Runnable, Listener
                     if (configReader.GetBloodMoonEndSoundConfig())
                         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 100.0f, 1.2f);
                 }
-                checkupAfter = 0; //This avoids some bugs when players use /time set 0
+                actuator.setBloodMoonCheckAt(0); //This avoids some bugs when players use /time set 0
             }
 
         }
 
     }
 
-    private long getNextEvening ()
+    private int getNextEvening ()
     {
         long currentTime = world.getFullTime();
         long remaining = currentTime % DAY;
 
-        return ((currentTime - remaining) + DAY + 11000);
+        return (int) ((currentTime - remaining) + DAY + 11000);
     }
 
     private long getTodayZero ()

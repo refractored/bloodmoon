@@ -15,18 +15,16 @@ public class PlayerTeleportListener implements Listener {
         World from = event.getFrom().getWorld();
         if (to != world && from != world) return; //None of our concern
 
-        if (from != to)
-        {
-            if (to == world && isInProgress())
-            {
+        if (from != to && isInProgress()) {
+            if (to == world) {
                 //Someone entered our bm world
                 HandleReconnectingPlayer(event.getPlayer());
             }
-            if (from == world && isInProgress())
-            {
+            if (from == world) {
                 //Someone left our bm world
                 HideNightBarPlayer(event.getPlayer());
             }
         }
+
     }
 }

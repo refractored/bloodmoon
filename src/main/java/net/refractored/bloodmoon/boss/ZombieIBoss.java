@@ -25,6 +25,9 @@ import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import static net.refractored.bloodmoon.managers.BloodmoonManager.GetActuator;
+import static net.refractored.bloodmoon.managers.BloodmoonManager.world;
+
 public final class ZombieIBoss extends Boss {
     Zombie zombieHost;
 
@@ -153,7 +156,7 @@ public final class ZombieIBoss extends Boss {
         }
 
         expDrop = rnd.nextInt(2) + 1;
-        expDrop *= reader.GetZombieBossExpMultiplier() * reader.GetExpMultConfig();
+        expDrop *= (int) (reader.GetZombieBossExpMultiplier() * (reader.GetExpMultConfig()[GetActuator(world).getBloodMoonLevel()]));
 
         for(int i = 0; i < expDrop; ++i) {
             ExperienceOrb orb = (ExperienceOrb)world.spawn(host.getLocation(), ExperienceOrb.class);

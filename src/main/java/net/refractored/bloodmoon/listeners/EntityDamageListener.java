@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon.listeners;
 
+import com.willfp.eco.core.particle.Particles;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import org.bukkit.Particle;
@@ -9,6 +10,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.projectiles.ProjectileSource;
+
+import java.io.ObjectInputFilter;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 import static net.refractored.bloodmoon.managers.BloodmoonManager.*;
 
@@ -34,6 +39,8 @@ public class EntityDamageListener implements Listener {
         if (receiver instanceof LivingEntity && damager instanceof LivingEntity)
         {
             ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
+            Double[] Damage = configReader.GetMobDamageMultConfig();
+            int Bloodmoonlevel = (GetActuator(world).getBloodMoonLevel() - 1);
             if (receiver instanceof Player)
             {
                 for (EntityType type : rewardedTypes)
@@ -41,14 +48,15 @@ public class EntityDamageListener implements Listener {
                     if (damager.getType() == type)
                     {
                         //Player is damaged by monster
-                        if (event.getFinalDamage() == 0 && configReader.GetShieldPreventEffects())
-                            return; //Hit was shielded. We shall not apply configs
-                        event.setDamage(event.getDamage() * configReader.GetMobDamageMultConfig());
+                        if (event.getFinalDamage() == 0 && configReader.GetShieldPreventEffects()) return;
+                        //Hit was shielded. We shall not apply configs
+                        event.setDamage(event.getDamage() * Damage[Bloodmoonlevel]);
                         ApplySpecialEffect((Player) receiver, (LivingEntity) damager);
                         if (configReader.GetPlayerDamageSoundConfig())
                             ((Player) receiver).playSound(receiver.getLocation(), Sound.AMBIENT_CAVE, 80.0f, 1.5f);
                         if (configReader.GetPlayerHitParticleConfig())
-                            world.spawnParticle(Particle.FLAME, receiver.getLocation(), 60);
+                             Particles.lookup("FLAME").spawn(receiver.getLocation(), 60);
+
                     }
                 }
             } else if (damager instanceof Player)
@@ -57,11 +65,11 @@ public class EntityDamageListener implements Listener {
                 {
                     if (receiver.getType() == type)
                     {
+                        Double[] Health = configReader.GetMobDamageMultConfig();
                         //Player dealt damage to monster
-                        event.setDamage((int) Math.ceil(event.getDamage() / configReader.GetMobHealthMultConfig()));
+                        event.setDamage((int) Math.ceil(event.getDamage() / Health[Bloodmoonlevel]));
                         if (configReader.GetMobHitParticleConfig())
-                            world.spawnParticle(Particle.CRIT_MAGIC, receiver.getLocation(), 60);
-
+                            Particles.lookup("CRIT_MAGIC").spawn(receiver.getLocation(), 60);
                     }
                 }
             }
