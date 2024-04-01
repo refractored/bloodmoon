@@ -66,7 +66,7 @@ public class BloodmoonManager implements Runnable, Closeable {
      */
     public static World world;
     private static boolean inProgress;
-    private static int bloodMoonLevel = 1;
+//    private static int bloodMoonLevel = 1;
     private static BossBar nightBar;
     private PeriodicManager actuatorPeriodic;
 
@@ -127,18 +127,17 @@ public class BloodmoonManager implements Runnable, Closeable {
         );
         this.bloodmoonDaysKey = NamespacedKeyUtils.create("bloodmoon", "days_" + world.getName());
         DaysPersistentData = new PersistentDataKey(
-                bloodmoonLevelKey,
+                bloodmoonDaysKey,
                 PersistentDataKeyType.INT,
-                1
+                Bloodmoon.GetInstance().getConfigReader(world).GetIntervalConfig()
         );
         this.bloodmoonCheckAtKey = NamespacedKeyUtils.create("bloodmoon", "checkat_" + world.getName());
         CheckAtPersistentData = new PersistentDataKey(
-                bloodmoonLevelKey,
+                bloodmoonCheckAtKey,
                 PersistentDataKeyType.INT,
                 0
         );
         blacklistedMobs = new ArrayList<>();
-        Logger.getLogger("Bloodmoon").info(levelsPersistentData.toString());
 
 //        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
 //        {
@@ -688,7 +687,6 @@ public class BloodmoonManager implements Runnable, Closeable {
         for (String str : configs)
         {
             String[] parts = str.split(",");
-            Logger.getLogger("Bloodmoon").info(Integer.toString(GetActuator(world).getBloodMoonLevel()));
             if (GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
             if (parts[1].equals("lightning"))
             {
@@ -769,16 +767,15 @@ public class BloodmoonManager implements Runnable, Closeable {
     );
     }
     public void setBloodMoonDays(int bloodMoonDays) {
-
         ServerProfile.load().write(
-                levelsPersistentData,
+                DaysPersistentData,
                 bloodMoonDays
         );
     }
     public void setBloodMoonCheckAt(int bloodMoonCheckAt) {
 
         ServerProfile.load().write(
-                levelsPersistentData,
+                CheckAtPersistentData,
                 bloodMoonCheckAt
         );
     }

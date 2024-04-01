@@ -45,7 +45,7 @@ public class BloodmoonInfo {
 //            return;
 //        }
 
-        int remainingDays = PeriodicNightCheck.GetDaysRemaining(world);
+        int remainingDays = (BloodmoonManager.GetActuator(world).getBloodMoonDays() + 1);
 
         if (remainingDays < 0) {
             System.out.println("[Error] remainingDays is lower than 0. Please regenerate both the bloodmoon cache and the config for world " + world.getName());

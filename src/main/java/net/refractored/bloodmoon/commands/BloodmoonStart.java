@@ -5,14 +5,11 @@ import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.Description;
 import revxrsal.commands.annotation.Optional;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
-
-import static net.refractored.bloodmoon.Bloodmoon.localeReader;
 
 public class BloodmoonStart {
     @CommandPermission("bloodmoon.admin.start")
@@ -50,8 +47,8 @@ public class BloodmoonStart {
             actor.reply(String.format("&cA Bloodmoon is already in progress in world \"%s\"",world.getName()));
             return;
         }
-        nightCheck.SetCheckAfter(0);
-        nightCheck.SetDaysRemaining(0);
+        BloodmoonManager.GetActuator(world).setBloodMoonCheckAt(0);
+        BloodmoonManager.GetActuator(world).setBloodMoonDays(0);
         world.setTime(12001);
         actor.reply(String.format("&aStarted a bloodmoon in world \"%s\".",world.getName()));
     }

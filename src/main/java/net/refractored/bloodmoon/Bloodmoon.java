@@ -1,16 +1,11 @@
 package net.refractored.bloodmoon;
 
-import com.willfp.eco.core.data.ServerProfile;
-import com.willfp.eco.core.data.keys.PersistentDataKey;
-import com.willfp.eco.core.data.keys.PersistentDataKeyType;
-import com.willfp.eco.util.NamespacedKeyUtils;
 import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.listeners.*;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.listeners.WorldLoadListener;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,9 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static net.refractored.bloodmoon.managers.DatabaseManager.getSqlAccess;
 
 /**
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
@@ -173,27 +166,27 @@ public final class Bloodmoon extends JavaPlugin {
 
     private void LoadCache (World world)
     {
-        try
-        {
-            SQLAccess access = getSqlAccess();
-            boolean exists = access.EntryExist("lastBloodMoon", new SQLField("world", FieldType.TEXT, true, false), world.getUID().toString());
-
-            if (exists)
-            {
-                ResultSet set = access.ExecuteSQLQuery("SELECT days, checkAt FROM lastBloodMoon WHERE world = '" + world.getUID().toString() + "';");
-                set.next();
-
-                PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
-
-                nightCheck.SetDaysRemaining(set.getInt("days"));
-                nightCheck.SetCheckAfter(set.getInt("checkAt"));
-                set.close();
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+//        try
+//        {
+//            SQLAccess access = getSqlAccess();
+//            boolean exists = access.EntryExist("lastBloodMoon", new SQLField("world", FieldType.TEXT, true, false), world.getUID().toString());
+//
+//            if (exists)
+//            {
+//                ResultSet set = access.ExecuteSQLQuery("SELECT days, checkAt FROM lastBloodMoon WHERE world = '" + world.getUID().toString() + "';");
+//                set.next();
+//
+//                PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
+//
+////                nightCheck.setBloodMoonDays(set.getInt("days"));
+//                nightCheck.SetCheckAfter(set.getInt("checkAt"));
+//                set.close();
+//            }
+//        }
+//        catch (SQLException e)
+//        {
+//            e.printStackTrace();
+//        }
     }
 
     //Create a config reader, setting it up if it does not exist
@@ -240,7 +233,6 @@ public final class Bloodmoon extends JavaPlugin {
 
         CreateFolder();
 
-        getSqlAccess();
         getLocaleReader();
 
         worldManager = new WorldLoadListener();
@@ -271,7 +263,6 @@ public final class Bloodmoon extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EntityDamageListener(), this);
 
         CheckOlderConfigs();
-//        ecoWrite();
     }
 
     /**
@@ -328,32 +319,12 @@ public final class Bloodmoon extends JavaPlugin {
             }
         }
     }
-//private void ecoWrite(){
-//    NamespacedKey key = NamespacedKeyUtils.create("bloodmoon", "level");
-//    Logger.getLogger("Bloodmoon").info("Updating cache database");
-//    PersistentDataKey<Integer> bloodmoonLevelKey = new PersistentDataKey(
-//            key,
-//            PersistentDataKeyType.INT,
-//            1
-//    );
-//    ServerProfile.load().write(
-//            bloodmoonLevelKey,
-//            3
-//    );
-//    Logger.getLogger("Bloodmoon").info(bloodmoonLevelKey.toString() );
-//
-//
-//}
     /**
      * Disables the plugin
      */
     @Override
     public void onDisable()
     {
-        for (PeriodicNightCheck nightCheck : nightChecks)
-        {
-            nightCheck.UpdateCacheDatabase();
-        }
 
         for (BloodmoonManager actuator : actuators)
         {
