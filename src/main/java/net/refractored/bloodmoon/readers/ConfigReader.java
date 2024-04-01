@@ -91,6 +91,8 @@ public class ConfigReader implements Closeable
     public static final String PLAYER_HIT_PARTICLE_EFFECT = "PlayerHitParticleEffect";
     public static final boolean DEFAULT_PLAYER_HIT_PARTICLE_EFFECT = true;
     public static final String MOB_HIT_PARTICLE_EFFECT = "MobHitParticleEffect";
+    public static final boolean INHERIT_ITEMS_DEFAULT = true;
+    public static final String INHERIT_ITEMS = "InheritItems";
     public static final boolean DEFAULT_MOB_HIT_PARTICLE_EFFECT = true;
     public static final String BASELINE_HORDE_SPAWNRATE = "BaselineHordeSpawnrate";
     public static final int BASELINE_HORDE_SPAWNRATE_DEFAULT = 800;
@@ -212,6 +214,8 @@ public class ConfigReader implements Closeable
             writer.write("  - \"2,2,gold_block 1\"\n");
             writer.write("#Here is an example of a special item drop with fire aspect I and sharpness III:\n");
             writer.write("# - \"diamond_sword name:Excalibur sharpness:3 fire_aspect:1\"\n");
+            writer.write(INHERIT_ITEMS + ": " + String.valueOf(INHERIT_ITEMS_DEFAULT) + "\n");
+            writer.write("#Enabling inheriting items allows items from bloodmoon level 1 to spawn in level 3:\n");
             writer.write("#These are AOE powers affecting all players around the boss\n");
             writer.write("#Accepted values are:\n");
             writer.write("#LIGHTNING,[range],[cooldown]\n");
@@ -593,6 +597,24 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return PREVENT_SLEEPING_DEFAULT;
+        }
+    }
+
+    public boolean GetInheritItemsConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(INHERIT_ITEMS);
+            if (interval == null)
+            {
+                CreateConfig(INHERIT_ITEMS, String.valueOf(INHERIT_ITEMS_DEFAULT));
+                interval = INHERIT_ITEMS;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return INHERIT_ITEMS_DEFAULT;
         }
     }
 

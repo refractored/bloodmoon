@@ -612,13 +612,18 @@ public class BloodmoonManager implements Runnable, Closeable {
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
         String[] items = configReader.GetItemListConfig(); //Get the list of items
+        Boolean itemsInherited = configReader.GetInheritItemsConfig(); //Get the list of items
         Map<String, Integer[]> indexes = new HashMap<>();
         int totalWeight = 0;
 
         for (String entry : items) {
             String[] parts = entry.split(",");
             int itemWeight = Integer.parseInt(parts[1]);
-            if (GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
+            if (itemsInherited){
+                if (GetActuator(world).getBloodMoonLevel() < Integer.parseInt(parts[0])) continue;
+            } else {
+                if (GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
+            }
             indexes.put(entry, new Integer[]{totalWeight, totalWeight + itemWeight});
             totalWeight += itemWeight;
         }
@@ -760,7 +765,6 @@ public class BloodmoonManager implements Runnable, Closeable {
      * @param bloodMoonLevel the blood moon level
      */
     public void setBloodMoonLevel(int bloodMoonLevel) {
-
     ServerProfile.load().write(
             levelsPersistentData,
             bloodMoonLevel
@@ -773,7 +777,6 @@ public class BloodmoonManager implements Runnable, Closeable {
         );
     }
     public void setBloodMoonCheckAt(int bloodMoonCheckAt) {
-
         ServerProfile.load().write(
                 CheckAtPersistentData,
                 bloodMoonCheckAt
