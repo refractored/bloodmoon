@@ -51,7 +51,7 @@ public class BloodmoonInfo {
         int remainingDays = (BloodmoonManager.GetActuator(world).getBloodMoonDays() + 1);
 
         if (remainingDays < 0) {
-            Bloodmoon.GetInstance().getLogger().warning("remainingDays is lower than 0. Please regen erate both the cache and the config for world" + world.getName());
+            Bloodmoon.GetInstance().getLogger().warning("remainingDays is lower than 0. Please regenerate both the cache and the config for world" + world.getName());
             actor.reply(localeReader.GetLocaleString("GeneralError"));
             return;
         }
