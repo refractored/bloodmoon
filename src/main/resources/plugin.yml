@@ -6,6 +6,7 @@ depend:
 softdepend:
   - "Multiverse-Core"
   - "WorldGuard"
+  - "PlaceholderAPI"
 api-version: 1.20
 authors: [SpectralMemories, refractored]
 description: A Bloodmoon shines every couple of nights
