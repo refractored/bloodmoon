@@ -3,9 +3,11 @@ package net.refractored.bloodmoon;
 import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.listeners.*;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
-import net.refractored.bloodmoon.managers.WorldManager;
+import net.refractored.bloodmoon.listeners.WorldLoadListener;
+import net.refractored.bloodmoon.managers.PlaceholderManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static net.refractored.bloodmoon.managers.DatabaseManager.getSqlAccess;
 
 /**
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
@@ -54,7 +55,7 @@ public final class Bloodmoon extends JavaPlugin {
     private static Map<World, ConfigReader> configReaders;
     private static List<ConfigReader> allConfigReaders;
 
-    private static WorldManager worldManager;
+    private static WorldLoadListener worldManager;
 
     /**
      * Returns the Bloodmoon instance
@@ -165,31 +166,6 @@ public final class Bloodmoon extends JavaPlugin {
         folder.mkdir();
     }
 
-    private void LoadCache (World world)
-    {
-        try
-        {
-            SQLAccess access = getSqlAccess();
-            boolean exists = access.EntryExist("lastBloodMoon", new SQLField("world", FieldType.TEXT, true, false), world.getUID().toString());
-
-            if (exists)
-            {
-                ResultSet set = access.ExecuteSQLQuery("SELECT days, checkAt FROM lastBloodMoon WHERE world = '" + world.getUID().toString() + "';");
-                set.next();
-
-                PeriodicNightCheck nightCheck = PeriodicNightCheck.GetPeriodicNightCheck(world);
-
-                nightCheck.SetDaysRemaining(set.getInt("days"));
-                nightCheck.SetCheckAfter(set.getInt("checkAt"));
-                set.close();
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     //Create a config reader, setting it up if it does not exist
     private ConfigReader CreateSingleConfigReader (World world)
     {
@@ -234,10 +210,9 @@ public final class Bloodmoon extends JavaPlugin {
 
         CreateFolder();
 
-        getSqlAccess();
         getLocaleReader();
 
-        worldManager = new WorldManager();
+        worldManager = new WorldLoadListener();
 
         nightChecks = new ArrayList<>();
         actuators = new ArrayList<>();
@@ -247,12 +222,26 @@ public final class Bloodmoon extends JavaPlugin {
         allConfigReaders = new ArrayList<>();
         bloodmoonWorlds = new ArrayList<>();
 
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceholderManager(this).register();
+        }
+
         for (World world : getServer().getWorlds())
         {
             LoadWorld(world);
         }
 
         getServer().getPluginManager().registerEvents (worldManager, this);
+
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new MobSpawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerConnectListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerSleepListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
+        getServer().getPluginManager().registerEvents(new EntityDamageListener(), this);
 
         CheckOlderConfigs();
     }
@@ -276,14 +265,8 @@ public final class Bloodmoon extends JavaPlugin {
         }
 
         BloodmoonManager actuator = new BloodmoonManager(world);
-        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
-        getServer().getPluginManager().registerEvents(new MobDeathListener(), this);
-        getServer().getPluginManager().registerEvents(new MobSpawnListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerConnectListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerRespawnListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerSleepHandler(), this);
-        getServer().getPluginManager().registerEvents(new PlayerTeleportListener(), this);
+
+
 
         actuators.add(actuator);
 
@@ -295,7 +278,6 @@ public final class Bloodmoon extends JavaPlugin {
             GetScheduler().runTaskLater(this, nightCheck, 0);
             getServer().getPluginManager().registerEvents(nightCheck, this);
             nightChecks.add(nightCheck);
-            LoadCache(world);
         }
 
         bloodmoonWorlds.add(world);
@@ -317,17 +299,12 @@ public final class Bloodmoon extends JavaPlugin {
             }
         }
     }
-
     /**
      * Disables the plugin
      */
     @Override
     public void onDisable()
     {
-        for (PeriodicNightCheck nightCheck : nightChecks)
-        {
-            nightCheck.UpdateCacheDatabase();
-        }
 
         for (BloodmoonManager actuator : actuators)
         {
@@ -359,6 +336,7 @@ public final class Bloodmoon extends JavaPlugin {
         {
             e.printStackTrace();
         }
+
     }
 
     private void CheckOlderConfigs ()

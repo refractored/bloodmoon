@@ -1,5 +1,6 @@
-package net.refractored.bloodmoon;
+package net.refractored.bloodmoon.managers;
 
+import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -13,7 +14,7 @@ import java.util.Random;
  * ActuatorPeriodic is a periodic runner designed to be ran once at the start of the bloodmoon
  * You must close it manually upon bloodmoon end
  */
-public class ActuatorPeriodic implements Runnable, Closeable
+public class PeriodicManager implements Runnable, Closeable
 {
     World world;
     Random random;
@@ -24,7 +25,7 @@ public class ActuatorPeriodic implements Runnable, Closeable
      * Default constructor
      * @param world world to affect
      */
-    public ActuatorPeriodic(World world)
+    public PeriodicManager(World world)
     {
         mustStop = false;
         this.world = world;

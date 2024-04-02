@@ -7,7 +7,11 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
-import net.refractored.bloodmoon.ActuatorPeriodic;
+import com.willfp.eco.core.data.ServerProfile;
+import com.willfp.eco.core.data.keys.PersistentDataKey;
+import com.willfp.eco.core.data.keys.PersistentDataKeyType;
+import com.willfp.eco.core.items.Items;
+import com.willfp.eco.util.NamespacedKeyUtils;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import net.refractored.bloodmoon.boss.IBoss;
@@ -19,19 +23,18 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SpawnCategory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.Closeable;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * This is the class that handles most interaction during a BloodMoon
@@ -63,9 +66,16 @@ public class BloodmoonManager implements Runnable, Closeable {
      */
     public static World world;
     private static boolean inProgress;
-    private int bloodMoonLevel = 1;
     private static BossBar nightBar;
-    private ActuatorPeriodic actuatorPeriodic;
+    private PeriodicManager actuatorPeriodic;
+
+    private final NamespacedKey bloodmoonLevelKey;
+    private final NamespacedKey bloodmoonDaysKey;
+    private final NamespacedKey bloodmoonCheckAtKey;
+
+    private final PersistentDataKey<Integer> levelsPersistentData;
+    private final PersistentDataKey<Integer> DaysPersistentData;
+    private final PersistentDataKey<Integer> CheckAtPersistentData;
 
     /**
      * The Blacklisted mobs.
@@ -108,12 +118,35 @@ public class BloodmoonManager implements Runnable, Closeable {
         this.world = world;
         inProgress = false;
         AddActuator(this);
+        this.bloodmoonLevelKey = NamespacedKeyUtils.create("bloodmoon", "level_" + world.getName());
+        levelsPersistentData = new PersistentDataKey(
+                bloodmoonLevelKey,
+                PersistentDataKeyType.INT,
+                1
+        );
+        this.bloodmoonDaysKey = NamespacedKeyUtils.create("bloodmoon", "days_" + world.getName());
+        DaysPersistentData = new PersistentDataKey(
+                bloodmoonDaysKey,
+                PersistentDataKeyType.INT,
+                Bloodmoon.GetInstance().getConfigReader(world).GetIntervalConfig()
+        );
+        this.bloodmoonCheckAtKey = NamespacedKeyUtils.create("bloodmoon", "checkat_" + world.getName());
+        CheckAtPersistentData = new PersistentDataKey(
+                bloodmoonCheckAtKey,
+                PersistentDataKeyType.INT,
+                0
+        );
         blacklistedMobs = new ArrayList<>();
 
-        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
-        {
-            StartBloodMoon();
-        }
+//        if (Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonConfig())
+//        {
+//            if (Bloodmoon.GetInstance().getConfigReader(world).GetBloodMoonLevelsEnabledConfig()){
+//                setBloodMoonLevel(Bloodmoon.GetInstance().getConfigReader(world).GetPermanentBloodMoonLevelConfig());
+//            } else {
+//                setBloodMoonLevel(1);
+//            }
+//            StartBloodMoon();
+//        }
 
         bosses = new ArrayList<>();
     }
@@ -128,7 +161,7 @@ public class BloodmoonManager implements Runnable, Closeable {
         ShowNightBar();
         BroadcastBloodMoonWarning();
 
-        actuatorPeriodic = new ActuatorPeriodic(world);
+        actuatorPeriodic = new PeriodicManager(world);
         actuatorPeriodic.run();
 
         SpawnBosses();
@@ -149,7 +182,7 @@ public class BloodmoonManager implements Runnable, Closeable {
             return;
         }
         inProgress = false;
-        bloodMoonLevel = 1;
+        setBloodMoonLevel(1);
 
         StopStorm();
         HideNightBar();
@@ -264,11 +297,15 @@ public class BloodmoonManager implements Runnable, Closeable {
         int maxMob = reader.GetHordeMaxPopulation();
         int mobAmount = random.nextInt(maxMob - minMob) + minMob;
         int maxDistance = reader.GetHordeSpawnDistance();
+        String[] mobList = switch (getBloodMoonLevel()) {
+            default -> reader.GetHordeMobWhitelist();
+            case 2 -> reader.GetHordeMobWhitelistLevel2();
+            case 3 -> reader.GetHordeMobWhitelistLevel3();
+        };
+        int mobListLen = mobList.length;
 
         for (int i = 0; i < mobAmount; i++)
         {
-            String[] mobList = reader.GetHordeMobWhitelist();
-            int mobListLen = mobList.length;
             EntityType mobType = EntityType.valueOf(mobList[random.nextInt(mobListLen)]);
 
             Location newMobLocation = hordeSpawnLocation.clone();
@@ -533,7 +570,7 @@ public class BloodmoonManager implements Runnable, Closeable {
      * @param player the player
      */
     public static void HandleReconnectingPlayer (Player player) {
-        if (isInProgress() && nightBar != null) nightBar.addPlayer(player);
+        if (BloodmoonManager.GetActuator(world).isInProgress() && nightBar != null) nightBar.addPlayer(player);
         BroadcastBloodMoonWarningPlayer(player);
     }
 
@@ -572,68 +609,34 @@ public class BloodmoonManager implements Runnable, Closeable {
         Material itemMaterial;
 
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
+
         String[] items = configReader.GetItemListConfig(); //Get the list of items
+        Boolean itemsInherited = configReader.GetInheritItemsConfig(); //Get the list of items
         Map<String, Integer[]> indexes = new HashMap<>();
         int totalWeight = 0;
 
-        for (String entry : items)
-        {
-            String[] parts = entry.split(":");
-            int itemWeight = Integer.parseInt(parts[2]);
-
+        for (String entry : items) {
+            String[] parts = entry.split(",");
+            int itemWeight = Integer.parseInt(parts[1]);
+            if (itemsInherited){
+                if (GetActuator(world).getBloodMoonLevel() < Integer.parseInt(parts[0])) continue;
+            } else {
+                if (GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
+            }
             indexes.put(entry, new Integer[]{totalWeight, totalWeight + itemWeight});
             totalWeight += itemWeight;
         }
 
         int rng = random.nextInt(totalWeight);
 
-        for (Map.Entry<String, Integer[]> entry : indexes.entrySet())
-        {
+        for (Map.Entry<String, Integer[]> entry : indexes.entrySet()) {
             int min = entry.getValue()[0];
             int max = entry.getValue()[1];
 
             if (rng >= min && rng < max)
             {
-                String[] parts = entry.getKey().split(":");
-                itemMaterial = Material.valueOf(parts[0]);
-
-                ItemStack itemStack = new ItemStack(itemMaterial, Integer.parseInt(parts[1]));
-
-                for (int i = 3; i < 6; i++)
-                {
-                    if (parts.length <= i) break;
-
-                    String line = parts[i];
-                    if (line.startsWith("$name"))
-                    {
-                        line = line.substring("$name".length() + 1);
-
-                        ItemMeta meta = itemStack.getItemMeta();
-                        meta.setDisplayName(line);
-                        itemStack.setItemMeta(meta);
-                    } else if (line.startsWith("$desc"))
-                    {
-                        line = line.substring("$desc".length() + 1);
-
-                        ItemMeta meta = itemStack.getItemMeta();
-                        meta.setLore(Arrays.asList(line.split("\\$n")));
-                        itemStack.setItemMeta(meta);
-                    } else if (line.startsWith("$enchant"))
-                    {
-                        line = line.substring("$enchant".length() + 1);
-
-                        String[] enchantLines = line.split(";");
-                        for (String enchantLine : enchantLines)
-                        {
-                            String[] enchant = enchantLine.split(",");
-                            Enchantment enchantment = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(enchant[0].toLowerCase()));
-                            if (enchantment == null) continue; //Enchantment not found. Meh
-                            itemStack.addEnchantment(enchantment, Integer.parseInt(enchant[1]));
-                        }
-                    }
-                }
-
-                return itemStack;
+                String[] parts = entry.getKey().split(",");
+                return Items.lookup(parts[2]).getItem();
             }
         }
         return null;
@@ -684,21 +687,20 @@ public class BloodmoonManager implements Runnable, Closeable {
 
         String[] configs = configReader.GetMobEffectConfig(mobTypeName);
 
+
         for (String str : configs)
         {
-            if (str.equals("lightning"))
+            String[] parts = str.split(",");
+            if (GetActuator(world).getBloodMoonLevel() != Integer.parseInt(parts[0])) continue;
+            if (parts[1].equals("lightning"))
             {
                 world.strikeLightning(player.getLocation());
                 continue;
             }
-
-
-            String[] parts = str.split(",");
-            PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(parts[0]));
+            PotionEffectType type = Registry.EFFECT.get(NamespacedKey.minecraft(parts[1]));
             if (type == null) continue; //Effect not found. Meh
-            String effectName = parts[0];
-            int ticks = (int) (20f * Float.parseFloat(parts[1]));
-            int amp = Integer.parseInt(parts[2]);
+            int ticks = (int) (20f * Float.parseFloat(parts[2]));
+            int amp = Integer.parseInt(parts[3]);
 
             player.addPotionEffect(new PotionEffect(type, ticks, amp));
 
@@ -710,7 +712,7 @@ public class BloodmoonManager implements Runnable, Closeable {
      *
      * @return the boolean
      */
-    public static boolean isInProgress() {
+    public boolean isInProgress() {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         return inProgress || reader.GetPermanentBloodMoonConfig();
     }
@@ -738,13 +740,22 @@ public class BloodmoonManager implements Runnable, Closeable {
         world.save();
     }
 
+    public int getBloodMoonCheckAt() {
+
+        return ServerProfile.load().read(CheckAtPersistentData);
+    }
+    public int getBloodMoonDays() {
+
+        return ServerProfile.load().read(DaysPersistentData);
+    }
     /**
      * Gets blood moon level.
      *
      * @return the blood moon level
      */
     public int getBloodMoonLevel() {
-        return bloodMoonLevel;
+
+        return ServerProfile.load().read(levelsPersistentData);
     }
 
     /**
@@ -753,6 +764,21 @@ public class BloodmoonManager implements Runnable, Closeable {
      * @param bloodMoonLevel the blood moon level
      */
     public void setBloodMoonLevel(int bloodMoonLevel) {
-        this.bloodMoonLevel = bloodMoonLevel;
+    ServerProfile.load().write(
+            levelsPersistentData,
+            bloodMoonLevel
+    );
+    }
+    public void setBloodMoonDays(int bloodMoonDays) {
+        ServerProfile.load().write(
+                DaysPersistentData,
+                bloodMoonDays
+        );
+    }
+    public void setBloodMoonCheckAt(int bloodMoonCheckAt) {
+        ServerProfile.load().write(
+                CheckAtPersistentData,
+                bloodMoonCheckAt
+        );
     }
 }

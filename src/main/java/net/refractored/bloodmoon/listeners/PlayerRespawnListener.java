@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon.listeners;
 
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,7 +18,7 @@ public class PlayerRespawnListener implements Listener {
 
         if (from != to)
         {
-            if (to == world && isInProgress())
+            if (to == world && BloodmoonManager.GetActuator(world).isInProgress())
             {
                 //Someone respawned in our bm world
                 HandleReconnectingPlayer(event.getPlayer());

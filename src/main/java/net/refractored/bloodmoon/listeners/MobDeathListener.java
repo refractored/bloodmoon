@@ -1,6 +1,7 @@
 package net.refractored.bloodmoon.listeners;
 
 import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.commands.BloodmoonLevelAdd;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.boss.IBoss;
 import net.refractored.bloodmoon.readers.ConfigReader;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Random;
 
@@ -35,13 +37,13 @@ public class MobDeathListener implements Listener {
                     LocaleReader.MessageAllLocale("BossSlain", new String[]{"$b", "$p"}, new String[]{boss.GetName(), killer.getName()}, world);
                 }
 
-                boss.Kill(killer != null && BloodmoonManager.isInProgress());
+                boss.Kill(killer != null && BloodmoonManager.GetActuator(world).isInProgress());
                 bosses.remove(boss);
                 return;
             }
         }
 
-        if (!BloodmoonManager.isInProgress()) return; //Only during BloodMoon
+        if (!BloodmoonManager.GetActuator(world).isInProgress()) return; //Only during BloodMoon
 
         if (entity.getKiller() == null) return; //No killer, no reward
 
@@ -69,7 +71,7 @@ public class MobDeathListener implements Listener {
 
         if (!eligible) return; //Not eligible for reward
 
-        event.setDroppedExp(event.getDroppedExp() * configReader.GetExpMultConfig());
+        event.setDroppedExp((int) (event.getDroppedExp() * configReader.GetExpMultConfig()[(GetActuator(world).getBloodMoonLevel() - 1)]));
 
         if (configReader.GetMobDeathThunderConfig())
             world.strikeLightningEffect(event.getEntity().getLocation());
@@ -88,6 +90,7 @@ public class MobDeathListener implements Listener {
 
         for (ItemStack item : bonusDrops)
         {
+            if (item == null) continue;
             world.dropItemNaturally(entity.getLocation(), item); //Drop items
         }
     }

@@ -1,6 +1,7 @@
 package net.refractored.bloodmoon.listeners;
 
 import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.entity.Player;
@@ -13,7 +14,7 @@ import static net.refractored.bloodmoon.managers.BloodmoonManager.*;
 public class PlayerDeathListener implements Listener {
     @EventHandler
     public void onPlayerDeath (PlayerDeathEvent event) {
-        if (!isInProgress()) return; //Only during BloodMoon
+        if (!BloodmoonManager.GetActuator(world).isInProgress()) return; //Only during BloodMoon
 
         LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);

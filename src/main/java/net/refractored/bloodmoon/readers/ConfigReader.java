@@ -6,7 +6,9 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ConfigReader implements Closeable
 {
@@ -60,8 +62,16 @@ public class ConfigReader implements Closeable
     public static final boolean MOBS_FROM_SPAWNER_NO_REWARD_DEFAULT = false;
     public static final String SHIELD_PREVENTS_EFFECTS = "ShieldPreventsEffects";
     public static final boolean SHIELD_PREVENTS_EFFECTS_DEFAULT = true;
+    public static final String BLOODMOON_LEVELS_ENABLED = "BloodmoonLevelsEnabled";
+    public static final boolean BLOODMOON_LEVELS_ENABLED_DEFAULT = true;
+
+
     public static final String PERMANENT_BLOOD_MOON = "PermanentBloodMoon";
     public static final boolean PERMANENT_BLOODMOON_DEFAULT = false;
+    public static final String PERMANENT_BLOOD_MOON_LEVEL = "PermanentBloodMoonLevel";
+    public static final int PERMANENT_BLOODMOON_LEVEL_DEFAULT = 1;
+
+
     public static final String ZOMBIEBOSSEFFECTS = "ZOMBIEBOSSEffects";
     public static final String ENABLE_ZOMBIE_BOSS = "EnableZombieBoss";
     public static final String ZOMBIE_BOSS_HEALTH = "ZombieBossHealth";
@@ -81,12 +91,17 @@ public class ConfigReader implements Closeable
     public static final String PLAYER_HIT_PARTICLE_EFFECT = "PlayerHitParticleEffect";
     public static final boolean DEFAULT_PLAYER_HIT_PARTICLE_EFFECT = true;
     public static final String MOB_HIT_PARTICLE_EFFECT = "MobHitParticleEffect";
+    public static final boolean INHERIT_ITEMS_DEFAULT = true;
+    public static final String INHERIT_ITEMS = "InheritItems";
     public static final boolean DEFAULT_MOB_HIT_PARTICLE_EFFECT = true;
     public static final String BASELINE_HORDE_SPAWNRATE = "BaselineHordeSpawnrate";
     public static final int BASELINE_HORDE_SPAWNRATE_DEFAULT = 800;
     public static final String HORDE_SPAWNRATE_VARIATION = "HordeSpawnrateVariation";
     public static final int HORDE_SPAWNRATE_VARIATION_DEFAULT = 200;
-    public static final String HORDE_MOB_WHITELIST = "HordeMobWhitelist";
+    public static final String HORDE_MOB_WHITELIST = "HordeMobWhitelistLevel1";
+    public static final String HORDE_MOB_WHITELIST_LEVEL_2 = "HordeMobWhitelistLevel2";
+    public static final String HORDE_MOB_WHITELIST_LEVEL_3 = "HordeMobWhitelistLevel3";
+
     public static final String HORDE_SPAWN_DISTANCE = "HordeSpawnDistance";
     public static final int HORDE_SPAWN_DISTANCE_DEFAULT = 12;
     public static final String HORDE_MIN_POPULATION = "HordeMinPopulation";
@@ -120,8 +135,12 @@ public class ConfigReader implements Closeable
             writer.write("#Config file for world:" + world.getName() + " (UUID: " + world.getUID().toString() + ")\n\n");
             writer.write("#Wether or not a BloodMoon happens in this world\n#Requires a server restart upon changes\n");
             writer.write(IS_BLACKLISTED + ": " + String.valueOf(IS_BLACKLISTED_DEFAULT) + "\n");
+            writer.write("#Enable or disable the leveling system of bloodmoons\n#When disabled level one configs are used for evereything.\n");
+            writer.write(BLOODMOON_LEVELS_ENABLED + ": " + String.valueOf(BLOODMOON_LEVELS_ENABLED_DEFAULT) + "\n");
             writer.write("#Sets a permanent BloodMoon in this world\n#Obviously the interval option is ignored when this is on\n");
             writer.write(PERMANENT_BLOOD_MOON + ": " + String.valueOf(PERMANENT_BLOODMOON_DEFAULT) + "\n");
+            writer.write("#Change the level of a the PERMANENT bloodmoon\n#This is ignored if levels are disabled\n");
+            writer.write(PERMANENT_BLOOD_MOON_LEVEL + ": " + String.valueOf(PERMANENT_BLOODMOON_LEVEL_DEFAULT) + "\n");
             writer.write("#Interval in days between BloodMoons\n");
             writer.write(BLOOD_MOON_INTERVAL + ": " + String.valueOf(DEFAULT_INTERVAL) + "\n");
             writer.write("#Do items despawn upon death?\n");
@@ -133,11 +152,20 @@ public class ConfigReader implements Closeable
             writer.write("#Minimum item amount to drop per mob death\n");
             writer.write(ITEM_DROPS_MINIMUM + ": " + String.valueOf(MIN_ITEM_DROP_DEFAULT) + "\n");
             writer.write("#Mob experience drop multiplicator. Whole number only\n");
-            writer.write(EXP_MULTIPLICATOR + ": " + String.valueOf(EXP_MULTIPLICATOR_DEFAULT) + "\n");
+            writer.write(EXP_MULTIPLICATOR  + ":\n");
+            writer.write("  - \"1\"\n");
+            writer.write("  - \"1\"\n");
+            writer.write("  - \"1\"\n");
             writer.write("#Mob damage multiplier. Whole number only\n");
-            writer.write(MOB_DAMAGE_MULT + ": " + String.valueOf(MOB_DAMAGE_MULT_DEFAULT) + "\n");
+            writer.write(MOB_DAMAGE_MULT  + ":\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
             writer.write("#Mob health multiplier. Whole number only\n");
-            writer.write(MOB_HEALTH_MULT + ": " + String.valueOf(MOB_HEALTH_MULT_DEFAULT) + "\n");
+            writer.write(MOB_HEALTH_MULT + ":\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
+            writer.write("  - \"3.0\"\n");
             writer.write("#Should there be a lightning effect on player death?\n");
             writer.write(LIGHTNING_EFFECT_ON_PLAYER_DEATH + ": " + String.valueOf(LIGTHNINGEFFECT_DEFAULT) + "\n");
             writer.write("#Adds a lightning effect when a mob dies\n");
@@ -173,20 +201,21 @@ public class ConfigReader implements Closeable
             writer.write("ZombieBossHealth: 50\n");
             writer.write("ZombieBossItemMultiplier: 10\n");
             writer.write("#List of items that can drop, using the\n");
-            writer.write("#\"[ITEM_CODE]:[STACK AMOUNT]:[WEIGHT]:$name [META NAME]:$desc [META DESCRIPTION]:$enchant [ENCHANTMENT LIST]\" format\n");
-            writer.write("#$name, $desc and $enchant are of course optional\n");
-            writer.write("#The enchantment list argument is formatted as follow: \"$enchant [ENCHANT NAME],[LEVEL];\"\n");
+            writer.write("#\"[BloodmoonLvL],[Weight],[Item]\" format\n");
+            writer.write("#The [Item] uses auxilor's eco item lookup. Read more here:\n");
+            writer.write("#https://plugins.auxilor.io/all-plugins/the-item-lookup-system\n");
             writer.write("#The percent chance of an item dropping is equal to [item weight] / [total weight] * 100\n");
-            writer.write("#Please refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html for the list of items\n");
-            writer.write("#Enchantment names are exactly as they appear in-game, except with \"_\" replacing spaces. Case is irrelevant\n");
             writer.write(DROP_ITEM_LIST + ":\n");
-            writer.write("  - \"IRON_INGOT:5:10\"\n");
-            writer.write("  - \"GOLD_INGOT:2:5\"\n");
-            writer.write("  - \"DIAMOND:1:1\"\n");
-            writer.write("  - \"IRON_BLOCK:1:5\"\n");
-            writer.write("  - \"GOLD_BLOCK:1:2\"\n");
+            writer.write("  - \"1,10,iron_ingot 5\"\n");
+            writer.write("  - \"1,5,gold_ingot 2\"\n");
+            writer.write("  - \"1,5,gold_ingot 2\"\n");
+            writer.write("  - \"3,1,diamond 1\"\n");
+            writer.write("  - \"2,5,iron_block 1\"\n");
+            writer.write("  - \"2,2,gold_block 1\"\n");
             writer.write("#Here is an example of a special item drop with fire aspect I and sharpness III:\n");
-            writer.write("# - \"DIAMOND_SWORD:1:1:$name Excalibur:$desc The legendary Excalibur$nSword of King Arthur:$enchant FIRE_ASPECT,1;sharpness,3\"\n");
+            writer.write("# - \"diamond_sword name:Excalibur sharpness:3 fire_aspect:1\"\n");
+            writer.write(INHERIT_ITEMS + ": " + String.valueOf(INHERIT_ITEMS_DEFAULT) + "\n");
+            writer.write("#Enabling inheriting items allows items from bloodmoon level 1 to spawn in level 3:\n");
             writer.write("#These are AOE powers affecting all players around the boss\n");
             writer.write("#Accepted values are:\n");
             writer.write("#LIGHTNING,[range],[cooldown]\n");
@@ -200,31 +229,31 @@ public class ConfigReader implements Closeable
             writer.write("ZombieBossPowerSet:\n");
             writer.write("  - \"WITHER,12,20,5,1\"\n");
             writer.write("#Mob effects on hit. Format (with no spaces in between):\n");
-            writer.write("#[Effect],[Duration in seconds],[Effect amplifier. Use 1 if you're unsure]\n");
+            writer.write("#[BloodmoonLevel],[Effect],[Duration in seconds],[Effect amplifier. Use 1 if you're unsure]\n");
             writer.write("#For a complete list of effects, refer to https://hub.spigotmc.org/javadocs/spigot/org/bukkit/potion/PotionEffectType.html\n");
-            writer.write("#Additional effects include: 'LIGHTNING'\n");
+            writer.write("#Additional effects include: 'lightning'\n");
             writer.write(ZOMBIEEFFECTS + ":\n");
-            writer.write("  - \"wither,7,1\"\n");
+            writer.write("  - \"1,wither,7,1\"\n");
             writer.write(HUSKEFFECT + ":\n");
-            writer.write("  - \"wither,7,1\"\n");
+            writer.write("  - \"1,wither,7,1\"\n");
             writer.write(DROWNEDEFFECT + ":\n");
-            writer.write("  - \"wither,7,1\"\n");
+            writer.write("  - \"1,wither,7,1\"\n");
             writer.write(ZOMBIE_VILLAGEREFFECT + ":\n");
-            writer.write("  - \"wither,7,1\"\n");
+            writer.write("  - \"1,wither,7,1\"\n");
             writer.write(SKELETONEFFECTS + ":\n");
-            writer.write("  - \"slowness,3.5,1\"\n");
+            writer.write("  - \"1,slowness,3.5,1\"\n");
             writer.write(CREEPEREFFECTS + ":\n");
-            writer.write("  - \"lightning\"\n");
+            writer.write("  - \"1,lightning\"\n");
             writer.write(PHANTOMEFFECTS + ":\n");
-            writer.write("  - \"levitation,1.5,3\"\n");
+            writer.write("  - \"1,levitation,1.5,3\"\n");
             writer.write(SPIDEREFFECTS + ":\n");
-            writer.write("  - \"poison,4,1\"\n");
-            writer.write("  - \"nausea,6,9999\"\n");
+            writer.write("  - \"1,poison,4,1\"\n");
+            writer.write("  - \"1,nausea,6,9999\"\n");
             writer.write("ENDERMANEffects:\n");
-            writer.write("  - \"slowness,2.5,2\"\n");
+            writer.write("  - \"1,slowness,2.5,2\"\n");
             writer.write("ZOMBIEBOSSEffects:\n");
-            writer.write("  - \"wither,9,2\"\n");
-            writer.write("\n#These commands will be ran right as a BloodMoon starts\n");
+            writer.write("  - \"1,wither,9,2\"\n");
+            writer.write("\n#Thes commands will be ran right as a BloodMoon starts\n");
             writer.write("#You must append a ;s, ;f or ;p at the end of the command:\n");
             writer.write("#using ;s runs the command as the server. Once\n");
             writer.write("#using ;f runs the command as the server, for each player. use $p as the player placeholder\n");
@@ -248,6 +277,15 @@ public class ConfigReader implements Closeable
             writer.write(" - \"ZOMBIE\"\n");
             writer.write(" - \"SKELETON\"\n");
             writer.write(" - \"SPIDER\"\n");
+            writer.write(HORDE_MOB_WHITELIST_LEVEL_2 + ":\n");
+            writer.write(" - \"ZOMBIE\"\n");
+            writer.write(" - \"SKELETON\"\n");
+            writer.write(" - \"SPIDER\"\n");
+            writer.write(HORDE_MOB_WHITELIST_LEVEL_3 + ":\n");
+            writer.write(" - \"ZOMBIE\"\n");
+            writer.write(" - \"SKELETON\"\n");
+            writer.write(" - \"SPIDER\"\n");
+            writer.write(" - \"PHANTOM\"\n");
             writer.write("#The distance from players in block at which hordes will spawn\n");
             writer.write(HORDE_SPAWN_DISTANCE + ": " + String.valueOf(HORDE_SPAWN_DISTANCE_DEFAULT) + "\n");
             writer.write("#The minimum number of mobs in a horde\n");
@@ -282,7 +320,9 @@ public class ConfigReader implements Closeable
         GetPreventSleepingConfig();
         GetMobsFromSpawnerNoRewardConfig ();
         GetShieldPreventEffects ();
+        GetBloodMoonLevelsEnabledConfig();
         GetPermanentBloodMoonConfig ();
+        GetPermanentBloodMoonLevelConfig();
         GetPreBloodMoonCommands();
         GetPostBloodMoonCommands();
         GetZombieBossDamage();
@@ -317,7 +357,7 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public String[] GetItemListConfig ()
+    public String[] GetItemListConfig()
     {
         try
         {
@@ -337,6 +377,7 @@ public class ConfigReader implements Closeable
             return new String[0];
         }
     }
+
 
     public String[] GetHordeMobWhitelist ()
     {
@@ -359,6 +400,46 @@ public class ConfigReader implements Closeable
         }
     }
 
+    public String[] GetHordeMobWhitelistLevel2 ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_MOB_WHITELIST_LEVEL_2);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
+            {
+                System.out.println("Warning: could not load mob whitelist!");
+                return new String[0];
+            }
+            ArrayList<String> list = (ArrayList<String>) interval;
+
+            return list.toArray(new String[0]);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Warning: could not load mob whitelist!");
+            return new String[0];
+        }
+    }
+    public String[] GetHordeMobWhitelistLevel3 ()
+    {
+        try
+        {
+            Object interval = GetConfig(HORDE_MOB_WHITELIST_LEVEL_3);
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG))
+            {
+                System.out.println("Warning: could not load mob whitelist!");
+                return new String[0];
+            }
+            ArrayList<String> list = (ArrayList<String>) interval;
+
+            return list.toArray(new String[0]);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Warning: could not load mob whitelist!");
+            return new String[0];
+        }
+    }
     public String[] GetMobEffectConfig (String mob)
     {
         try
@@ -412,7 +493,23 @@ public class ConfigReader implements Closeable
             return HORDES_ENABLED_DEFAULT;
         }
     }
-
+    public boolean GetBloodMoonLevelsEnabledConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(BLOODMOON_LEVELS_ENABLED);
+            if (interval == null)
+            {
+                CreateConfig(BLOODMOON_LEVELS_ENABLED, String.valueOf(BLOODMOON_LEVELS_ENABLED_DEFAULT));
+                interval = BLOODMOON_LEVELS_ENABLED_DEFAULT;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return BLOODMOON_LEVELS_ENABLED_DEFAULT;
+        }
+    }
     public boolean GetPermanentBloodMoonConfig ()
     {
         try
@@ -428,6 +525,24 @@ public class ConfigReader implements Closeable
         catch (FileNotFoundException e)
         {
             return PERMANENT_BLOODMOON_DEFAULT;
+        }
+    }
+
+    public int GetPermanentBloodMoonLevelConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(PERMANENT_BLOOD_MOON_LEVEL);
+            if (interval == null)
+            {
+                CreateConfig(PERMANENT_BLOOD_MOON_LEVEL, String.valueOf(PERMANENT_BLOODMOON_LEVEL_DEFAULT));
+                interval = PERMANENT_BLOODMOON_LEVEL_DEFAULT;
+            }
+            return (int) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return PERMANENT_BLOODMOON_LEVEL_DEFAULT;
         }
     }
 
@@ -485,6 +600,24 @@ public class ConfigReader implements Closeable
         }
     }
 
+    public boolean GetInheritItemsConfig ()
+    {
+        try
+        {
+            Object interval = GetConfig(INHERIT_ITEMS);
+            if (interval == null)
+            {
+                CreateConfig(INHERIT_ITEMS, String.valueOf(INHERIT_ITEMS_DEFAULT));
+                interval = INHERIT_ITEMS;
+            }
+            return (boolean) interval;
+        }
+        catch (FileNotFoundException e)
+        {
+            return INHERIT_ITEMS_DEFAULT;
+        }
+    }
+
     public int GetIntervalConfig ()
     {
         try
@@ -503,21 +636,28 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public int GetExpMultConfig ()
-    {
-        try
-        {
+    public Double[] GetExpMultConfig () {
+        try {
+            // This is pretty hacky imo, if I rewrite configwriter then this will go away
             Object interval = GetConfig(EXP_MULTIPLICATOR);
-            if (interval == null)
-            {
-                CreateConfig(EXP_MULTIPLICATOR, String.valueOf(EXP_MULTIPLICATOR_DEFAULT));
-                interval = EXP_MULTIPLICATOR_DEFAULT;
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG)) {
+                System.out.println("Warning: could not load Damage list!");
+                return new Double[0];
             }
-            return (int) interval;
-        }
-        catch (FileNotFoundException e)
-        {
-            return EXP_MULTIPLICATOR_DEFAULT;
+            ArrayList<String> stringList = (ArrayList<String>) interval;
+            ArrayList<Double> doubleList = new ArrayList<>();
+            for (String str : stringList) {
+                try {
+                    doubleList.add(Double.valueOf(str));
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing string to double: " + str);
+                }
+            }
+            return doubleList.toArray(new Double[0]);
+        } catch (Exception e) {
+            System.out.println("Warning: could not load Damage list!");
+            e.printStackTrace();
+            return new Double[0];
         }
     }
 
@@ -990,42 +1130,52 @@ public class ConfigReader implements Closeable
         }
     }
 
-    public double GetMobDamageMultConfig ()
-    {
-        try
-        {
+    public Double[] GetMobDamageMultConfig() {
+        try {
             Object interval = GetConfig(MOB_DAMAGE_MULT);
-            if (interval == null)
-            {
-                CreateConfig(MOB_DAMAGE_MULT, String.valueOf(MOB_DAMAGE_MULT_DEFAULT));
-                interval = MOB_DAMAGE_MULT_DEFAULT;
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG)) {
+                System.out.println("Warning: could not load Damage list!");
+                return new Double[0];
             }
-            return (double) interval;
-        }
-        catch (FileNotFoundException e)
-        {
-            return MOB_DAMAGE_MULT_DEFAULT;
+            ArrayList<String> stringList = (ArrayList<String>) interval;
+            ArrayList<Double> doubleList = new ArrayList<>();
+            for (String str : stringList) {
+                try {
+                    doubleList.add(Double.valueOf(str));
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing string to double: " + str);
+                }
+            }
+            return doubleList.toArray(new Double[0]);
+        } catch (Exception e) {
+            System.out.println("Warning: could not load Damage list!");
+            e.printStackTrace();
+            return new Double[0];
         }
     }
-
-    public double GetMobHealthMultConfig ()
-    {
-        try
-        {
+    public Double[] GetMobHealthMultConfig (){
+        try {
             Object interval = GetConfig(MOB_HEALTH_MULT);
-            if (interval == null)
-            {
-                CreateConfig(MOB_HEALTH_MULT, String.valueOf(MOB_HEALTH_MULT_DEFAULT));
-                interval = MOB_HEALTH_MULT_DEFAULT;
+            if (interval == null || String.valueOf(interval).equals(NULL_CONFIG)) {
+                System.out.println("Warning: could not load Damage list!");
+                return new Double[0];
             }
-            return (double) interval;
-        }
-        catch (FileNotFoundException e)
-        {
-            return MOB_HEALTH_MULT_DEFAULT;
+            ArrayList<String> stringList = (ArrayList<String>) interval;
+            ArrayList<Double> doubleList = new ArrayList<>();
+            for (String str : stringList) {
+                try {
+                    doubleList.add(Double.valueOf(str));
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing string to double: " + str);
+                }
+            }
+            return doubleList.toArray(new Double[0]);
+        } catch (Exception e) {
+            System.out.println("Warning: could not load Damage list!");
+            e.printStackTrace();
+            return new Double[0];
         }
     }
-
     //============================================================================================================
 
 
@@ -1048,7 +1198,7 @@ public class ConfigReader implements Closeable
 
 
 
-    private Object GetConfig (String config) throws FileNotFoundException
+    private Object GetConfig(String config) throws FileNotFoundException
     {
         if (cache == null)
         {
