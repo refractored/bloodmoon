@@ -186,6 +186,3 @@ fabric.properties
 build
 
 exes/
-gradle/
-gradlew
-gradlew.bat
