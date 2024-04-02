@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon.listeners;
 
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,7 +16,7 @@ public class PlayerTeleportListener implements Listener {
         World from = event.getFrom().getWorld();
         if (to != world && from != world) return; //None of our concern
 
-        if (from != to && isInProgress()) {
+        if (from != to && BloodmoonManager.GetActuator(world).isInProgress()) {
             if (to == world) {
                 //Someone entered our bm world
                 HandleReconnectingPlayer(event.getPlayer());

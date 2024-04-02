@@ -66,7 +66,6 @@ public class BloodmoonManager implements Runnable, Closeable {
      */
     public static World world;
     private static boolean inProgress;
-//    private static int bloodMoonLevel = 1;
     private static BossBar nightBar;
     private PeriodicManager actuatorPeriodic;
 
@@ -571,7 +570,7 @@ public class BloodmoonManager implements Runnable, Closeable {
      * @param player the player
      */
     public static void HandleReconnectingPlayer (Player player) {
-        if (isInProgress() && nightBar != null) nightBar.addPlayer(player);
+        if (BloodmoonManager.GetActuator(world).isInProgress() && nightBar != null) nightBar.addPlayer(player);
         BroadcastBloodMoonWarningPlayer(player);
     }
 
@@ -713,7 +712,7 @@ public class BloodmoonManager implements Runnable, Closeable {
      *
      * @return the boolean
      */
-    public static boolean isInProgress() {
+    public boolean isInProgress() {
         ConfigReader reader = Bloodmoon.GetInstance().getConfigReader(world);
         return inProgress || reader.GetPermanentBloodMoonConfig();
     }

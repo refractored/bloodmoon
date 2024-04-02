@@ -4,8 +4,10 @@ import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.listeners.*;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.listeners.WorldLoadListener;
+import net.refractored.bloodmoon.managers.PlaceholderManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -219,6 +221,10 @@ public final class Bloodmoon extends JavaPlugin {
         configReaders = new HashMap<>();
         allConfigReaders = new ArrayList<>();
         bloodmoonWorlds = new ArrayList<>();
+
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PlaceholderManager(this).register();
+        }
 
         for (World world : getServer().getWorlds())
         {
