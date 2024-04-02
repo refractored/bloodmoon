@@ -42,7 +42,7 @@ public class BloodmoonInfo {
             return;
         }
 
-        if (BloodmoonManager.isInProgress())
+        if (BloodmoonManager.GetActuator(world).isInProgress())
         {
             actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
             return;

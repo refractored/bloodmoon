@@ -2,6 +2,7 @@ package net.refractored.bloodmoon.listeners;
 
 import com.willfp.eco.core.particle.Particles;
 import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -20,7 +21,7 @@ import static net.refractored.bloodmoon.managers.BloodmoonManager.*;
 public class EntityDamageListener implements Listener {
     @EventHandler
     public void onEntityDamage (EntityDamageByEntityEvent event) {
-        if (!isInProgress()) return; //Only during BloodMoon
+        if (!BloodmoonManager.GetActuator(world).isInProgress()) return; //Only during BloodMoon
 
         Entity receiver = event.getEntity();
         Entity damager = event.getDamager();

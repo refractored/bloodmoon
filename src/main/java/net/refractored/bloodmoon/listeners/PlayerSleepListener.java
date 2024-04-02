@@ -1,6 +1,7 @@
 package net.refractored.bloodmoon.listeners;
 
 import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.event.EventHandler;
@@ -14,7 +15,7 @@ public class PlayerSleepListener implements Listener {
     public void onPlayerSleeps (PlayerBedEnterEvent event) {
         if (event.getPlayer().getWorld() == world)
         {
-            if (isInProgress())
+            if (BloodmoonManager.GetActuator(world).isInProgress())
             {
                 ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
                 if (configReader.GetPreventSleepingConfig())

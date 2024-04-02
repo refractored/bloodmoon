@@ -37,13 +37,13 @@ public class MobDeathListener implements Listener {
                     LocaleReader.MessageAllLocale("BossSlain", new String[]{"$b", "$p"}, new String[]{boss.GetName(), killer.getName()}, world);
                 }
 
-                boss.Kill(killer != null && BloodmoonManager.isInProgress());
+                boss.Kill(killer != null && BloodmoonManager.GetActuator(world).isInProgress());
                 bosses.remove(boss);
                 return;
             }
         }
 
-        if (!BloodmoonManager.isInProgress()) return; //Only during BloodMoon
+        if (!BloodmoonManager.GetActuator(world).isInProgress()) return; //Only during BloodMoon
 
         if (entity.getKiller() == null) return; //No killer, no reward
 

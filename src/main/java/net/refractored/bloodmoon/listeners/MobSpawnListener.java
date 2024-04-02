@@ -1,6 +1,7 @@
 package net.refractored.bloodmoon.listeners;
 
 import net.refractored.bloodmoon.Bloodmoon;
+import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -15,7 +16,7 @@ public class MobSpawnListener implements Listener {
     public void onMobSpawn (SpawnerSpawnEvent event) {
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
 
-        if (configReader.GetMobsFromSpawnerNoRewardConfig() && event.getEntity().getWorld() == world && isInProgress())
+        if (configReader.GetMobsFromSpawnerNoRewardConfig() && event.getEntity().getWorld() == world && BloodmoonManager.GetActuator(world).isInProgress())
         {
             for (EntityType type : rewardedTypes)
             {
