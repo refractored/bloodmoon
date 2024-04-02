@@ -42,7 +42,6 @@ public class PlaceholderManager extends PlaceholderExpansion {
             String worldName = params.replace("inprogress_", "");
             World world = Bukkit.getWorld(worldName);
             if (world != null) {
-                // Check if blood moon event is in progress in the specified world
                 boolean isInProgress = BloodmoonManager.GetActuator(world).isInProgress();
                 return String.valueOf(isInProgress);
             } else {
@@ -53,7 +52,6 @@ public class PlaceholderManager extends PlaceholderExpansion {
             String worldName = params.replace("level_", "");
             World world = Bukkit.getWorld(worldName);
             if (world != null) {
-                // Check if blood moon event is in progress in the specified world
                 int level = BloodmoonManager.GetActuator(world).getBloodMoonLevel();
                 return String.valueOf(level);
             } else {
@@ -64,7 +62,6 @@ public class PlaceholderManager extends PlaceholderExpansion {
             String worldName = params.replace("days_", "");
             World world = Bukkit.getWorld(worldName);
             if (world != null) {
-                // Check if blood moon event is in progress in the specified world
                 int days = BloodmoonManager.GetActuator(world).getBloodMoonDays();
                 return String.valueOf(days);
             } else {
