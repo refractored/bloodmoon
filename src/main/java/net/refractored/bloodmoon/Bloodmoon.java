@@ -12,9 +12,6 @@ import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.spectralmemories.sqlaccess.FieldType;
-import org.spectralmemories.sqlaccess.SQLAccess;
-import org.spectralmemories.sqlaccess.SQLField;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
 
 import java.io.File;
@@ -44,7 +41,6 @@ public final class Bloodmoon extends JavaPlugin {
     public static final String LOCALES_YML = "locales.yml";
     public final static long NIGHT_CHECK_DELAY = 40;
 
-    public static SQLAccess sqlAccess;
     public static LocaleReader localeReader;
 
     private static Bloodmoon instance;
@@ -312,22 +308,6 @@ public final class Bloodmoon extends JavaPlugin {
             actuator.close();
         }
 
-        if (sqlAccess != null) sqlAccess.close();
-        for (ConfigReader configReader : allConfigReaders)
-        {
-            if (configReader != null)
-            {
-                try
-                {
-                    configReader.close();
-                }
-                catch (IOException e)
-                {
-                    getLogger().log(Level.SEVERE,"[Error]");
-                    e.printStackTrace();
-                }
-            }
-        }
         try
         {
             localeReader.close();

@@ -7,11 +7,6 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.spectralmemories.sqlaccess.FieldType;
-import org.spectralmemories.sqlaccess.SQLAccess;
-import org.spectralmemories.sqlaccess.SQLField;
-
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
