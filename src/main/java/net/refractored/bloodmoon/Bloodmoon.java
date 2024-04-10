@@ -218,9 +218,6 @@ public final class Bloodmoon extends EcoPlugin {
         allConfigReaders = new ArrayList<>();
         bloodmoonWorlds = new ArrayList<>();
 
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            new PlaceholderManager(this).register();
-        }
 
         for (World world : getServer().getWorlds())
         {
@@ -323,8 +320,6 @@ public final class Bloodmoon extends EcoPlugin {
     {
         getLogger().log(Level.INFO,"This plugin is still in its infancy. If you encounter a bug, please report it to https://github.com/refractored/bloodmoon");
 
-        File oldConfig = new File (getDataFolder() + SLASH + CONFIG_FILE);
-        if (oldConfig.exists()) getLogger().log(Level.WARNING,"[Deprecated] BloodMoon/config.yml is no longer used. Use per-world configuration instead");
 
         String localesVersion = getLocaleReader().GetFileVersion();
         if (localesVersion.equals("NaN"))
