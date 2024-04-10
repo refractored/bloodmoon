@@ -1,11 +1,11 @@
 package net.refractored.bloodmoon.commands;
 
 import com.willfp.eco.core.Eco;
+import com.willfp.eco.core.config.base.LangYml;
 import net.refractored.bloodmoon.Bloodmoon;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.PeriodicNightCheck;
 import net.refractored.bloodmoon.readers.ConfigReader;
-import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.Command;
@@ -21,16 +21,19 @@ public class BloodmoonInfo {
     @Command("bloodmoon info")
     public void bloodmoonInfo(BukkitCommandActor actor) {
         World world = actor.getAsPlayer().getWorld();
-        LocaleReader localeReader = Bloodmoon.GetInstance().getLocaleReader();
+        LangYml LangReader = Bloodmoon.GetInstance().getLangYml();
         ConfigReader configReader = Bloodmoon.GetInstance().getConfigReader(world);
         if (world.getEnvironment() != World.Environment.NORMAL) {
-            actor.reply("&cThis command can only be used in the overworld.");
+            actor.error(Bloodmoon.GetInstance().getLangYml().get("WorldIsNotOverworld").toString());
+
             return;
         }
 
         if (configReader.GetPermanentBloodMoonConfig())
         {
-            actor.reply(localeReader.GetLocaleString("WorldIsPermanentBloodMoon"));
+
+            actor.error(LangReader.get("WorldIsPermanentBloodMoon").toString());
+
             return;
         }
 
@@ -38,13 +41,13 @@ public class BloodmoonInfo {
 
         if (worldActuator == null)
         {
-            actor.reply(localeReader.GetLocaleString("NoBloodMoonInWorld"));
+            actor.reply(String.format(LangReader.get("NoBloodMoonInWorld").toString(), world.getName()));
             return;
         }
 
         if (BloodmoonManager.GetActuator(world).isInProgress())
         {
-            actor.reply(localeReader.GetLocaleString("BloodMoonRightNow"));
+            actor.error(String.format(LangReader.get("BloodMoonRightNow").toString(), world.getName()));
             return;
         }
 
@@ -52,13 +55,10 @@ public class BloodmoonInfo {
 
         if (remainingDays < 0) {
             Bloodmoon.GetInstance().getLogger().warning("remainingDays is lower than 0. Please regenerate both the cache and the config for world" + world.getName());
-            actor.reply(localeReader.GetLocaleString("GeneralError"));
+            actor.error(LangReader.get("GeneralError").toString());
             return;
         }
-
-        actor.reply(String.format("&aThere are %d days remaining until the bloodmoon in world \"%s\".", remainingDays, world.getName()));
-        actor.reply(String.format("&aThe bloodmoon is level %d", worldActuator.getBloodMoonLevel()));
-
-
+        actor.reply(String.format(LangReader.get("DaysRemaning").toString(), remainingDays, world.getName()));
+        actor.reply(String.format(LangReader.get("BloodmoonLevel").toString(), worldActuator.getBloodMoonLevel()));
     }
 }

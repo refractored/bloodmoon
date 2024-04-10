@@ -1,1 +1,4 @@
-### Temp
+# Per world configuration is used. This config is just used to disable bloodmoons in worlds.
+# When a bloodmoon is disabled in a world, the config will not be read or created from said world.
+disabled-worlds:
+  - "WorldWithNoBloodmoon"

@@ -2,7 +2,6 @@ package net.refractored.bloodmoon;
 
 import net.refractored.bloodmoon.managers.BloodmoonManager;
 import net.refractored.bloodmoon.readers.ConfigReader;
-import net.refractored.bloodmoon.readers.LocaleReader;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -129,6 +128,7 @@ public class PeriodicNightCheck implements Runnable, Listener
             {
 
                 actuator.StopBloodMoon();
+                me
                 LocaleReader.MessageAllLocale("BloodMoonEndingMessage", null, null, world);
                 for (Player player : world.getPlayers())
                 {
