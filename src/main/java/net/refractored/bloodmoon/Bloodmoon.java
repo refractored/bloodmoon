@@ -30,7 +30,6 @@ import java.util.logging.Level;
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
  */
 public final class Bloodmoon extends EcoPlugin {
-    public static final String CACHE_DB = "cache.db";
     /**
      * The config file
      */
@@ -312,6 +311,7 @@ public final class Bloodmoon extends EcoPlugin {
         catch (IOException e)
         {
             e.printStackTrace();
+
         }
 
     }
