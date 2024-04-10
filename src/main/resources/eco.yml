@@ -1,0 +1,5 @@
+options:
+  bstats-id: 21561
+  color: "&#FB0808"
+  uses-reflective-reload: false
+  supports-extensions: false

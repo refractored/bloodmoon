@@ -1,5 +1,6 @@
 package net.refractored.bloodmoon;
 
+import com.willfp.eco.core.EcoPlugin;
 import net.refractored.bloodmoon.commands.RegisterCommands;
 import net.refractored.bloodmoon.listeners.*;
 import net.refractored.bloodmoon.managers.BloodmoonManager;
@@ -28,7 +29,7 @@ import java.util.logging.Level;
 /**
  * Entry class for the BloodMoon plugin. Singleton, you should never create an instance manually
  */
-public final class Bloodmoon extends JavaPlugin {
+public final class Bloodmoon extends EcoPlugin {
     public static final String CACHE_DB = "cache.db";
     /**
      * The config file
@@ -194,9 +195,8 @@ public final class Bloodmoon extends JavaPlugin {
     /**
      * Enables the plugin
      */
-
     @Override
-    public void onEnable()
+    public void handleEnable()
     {
         BukkitCommandHandler handler = BukkitCommandHandler.create(this);
         RegisterCommands.register(handler);
@@ -299,7 +299,7 @@ public final class Bloodmoon extends JavaPlugin {
      * Disables the plugin
      */
     @Override
-    public void onDisable()
+    public void handleDisable()
     {
 
         for (BloodmoonManager actuator : actuators)

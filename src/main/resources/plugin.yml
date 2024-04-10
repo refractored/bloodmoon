@@ -8,5 +8,5 @@ softdepend:
   - "WorldGuard"
   - "PlaceholderAPI"
 api-version: 1.20
-authors: [SpectralMemories, refractored]
-description: A Bloodmoon shines every couple of nights
+authors: [SpectralMemories, refractored, baconing]
+description: A bloodmoon shines every couple of nights
