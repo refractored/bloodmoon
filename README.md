@@ -2,7 +2,7 @@
 
 Original Repository: https://gitlab.com/SpectralMemories/bloodmoon
 
-Recoded Repo: https://github.com/refractored/bloodmoon
+Recoded Repo: https://github.com/refractored/BloodmoonReloaded
 
 Plugins that adds a deadly BloodMoon to your Spigot server once every few days
 
